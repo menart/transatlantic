@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: backend
+  #Jackson
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+  # Cache/Redis
+  cache:
+    type: redis
+    default:
+      ttl: ${DEFAULT_TTL:3600}
+    batch:
+      size: ${CACHE_BATCH_SIZE:1000}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  # JDBC Pooled Datasource
+  jpa:
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: ${SHOW_SQL:false}
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:5432}/${DATASOURCE_DATABASE:transatlantic}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
+  liquibase:
+    change-log: classpath:liquibase/changelog.yaml
+    enabled: true
+    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:5432}/${DATASOURCE_DATABASE:transatlantic}
+    user: ${LIQUIBASE_DATASOURCE_USERNAME:postgres}
+    password: ${LIQUIBASE_DATASOURCE_PASSWORD:postgres}
+
+  # Log
+  logging:
+    level:
+      root: ${LOGGING_LEVEL:WARN}
+      org.springframework.cache: ${LOGGING_LEVEL:WARN}
+
+constant:
+  time_hold_sms: 60
+  count_number_code: 4
+  sms_code_live: 6000
+
+#Jwt
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_EXPIRATION}
+  issuer: ${spring.application.name}
