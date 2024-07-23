@@ -35,7 +35,7 @@ public class ErrorHandlingControllerAdvice {
 
 
     @ResponseBody
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(AuthSmsException.class)
     public ErrorResponseDto handleAuthSmsException(AuthSmsException ex) {
         return new ErrorResponseDto(HttpStatus.BAD_REQUEST.getReasonPhrase(),

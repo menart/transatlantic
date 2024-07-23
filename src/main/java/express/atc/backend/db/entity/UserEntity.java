@@ -2,17 +2,18 @@ package express.atc.backend.db.entity;
 
 import express.atc.backend.enums.UserRole;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.Table;
+import lombok.*;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import java.util.Set;
 
 @Getter
+@Setter
 @Entity
 @Builder(toBuilder = true)
 @Accessors(chain = true)
@@ -31,10 +32,31 @@ public class UserEntity {
     @Column
     @Enumerated(EnumType.STRING)
     private UserRole role;
+    @Column
+    private boolean enable;
+    @Column
+    private String surname;
+    @Column
+    private String firstName;
+    @Column
+    private String lastName;
+    @Column
+    private LocalDate birthday;
+    @Column
+    private String inn;
+    @Column
+    private String email;
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private LocalDateTime updatedAt;
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime createdAt;
+
+    public boolean isFullInfo(){
+        return Objects.nonNull(surname)
+                && Objects.nonNull(firstName)
+                && Objects.nonNull(lastName)
+                && Objects.nonNull(birthday);
+    }
 }

@@ -6,6 +6,7 @@ import express.atc.backend.dto.UserDto;
 import express.atc.backend.mapper.UserDetailMapper;
 import express.atc.backend.mapper.UserMapper;
 import express.atc.backend.security.UserDetail;
+import express.atc.backend.service.DocumentService;
 import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class UserServiceImpl implements UserService {
     private final UsersRepository usersRepository;
     private final UserMapper userMapper;
     private final UserDetailMapper userDetailMapper;
+    private final DocumentService documentService;
 
     @Override
     public UserDto findOrCreateByPhone(String phone) {
@@ -47,6 +49,21 @@ public class UserServiceImpl implements UserService {
      */
     public UserDetailsService userDetailsService() {
         return this::findUserDetails;
+    }
+
+    @Override
+    public UserDto updateFullUserInfo(UserDto userInfo) {
+        UserEntity entity = getUserByPhone(userInfo.getPhone())
+                .orElseThrow();
+        entity = userMapper.toEntity(userInfo)
+                .setId(entity.getId())
+                .setRole(entity.getRole());
+        entity.setEnable(entity.isFullInfo());
+        var user = userMapper.toDto(usersRepository.save(entity));
+        userInfo.getDocument().setUser(entity);
+        var document = documentService.addOrUpdateDocument(userInfo.getDocument());
+        user.setDocument(document);
+        return user;
     }
 
     private Optional<UserEntity> getUserByPhone(String phone) {

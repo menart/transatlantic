@@ -1,0 +1,36 @@
+---
+databaseChangeLog:
+  - changeSet:
+      id: 03
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: WARN
+        - not:
+            - tableExists:
+                tableName: users
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: enable
+                  type: boolean
+                  defaultValueBoolean:  false
+              - column:
+                  name: surname
+                  type: varchar(255)
+              - column:
+                  name: first_name
+                  type: varchar(255)
+              - column:
+                  name: last_name
+                  type: varchar(255)
+              - column:
+                  name: birthday
+                  type: date
+              - column:
+                  name: inn
+                  type: varchar(12)
+              - column:
+                  name: email
+                  type: varchar(150)

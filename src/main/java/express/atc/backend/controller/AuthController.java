@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/auth/", produces = "application/json")
+@Tag(name = "Authentication controller", description = "Контроллер для работы авторизацией пользователя")
 public class AuthController {
 
     private final AuthService authService;
@@ -41,6 +43,21 @@ public class AuthController {
         return authService.makeCode(ipAddress, authSmsDto);
     }
 
+    @Operation(summary = "Проверка СМС")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Сгенирированый JWT токен",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = JwtAuthenticationResponse.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "401",
+                    description = " Ошибка авторизации, неверный код",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
     @PostMapping("/validate")
     public JwtAuthenticationResponse validateCode(@RequestBody @Valid ValidateSmsDto validateSms) throws AuthSmsException {
         return authService.validateCode(validateSms);

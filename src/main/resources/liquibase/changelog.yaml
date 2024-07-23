@@ -4,3 +4,7 @@ databaseChangeLog:
       file: liquibase/changeset/01-create_table_auth.yaml
   - include:
       file: liquibase/changeset/02-create_table_users.yaml
+  - include:
+      file: liquibase/changeset/03-update_table_users.yaml
+  - include:
+      file: liquibase/changeset/04-create_table_docs.yaml

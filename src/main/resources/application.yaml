@@ -33,11 +33,19 @@ spring:
     user: ${LIQUIBASE_DATASOURCE_USERNAME:postgres}
     password: ${LIQUIBASE_DATASOURCE_PASSWORD:postgres}
 
-  # Log
-  logging:
-    level:
-      root: ${LOGGING_LEVEL:WARN}
-      org.springframework.cache: ${LOGGING_LEVEL:WARN}
+# Log
+logging:
+  level:
+    net:
+      ttddyy:
+        dsproxy:
+          listener: debug
+    org:
+      springframework:
+        jdbc:
+          core:
+            JdbcTemplate: DEBUG
+            StatementCreatorUtils: TRACE
 
 constant:
   time_hold_sms: 60

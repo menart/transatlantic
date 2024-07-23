@@ -10,4 +10,6 @@ public interface UserService {
     UserDto findUserByPhone(String phone);
 
     UserDetailsService userDetailsService();
+
+    UserDto updateFullUserInfo(UserDto userInfo);
 }
