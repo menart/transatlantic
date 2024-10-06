@@ -15,6 +15,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 
@@ -24,7 +25,8 @@ import static express.atc.backend.exception.ValidationMessage.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
+@Accessors(chain = true)
 public class UserDto {
     @JsonIgnore
     private Long id;
@@ -63,5 +65,8 @@ public class UserDto {
             "Согласие \"Публичной офертой о заключении договора на предоставление " +
                     "услуг таможенного представительства для физических лиц\"")
     @AssertTrue(message = DISAGREE)
-    private boolean agree;
+    @Builder.Default
+    private boolean agree = true;
+    @Builder.Default
+    private boolean full = true;
 }

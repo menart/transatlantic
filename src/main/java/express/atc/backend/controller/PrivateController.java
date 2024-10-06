@@ -16,6 +16,6 @@ abstract class PrivateController {
         var header = ((ServletRequestAttributes) Objects.requireNonNull(
                 RequestContextHolder.getRequestAttributes()))
                 .getRequest().getHeader(AUTH_HEADER_NAME);
-        return header.substring(BEARER_PREFIX.length());
+        return header != null ? header.substring(BEARER_PREFIX.length()) : null;
     }
 }

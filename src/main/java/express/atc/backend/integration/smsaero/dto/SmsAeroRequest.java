@@ -1,4 +1,4 @@
-package express.atc.backend.integration.dto;
+package express.atc.backend.integration.smsaero.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

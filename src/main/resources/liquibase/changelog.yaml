@@ -8,3 +8,5 @@ databaseChangeLog:
       file: liquibase/changeset/03-update_table_users.yaml
   - include:
       file: liquibase/changeset/04-create_table_docs.yaml
+  - include:
+      file: liquibase/changeset/05-create_table_files.yaml

@@ -17,4 +17,6 @@ public interface AuthSmsRepository extends CrudRepository<AuthSmsEntity, Long> {
     Integer countByIpaddressAndCreatedAtAfter(String ipAddress, LocalDateTime time);
 
     Optional<AuthSmsEntity> findFirstByPhoneAndCodeAndCreatedAtAfter(String phone, String code, LocalDateTime createdAt);
+
+    Optional<AuthSmsEntity> findFirstByPhoneOrderByCreatedAtDesc(String phone);
 }

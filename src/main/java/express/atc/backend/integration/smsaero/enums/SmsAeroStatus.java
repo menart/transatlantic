@@ -1,4 +1,4 @@
-package express.atc.backend.integration.enums;
+package express.atc.backend.integration.smsaero.enums;
 
 import lombok.RequiredArgsConstructor;
 

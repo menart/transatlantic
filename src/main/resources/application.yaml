@@ -57,3 +57,15 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION}
   issuer: ${spring.application.name}
+
+#SMS Aero
+sms-aero:
+  enable: false
+  url: ${SMS_AERO_URL:https://gate.smsaero.ru/v2}
+  sign: ${SMS_AERO_SIGN}
+  token: ${SMS_AERO_TOKEN}
+  login: ${SMS_AERO_LOGIN}
+
+telegram:
+  name: mrkvk_test_bot
+  token: 5324532057:AAHffyV67hNNkZoPSG2CZFqdHJL5vryAoUo

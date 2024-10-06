@@ -10,4 +10,6 @@ public interface AuthService {
     int makeCode(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException;
 
     JwtAuthenticationResponse validateCode(ValidateSmsDto validateSms) throws AuthSmsException;
+
+    String getSms(String phone);
 }
