@@ -69,3 +69,12 @@ sms-aero:
 telegram:
   name: mrkvk_test_bot
   token: 5324532057:AAHffyV67hNNkZoPSG2CZFqdHJL5vryAoUo
+
+#Cargoflow
+cargoflow:
+  url: ${CARGOFLOW_URL:https://gate.smsaero.ru/v2}
+  login: ${CARGOFLOW_LOGIN}
+  password: ${CARGOFLOW_PASSWORD}
+  endpoint:
+    auth: ${CARGOFLOW_AUTH_ENDPOINT}
+    order: ${CARGOFLOW_ORDER_ENDPOINT}
