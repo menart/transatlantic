@@ -15,11 +15,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(path = "/api/auth/", produces = "application/json")
+@RequestMapping(path = "/api/auth", produces = "application/json")
 @Tag(name = "Authentication controller", description = "Контроллер для работы авторизацией пользователя")
 public class AuthController {
 
@@ -61,5 +62,11 @@ public class AuthController {
     @PostMapping("/validate")
     public JwtAuthenticationResponse validateCode(@RequestBody @Valid ValidateSmsDto validateSms) throws AuthSmsException {
         return authService.validateCode(validateSms);
+    }
+
+    @GetMapping("/sms")
+    //@ConditionalOnExpression("${smsAero.enabled:false}!='true'")
+    public String getSms(@RequestParam String phone){
+        return authService.getSms(phone);
     }
 }

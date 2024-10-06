@@ -1,0 +1,36 @@
+---
+databaseChangeLog:
+  - changeSet:
+      id: 06
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: orders
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: order_id_pkey
+                  name: uuid
+                  type: UUID
+              - column:
+                  name: order_number
+                  type: varchar(100)
+                  nullable: false
+              - column:
+                  name: track_number
+                  type: varchar(100)
+                  nullable: false
+              - column:
+                  name: address
+                  type: varchar(500)
+                  nullable: false
+              - column:
+                  name: marketplace
+                  type: varchar(500)

@@ -29,7 +29,7 @@ import static express.atc.backend.exception.ValidationMessage.DOC_TYPE_NOT_VALID
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
+@JsonNaming(PropertyNamingStrategies.LowerCamelCaseStrategy.class)
 public class DocumentDto {
     @JsonIgnore
     private Long id;

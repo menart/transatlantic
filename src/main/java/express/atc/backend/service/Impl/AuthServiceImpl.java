@@ -9,20 +9,24 @@ import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.mapper.UserDetailMapper;
 import express.atc.backend.service.AuthService;
 import express.atc.backend.service.JwtService;
+import express.atc.backend.service.MessageService;
 import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
 
 @Service
+@CrossOrigin
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final AuthSmsRepository authSmsRepository;
     private final UserService userService;
     private final UserDetailMapper userDetailMapper;
+    private final MessageService messageService;
     private final JwtService jwt;
 
     @Value(value = "${constant.time_hold_sms}")
@@ -47,6 +51,7 @@ public class AuthServiceImpl implements AuthService {
                 .createdAt(LocalDateTime.now())
                 .build();
         authSmsRepository.save(authSmsEntity);
+        messageService.send(authSmsDto.getPhone(), code);
         return TIME_HOLD_SMS;
     }
 
@@ -62,6 +67,13 @@ public class AuthServiceImpl implements AuthService {
         return JwtAuthenticationResponse.builder()
                 .token(jwt.generateToken(userDetailMapper.toUserDetail(user)))
                 .build();
+    }
+
+    @Override
+    public String getSms(String phone) {
+        return authSmsRepository.findFirstByPhoneOrderByCreatedAtDesc(phone)
+                .map(AuthSmsEntity::getCode)
+                .orElse("no find code");
     }
 
     private String makeCodeForPhone() {

@@ -33,7 +33,10 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDto findUserByPhone(String phone) {
-        return userMapper.toDto(getUserByPhone(phone).orElse(null));
+        var user = getUserByPhone(phone).orElse(null);
+        if (user == null) return null;
+        return userMapper.toDto(user)
+                .setDocument(documentService.findDocumentForUser(user));
     }
 
     private UserDetail findUserDetails(String phone) {

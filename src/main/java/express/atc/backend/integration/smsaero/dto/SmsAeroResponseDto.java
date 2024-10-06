@@ -1,9 +1,11 @@
-package express.atc.backend.integration.dto;
+package express.atc.backend.integration.smsaero.dto;
 
-import express.atc.backend.integration.enums.SmsAeroStatus;
+import express.atc.backend.integration.smsaero.enums.SmsAeroStatus;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
+@Data
 public class SmsAeroResponseDto {
 
     private int id;
@@ -13,6 +15,7 @@ public class SmsAeroResponseDto {
     private SmsAeroStatus status;
     private String extendStatus;
     private String channel;
+    private Double cost;
     private LocalDateTime dateCreate;
     private LocalDateTime dateSend;
 }
