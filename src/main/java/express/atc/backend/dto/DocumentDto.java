@@ -6,15 +6,14 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import express.atc.backend.db.entity.UserEntity;
 import express.atc.backend.enums.DocumentType;
 import express.atc.backend.serializer.DocumentTypeDeserializer;
 import express.atc.backend.serializer.DocumentTypeSerializer;
-import express.atc.backend.validator.DocumentTypeValid;
+import express.atc.backend.serializer.LocalDateValidDeserializer;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +36,7 @@ public class DocumentDto {
     private UserEntity user;
     @JsonDeserialize(using = DocumentTypeDeserializer.class)
     @JsonSerialize(using = DocumentTypeSerializer.class)
-    @DocumentTypeValid(message = DOC_TYPE_NOT_VALID)
+    @NotNull(message = DOC_TYPE_NOT_VALID)
     @Schema(description = "Тип документа:     <br/>" +
             "21 - \"Паспорт РФ\",<br/>" +
             "10 - \"Паспорт иностранного гражданина\",<br/>" +
@@ -58,14 +57,13 @@ public class DocumentDto {
     private String nameDepartment;
     @Schema(description = "Дата выдачи документа")
     @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonDeserialize(using = LocalDateValidDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @Pattern(regexp = "[0-3][0-9]-[0|1][0-9]-(19|20)[0-9]{2}", message = DATE_NOT_VALID)
+    @NotNull(message = "Дата выдачи документа: " + DATE_NOT_VALID)
     private LocalDate issueDate;
     @Schema(description = "Дата, до которой действует документ")
     @JsonSerialize(using = LocalDateSerializer.class)
-    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonDeserialize(using = LocalDateValidDeserializer.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    @Pattern(regexp = "[0-3][0-9]-[0|1][0-9]-(19|20)[0-9]{2}", message = DATE_NOT_VALID)
     private LocalDate expiredDate;
 }

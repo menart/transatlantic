@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -66,8 +67,8 @@ public class UserController extends PrivateController {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
-    @PostMapping("/update")
-    public UserDto updateFullUserInfo(@RequestBody UserDto userInfo) {
+    @PostMapping("/me")
+    public UserDto updateFullUserInfo(@Valid @RequestBody UserDto userInfo) {
         String userPhone = jwtService.extractPhone(getToken());
         userInfo.setPhone(userPhone);
         return userService.updateFullUserInfo(userInfo);

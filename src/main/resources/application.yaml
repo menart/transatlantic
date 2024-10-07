@@ -72,7 +72,7 @@ telegram:
 
 #Cargoflow
 cargoflow:
-  url: ${CARGOFLOW_URL:https://gate.smsaero.ru/v2}
+  url: ${CARGOFLOW_URL:https://test.cargoflow.app/}
   login: ${CARGOFLOW_LOGIN}
   password: ${CARGOFLOW_PASSWORD}
   endpoint:
