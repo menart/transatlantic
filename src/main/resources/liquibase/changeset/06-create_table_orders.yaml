@@ -7,30 +7,50 @@ databaseChangeLog:
         - onFail: MARK_RAN
         - not:
             - tableExists:
-                tableName: orders
+                tableName: tracking
       changes:
         - createTable:
-            tableName: orders
+            tableName: tracking
             columns:
               - column:
                   constraints:
                     nullable: false
                     primaryKey: true
                     primaryKeyName: order_id_pkey
-                  name: uuid
-                  type: UUID
+                  name: id
+                  type: bigint
+              - column:
+                  name: user_phone
+                  type: varchar(15)
+                  constraints:
+                    nullable: false
               - column:
                   name: order_number
                   type: varchar(100)
-                  nullable: false
+                  constraints:
+                    nullable: false
               - column:
                   name: track_number
                   type: varchar(100)
-                  nullable: false
+                  constraints:
+                    nullable: false
               - column:
                   name: address
                   type: varchar(500)
-                  nullable: false
+                  constraints:
+                    nullable: false
               - column:
                   name: marketplace
                   type: varchar(500)
+              - column:
+                  name: items
+                  type: jsonb
+        - createSequence:
+            - cacheSize: 1
+            - cycle: false
+            - dataType: bigint
+            - incrementBy: 1
+            - maxValue: 9223372036854775807
+            - minValue: 1
+            - sequenceName: tracking_id_seq
+            - startValue: 1

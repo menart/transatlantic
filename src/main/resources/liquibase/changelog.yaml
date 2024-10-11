@@ -10,3 +10,5 @@ databaseChangeLog:
       file: liquibase/changeset/04-create_table_docs.yaml
   - include:
       file: liquibase/changeset/05-create_table_files.yaml
+  - include:
+      file: liquibase/changeset/06-create_table_orders.yaml
