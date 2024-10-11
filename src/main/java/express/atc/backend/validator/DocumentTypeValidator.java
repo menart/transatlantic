@@ -4,11 +4,11 @@ import express.atc.backend.enums.DocumentType;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class DocumentTypeValidator implements ConstraintValidator<DocumentTypeValid, String> {
+public class DocumentTypeValidator implements ConstraintValidator<DocumentTypeValid, Integer> {
     @Override
-    public boolean isValid(String s, ConstraintValidatorContext constraintValidatorContext) {
+    public boolean isValid(Integer s, ConstraintValidatorContext constraintValidatorContext) {
         try {
-            return DocumentType.getDocumentTypeById(Integer.parseInt(s)) != null;
+            return DocumentType.getDocumentTypeById(s) != null;
         } catch (Exception e) {
             return false;
         }
