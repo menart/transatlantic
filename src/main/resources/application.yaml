@@ -1,6 +1,9 @@
 spring:
   application:
     name: backend
+  http:
+    encoding:
+      force: false
   #Jackson
   jackson:
     mapper:
@@ -46,7 +49,10 @@ logging:
           core:
             JdbcTemplate: DEBUG
             StatementCreatorUtils: TRACE
-
+    reactor:
+      netty:
+        http:
+          client: DEBUG
 constant:
   time_hold_sms: 60
   count_number_code: 4
@@ -72,9 +78,14 @@ telegram:
 
 #Cargoflow
 cargoflow:
-  url: ${CARGOFLOW_URL:https://test.cargoflow.app/}
-  login: ${CARGOFLOW_LOGIN}
+  url: ${CARGOFLOW_URL:https://test.cargoflow.app}
+  username: ${CARGOFLOW_USERNAME}
   password: ${CARGOFLOW_PASSWORD}
-  endpoint:
-    auth: ${CARGOFLOW_AUTH_ENDPOINT}
-    order: ${CARGOFLOW_ORDER_ENDPOINT}
+  order:
+    endpoint: ${CARGOFLOW_URL}${CARGOFLOW_ORDER_ENDPOINT:/cargoflow/rest/v2/entities/cargoflowOrder/search}
+  cuba:
+    rest:
+      endpoint: ${cargoflow.url}${CARGOFLOW_AUTH_ENDPOINT:/cargoflow/rest/v2/oauth/token}
+      client:
+        id: ${CUBA_REST_CLIENT_ID}
+        secret: ${CUBA_REST_CLIENT_SECRET}

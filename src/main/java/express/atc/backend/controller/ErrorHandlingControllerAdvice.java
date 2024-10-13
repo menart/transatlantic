@@ -1,7 +1,9 @@
 package express.atc.backend.controller;
 
 import express.atc.backend.dto.ErrorResponseDto;
+import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
+import express.atc.backend.exception.TrackNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -39,6 +41,14 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler(AuthSmsException.class)
     public ErrorResponseDto handleAuthSmsException(AuthSmsException ex) {
         return new ErrorResponseDto(HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                Collections.singletonList(ex.getMessage()));
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(TrackNotFoundException.class)
+    public ErrorResponseDto handleApiException(ApiException ex) {
+        return new ErrorResponseDto(HttpStatus.NOT_FOUND.getReasonPhrase(),
                 Collections.singletonList(ex.getMessage()));
     }
 

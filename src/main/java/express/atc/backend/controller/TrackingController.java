@@ -2,7 +2,7 @@ package express.atc.backend.controller;
 
 import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.dto.TrackingDto;
-import express.atc.backend.dto.UserDto;
+import express.atc.backend.exception.TrackNotFoundException;
 import express.atc.backend.service.JwtService;
 import express.atc.backend.service.TrackingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,7 +40,7 @@ public class TrackingController extends PrivateController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @GetMapping("/find/{trackNumber}")
-    public TrackingDto findTrack(@PathVariable String trackNumber) {
+    public TrackingDto findTrack(@PathVariable String trackNumber) throws TrackNotFoundException {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
         return trackingService.find(trackNumber, userPhone);
