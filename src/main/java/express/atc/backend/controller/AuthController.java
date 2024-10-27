@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping(path = "/api/auth", produces = "application/json")
 @Tag(name = "Authentication controller", description = "Контроллер для работы авторизацией пользователя")
 public class AuthController {

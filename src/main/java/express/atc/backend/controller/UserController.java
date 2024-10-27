@@ -21,7 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/user/", produces = "application/json")
 @Tag(name = "User controller", description = "Контроллер для работы с информацией о пользователе")

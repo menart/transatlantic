@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@CrossOrigin
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
 @RequestMapping(path = "/api/tracking/", produces = "application/json")
 @Tag(name = "Tracking controller", description = "Контроллер для отслеживания заказа")
