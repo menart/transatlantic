@@ -12,6 +12,6 @@ public class DocumentTypeSerializer extends JsonSerializer<DocumentType> {
 
     @Override
     public void serialize(DocumentType documentType, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        jsonGenerator.writeObject(documentType.getId());
+        jsonGenerator.writeObject(documentType.getName());
     }
 }
