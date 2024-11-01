@@ -1,14 +1,12 @@
 ---
 databaseChangeLog:
   - include:
-      file: liquibase/changeset/01-create_table_auth.yaml
+      file: liquibase/changeset/table/auth_sms.yaml
   - include:
-      file: liquibase/changeset/02-create_table_users.yaml
+      file: liquibase/changeset/table/users.yaml
   - include:
-      file: liquibase/changeset/03-update_table_users.yaml
+      file: liquibase/changeset/table/docs.yaml
   - include:
-      file: liquibase/changeset/04-create_table_docs.yaml
+      file: liquibase/changeset/table/files.yaml
   - include:
-      file: liquibase/changeset/05-create_table_files.yaml
-  - include:
-      file: liquibase/changeset/06-create_table_orders.yaml
+      file: liquibase/changeset/table/tracking.yaml

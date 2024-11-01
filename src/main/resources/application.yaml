@@ -1,9 +1,6 @@
 spring:
   application:
     name: backend
-  http:
-    encoding:
-      force: false
   #Jackson
   jackson:
     mapper:

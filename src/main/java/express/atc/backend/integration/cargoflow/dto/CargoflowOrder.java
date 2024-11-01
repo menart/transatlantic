@@ -3,11 +3,16 @@ package express.atc.backend.integration.cargoflow.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.key.OffsetDateTimeKeyDeserializer;
+import express.atc.backend.integration.cargoflow.dto.Order.OrderPropertyDto;
+import express.atc.backend.integration.cargoflow.serializer.CargoflowPropertyDeserializer;
 import express.atc.backend.serializer.DateTimeDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.TimeZone;
 
@@ -23,13 +28,15 @@ public class CargoflowOrder {
 
     private String orderCollected;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
-    @JsonDeserialize(using = DateTimeDeserializer.class)
-    private OffsetDateTime opTime;
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    private LocalDateTime opTime;
     private TimeZone opTimezone;
     private String opLocation;
 
     private Double weight;
-    private String hsCodeTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    private LocalDateTime hsCodeTime;
     private String idInfo;
     private Integer failureCount;
     private String status;
@@ -39,14 +46,16 @@ public class CargoflowOrder {
     private String logisticsOrderCode;
     private String idValidationStatus;
     private Long tariff;
-    private String properties;
+    @JsonDeserialize(using = CargoflowPropertyDeserializer.class)
+    private OrderPropertyDto properties;
 
     private String lastmileInfo;
     private String lastmileStatus;
-
-    @JsonDeserialize(using = DateTimeDeserializer.class)
-    private OffsetDateTime createdAt;
-    @JsonDeserialize(using = DateTimeDeserializer.class)
-    private OffsetDateTime updatedAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    private LocalDateTime updatedAt;
     private String hsCodeStatus;
 }

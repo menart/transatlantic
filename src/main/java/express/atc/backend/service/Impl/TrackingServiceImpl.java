@@ -8,7 +8,11 @@ import express.atc.backend.integration.cargoflow.service.CargoflowService;
 import express.atc.backend.mapper.TrackingMapper;
 import express.atc.backend.service.TrackingService;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,13 +24,22 @@ public class TrackingServiceImpl implements TrackingService {
 
     @Override
     public TrackingDto find(String trackNumber, String userPhone) throws TrackNotFoundException {
-        TrackingEntity entity = trackingRepository.findByTrackNumber(trackNumber)
-                .orElse(findByCargoFlow(trackNumber));
-        return trackingMapper.toDto(entity);
+        Optional<TrackingEntity> entity = trackingRepository.findByTrackNumber(trackNumber);
+        return trackingMapper.toDto(entity.isEmpty() ? findByCargoFlow(trackNumber) : entity.get());
     }
 
     private TrackingEntity findByCargoFlow(String trackNumber) throws TrackNotFoundException {
-        return trackingMapper.toEntity(cargoflowService.getInfoByTrackNumber(trackNumber));
-//                .orElseThrow(TrackNotFoundException::new);
+        var trackingEntity = trackingMapper.toEntity(getInfoByTrackNumber(trackNumber)
+                .orElseThrow(TrackNotFoundException::new));
+        return trackingRepository.save(trackingEntity);
+    }
+
+    private Optional<TrackingDto> getInfoByTrackNumber(String trackNumber) {
+        List<TrackingDto> trackingDtoList = cargoflowService.getInfoByTrackNumber(trackNumber);
+        if (CollectionUtils.isNotEmpty(trackingDtoList)) {
+            return Optional.of(trackingDtoList.get(0));
+        } else {
+            return Optional.empty();
+        }
     }
 }

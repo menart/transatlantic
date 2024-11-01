@@ -1,50 +1,61 @@
 ---
 databaseChangeLog:
   - changeSet:
-      id: 06
+      id: auth_sms:create
       author: Artamonov Aleksander
       preConditions:
         - onFail: MARK_RAN
         - not:
             - tableExists:
-                tableName: tracking
+                tableName: auth_sms
       changes:
         - createTable:
-            tableName: tracking
+            tableName: auth_sms
             columns:
               - column:
+                  autoIncrement: true
                   constraints:
                     nullable: false
                     primaryKey: true
-                    primaryKeyName: order_id_pkey
+                    primaryKeyName: auth_code_id_pkey
                   name: id
                   type: bigint
               - column:
-                  name: user_phone
+                  name: phone
                   type: varchar(15)
                   constraints:
                     nullable: false
               - column:
-                  name: order_number
-                  type: varchar(100)
+                  name: ipaddress
+                  type: varchar(15)
                   constraints:
                     nullable: false
               - column:
-                  name: track_number
-                  type: varchar(100)
+                  name: code
+                  type: varchar(10)
                   constraints:
                     nullable: false
               - column:
-                  name: address
-                  type: varchar(500)
+                  name: created_at
+                  type: timestamp
                   constraints:
                     nullable: false
+        - createIndex:
+            columns:
               - column:
-                  name: marketplace
-                  type: varchar(500)
+                  name: ipaddress
               - column:
-                  name: items
-                  type: jsonb
+                  name: created_at
+            indexName:  idx_ipaddress
+            tableName: auth_sms
+        - createIndex:
+            columns:
+              - column:
+                  name: phone
+              - column:
+                  name: created_at
+            indexName:  idx_phone
+            tableName: auth_sms
         - createSequence:
             - cacheSize: 1
             - cycle: false
@@ -52,5 +63,5 @@ databaseChangeLog:
             - incrementBy: 1
             - maxValue: 9223372036854775807
             - minValue: 1
-            - sequenceName: tracking_id_seq
+            - sequenceName: auth_sms_id_seq
             - startValue: 1

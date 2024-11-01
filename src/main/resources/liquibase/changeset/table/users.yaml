@@ -1,7 +1,7 @@
 ---
 databaseChangeLog:
   - changeSet:
-      id: 02
+      id: users:create
       author: Artamonov Aleksander
       preConditions:
         - onFail: MARK_RAN
@@ -56,3 +56,37 @@ databaseChangeLog:
             - minValue: 1
             - sequenceName: users_id_seq
             - startValue: 1
+  - changeSet:
+      id: users:change-01
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: WARN
+        - not:
+            - tableExists:
+                tableName: users
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: enable
+                  type: boolean
+                  defaultValueBoolean:  false
+              - column:
+                  name: surname
+                  type: varchar(255)
+              - column:
+                  name: first_name
+                  type: varchar(255)
+              - column:
+                  name: last_name
+                  type: varchar(255)
+              - column:
+                  name: birthday
+                  type: date
+              - column:
+                  name: inn
+                  type: varchar(12)
+              - column:
+                  name: email
+                  type: varchar(150)

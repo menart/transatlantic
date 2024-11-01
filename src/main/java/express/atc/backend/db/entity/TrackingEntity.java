@@ -7,6 +7,9 @@ import lombok.experimental.Accessors;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -40,5 +43,8 @@ public class TrackingEntity {
 
     @Column
     @JdbcTypeCode(SqlTypes.JSON)
-    private OrderDto items;
+    private List<OrderDto> items;
+
+    @Column
+    private LocalDateTime orderDatetime;
 }

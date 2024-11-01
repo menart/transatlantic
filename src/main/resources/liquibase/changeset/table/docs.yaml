@@ -1,7 +1,7 @@
 ---
 databaseChangeLog:
   - changeSet:
-      id: 04
+      id: docs:create
       author: Artamonov Aleksander
       preConditions:
         - onFail: MARK_RAN

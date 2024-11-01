@@ -6,6 +6,8 @@ import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.exception.TrackNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -40,8 +42,16 @@ public class ErrorHandlingControllerAdvice {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(AuthSmsException.class)
     public ErrorResponseDto handleAuthSmsException(AuthSmsException ex) {
-        return new ErrorResponseDto(HttpStatus.BAD_REQUEST.getReasonPhrase(),
+        return new ErrorResponseDto(HttpStatus.UNAUTHORIZED.getReasonPhrase(),
                 Collections.singletonList(ex.getMessage()));
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AuthenticationException.class)
+    public ErrorResponseDto handleForbidden() {
+        return new ErrorResponseDto(HttpStatus.FORBIDDEN.getReasonPhrase(),
+                Collections.singletonList("Доступ запрещен"));
     }
 
     @ResponseBody
