@@ -5,17 +5,6 @@ spring:
   jackson:
     mapper:
       accept-case-insensitive-enums: true
-  # Cache/Redis
-  cache:
-    type: redis
-    default:
-      ttl: ${DEFAULT_TTL:3600}
-    batch:
-      size: ${CACHE_BATCH_SIZE:1000}
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
   # JDBC Pooled Datasource
   jpa:
     database: postgresql
@@ -83,14 +72,14 @@ telegram:
 
 #Cargoflow
 cargoflow:
-  url: ${CARGOFLOW_URL:https://test.cargoflow.app}
+  url: ${CARGOFLOW_URL}
   username: ${CARGOFLOW_USERNAME}
   password: ${CARGOFLOW_PASSWORD}
   order:
-    endpoint: ${CARGOFLOW_URL}${CARGOFLOW_ORDER_ENDPOINT:/cargoflow/rest/v2/entities/cargoflowOrder/search}
+    endpoint: ${cargoflow.url}${CARGOFLOW_ORDER_ENDPOINT}
   cuba:
     rest:
-      endpoint: ${cargoflow.url}${CARGOFLOW_AUTH_ENDPOINT:/cargoflow/rest/v2/oauth/token}
+      endpoint: ${cargoflow.url}${CARGOFLOW_AUTH_ENDPOINT}
       client:
         id: ${CUBA_REST_CLIENT_ID}
         secret: ${CUBA_REST_CLIENT_SECRET}

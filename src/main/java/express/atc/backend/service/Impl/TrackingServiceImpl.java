@@ -25,7 +25,11 @@ public class TrackingServiceImpl implements TrackingService {
     @Override
     public TrackingDto find(String trackNumber, String userPhone) throws TrackNotFoundException {
         Optional<TrackingEntity> entity = trackingRepository.findByTrackNumber(trackNumber);
-        return trackingMapper.toDto(entity.isEmpty() ? findByCargoFlow(trackNumber) : entity.get());
+        TrackingDto dto = trackingMapper.toDto(entity.isEmpty() ? findByCargoFlow(trackNumber) : entity.get());
+        if (userPhone == null || !dto.getPhone().equals(userPhone)) {
+            dto.setItems(null);
+        }
+        return dto;
     }
 
     private TrackingEntity findByCargoFlow(String trackNumber) throws TrackNotFoundException {
