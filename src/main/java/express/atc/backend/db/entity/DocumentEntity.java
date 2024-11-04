@@ -1,7 +1,6 @@
 package express.atc.backend.db.entity;
 
 import express.atc.backend.enums.DocumentType;
-import express.atc.backend.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;

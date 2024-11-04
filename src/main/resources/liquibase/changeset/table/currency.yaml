@@ -1,0 +1,23 @@
+---
+databaseChangeLog:
+  - changeSet:
+      id: currency:create
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: currency
+      changes:
+        - createTable:
+            tableName: currency
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: currency_id_pkey
+                  name: id
+                  type: bigint
+              - column:

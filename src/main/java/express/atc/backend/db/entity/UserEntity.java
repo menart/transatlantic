@@ -2,15 +2,14 @@ package express.atc.backend.db.entity;
 
 import express.atc.backend.enums.UserRole;
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter
 @Setter

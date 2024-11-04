@@ -1,12 +1,9 @@
 package express.atc.backend.integration.cargoflow.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import express.atc.backend.dto.TrackingDto;
 import express.atc.backend.integration.cargoflow.dto.CargoflowOrder;
 import express.atc.backend.integration.cargoflow.dto.ConditionDto;
 import express.atc.backend.integration.cargoflow.dto.FilterDto;
-import express.atc.backend.integration.cargoflow.dto.Order.OrderPropertyDto;
 import express.atc.backend.integration.cargoflow.dto.RequestOrderDto;
 import express.atc.backend.integration.cargoflow.mapper.CargoflowMapper;
 import express.atc.backend.integration.cargoflow.service.CargoflowAuthService;
@@ -28,7 +25,6 @@ public class CargoflowServiceImpl implements CargoflowService {
 
     private final CargoflowAuthService cargoflowAuthService;
     private final WebClient cargoflowOrderWebClient;
-    private final ObjectMapper jsonObjectMapper;
     private final CargoflowMapper cargoflowMapper;
 
     @Override
@@ -49,7 +45,7 @@ public class CargoflowServiceImpl implements CargoflowService {
                 .collectList()
                 .block();
         log.info("{}", cargoflowOrders);
-        return cargoflowOrders.stream().parallel()
+        return cargoflowOrders.stream()
                 .map(cargoflowMapper::toTracking)
                 .toList();
     }

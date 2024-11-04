@@ -65,7 +65,7 @@ public class CargoflowConfig {
         HttpClient httpClient = HttpClient.create()
                 .secure(t -> t.sslContext(sslContext))
                 .followRedirect(true)
-                .wiretap("reactor.netty.http.client.HttpClient",
+                .wiretap(this.getClass().getCanonicalName(),
                         LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL);
 
         return WebClient.builder()
