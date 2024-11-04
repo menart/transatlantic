@@ -83,3 +83,9 @@ cargoflow:
       client:
         id: ${CUBA_REST_CLIENT_ID}
         secret: ${CUBA_REST_CLIENT_SECRET}
+
+#CBRF
+cbrf:
+  url: https://www.cbr.ru/scripts/XML_daily.asp
+  scheduler:
+    cron: 0 */1 * * * *
