@@ -12,15 +12,15 @@ spring:
     show-sql: ${SHOW_SQL:false}
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:5432}/${DATASOURCE_DATABASE:transatlantic}
-    username: ${DATASOURCE_USERNAME:postgres}
-    password: ${DATASOURCE_PASSWORD:postgres}
+    url: jdbc:postgresql://${DATASOURCE_HOST}:${DATASOURCE_PORT}/${DATASOURCE_DATABASE}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
   liquibase:
     change-log: classpath:liquibase/changelog.yaml
     enabled: true
-    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:5432}/${DATASOURCE_DATABASE:transatlantic}
-    user: ${LIQUIBASE_DATASOURCE_USERNAME:postgres}
-    password: ${LIQUIBASE_DATASOURCE_PASSWORD:postgres}
+    url: ${spring.datasource.url}
+    user: ${LIQUIBASE_DATASOURCE_USERNAME}
+    password: ${LIQUIBASE_DATASOURCE_PASSWORD}
 
 server:
   port: 8080
@@ -61,7 +61,7 @@ jwt:
 #SMS Aero
 sms-aero:
   enable: false
-  url: ${SMS_AERO_URL:https://gate.smsaero.ru/v2}
+  url: ${SMS_AERO_URL}
   sign: ${SMS_AERO_SIGN}
   token: ${SMS_AERO_TOKEN}
   login: ${SMS_AERO_LOGIN}
@@ -89,3 +89,12 @@ cbrf:
   url: https://www.cbr.ru/scripts/XML_daily.asp
   scheduler:
     cron: 0 */1 * * * *
+#FEE
+customs-fee:
+  currency: EUR
+  limit-price: 20000
+  fee-price-percent: 15.0
+  limit-weight: 31000
+  fee-weight-by-kg: 200
+  fixed-our-fee: 500
+  percent-amends: 7.0
