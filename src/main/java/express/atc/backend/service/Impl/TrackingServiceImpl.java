@@ -27,7 +27,7 @@ public class TrackingServiceImpl implements TrackingService {
         Optional<TrackingEntity> entity = trackingRepository.findByTrackNumber(trackNumber);
         TrackingDto dto = trackingMapper.toDto(entity.isEmpty() ? findByCargoFlow(trackNumber) : entity.get());
         if (userPhone == null || !dto.getPhone().equals(userPhone)) {
-            dto.setItems(null);
+            dto.setGoods(null);
         }
         return dto;
     }

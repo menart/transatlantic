@@ -21,3 +21,23 @@ databaseChangeLog:
                   name: id
                   type: bigint
               - column:
+                  name: code
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: char_code
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: date
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueDate: Now()
+                  constraints:
+                    nullable: false

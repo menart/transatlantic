@@ -11,8 +11,8 @@ public class CbrfScheduler {
 
     private final CbrfService cbrfService;
 
-        @Scheduled(cron = "${cbrf.scheduler.cron}")
-//    @Scheduled(initialDelay = 1000)
+//        @Scheduled(cron = "${cbrf.scheduler.cron}")
+    @Scheduled(initialDelay = 1000)
     public void updateCurrencyScheduler() {
         cbrfService.updateCurrency();
     }

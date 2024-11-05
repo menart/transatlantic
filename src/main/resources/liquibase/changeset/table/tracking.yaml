@@ -64,3 +64,11 @@ databaseChangeLog:
             - column:
                 name: order_datetime
                 type: timestamp
+  - changeSet:
+      id: tracking:change-02
+      author: Artamonov Aleksander
+      changes:
+        - renameColumn:
+            tableName: tracking
+            newColumnName: goods
+            oldColumnName: items

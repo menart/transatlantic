@@ -1,6 +1,7 @@
 package express.atc.backend.db.entity;
 
 import express.atc.backend.dto.OrderDto;
+import express.atc.backend.dto.OrdersDto;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -43,7 +44,7 @@ public class TrackingEntity {
 
     @Column
     @JdbcTypeCode(SqlTypes.JSON)
-    private List<OrderDto> items;
+    private OrdersDto goods;
 
     @Column
     private LocalDateTime orderDatetime;

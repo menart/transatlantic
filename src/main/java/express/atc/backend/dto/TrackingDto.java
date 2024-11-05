@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Accessors(chain = true)
@@ -32,9 +31,11 @@ public class TrackingDto {
     @Schema(description = "Магазин")
     private String marketplace;
     @Schema(description = "Состав заказа, может отсутствовать, если не совпадает номер телефона")
-    private List<OrderDto> items;
+    private OrdersDto goods;
     @Schema(description = "Дата создания заказа yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime orderDatetime;
+    @Schema(description = "Сумма таможенного платежа")
+    private CalculateDto calculate;
 }
