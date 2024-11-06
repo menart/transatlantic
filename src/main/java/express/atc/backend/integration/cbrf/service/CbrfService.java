@@ -2,10 +2,10 @@ package express.atc.backend.integration.cbrf.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import express.atc.backend.integration.cbrf.dto.CurrencyDto;
 import express.atc.backend.integration.cbrf.dto.ListCurrencyDto;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +28,7 @@ public class CbrfService {
     @Getter
     private Map<String, CurrencyDto> currencyMap = new HashMap<>();
 
+    @PostConstruct
     public void updateCurrency() {
         var response = cbrfWebClient
                 .get()

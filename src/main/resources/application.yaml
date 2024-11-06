@@ -86,15 +86,15 @@ cargoflow:
 
 #CBRF
 cbrf:
-  url: https://www.cbr.ru/scripts/XML_daily.asp
+  url: ${CBRF_URL}
   scheduler:
-    cron: 0 */1 * * * *
+    cron: ${CBRF_CRON}
 #FEE
 customs-fee:
-  currency: EUR
-  limit-price: 20000
-  fee-price-percent: 15.0
-  limit-weight: 31000
-  fee-weight-by-kg: 200
-  fixed-our-fee: 500
-  percent-amends: 7.0
+  currency: ${CUSTOMS_FEE_CURRENCY}
+  limit-price: ${CUSTOMS_FEE_LIMIT_PRICE}
+  fee-price-percent: ${CUSTOMS_FEE_PRICE_PERCENT}
+  limit-weight: ${CUSTOMS_FEE_LIMIT_WEIGHT}
+  fee-weight-by-kg: ${CUSTOMS_FEE_WEIGHT_BY_KG}
+  fixed-our-tax: ${CUSTOMS_FEE_FIXED_OUR_TAX}
+  percent-amends: ${CUSTOMS_FEE_PERCENT_AMENDS}

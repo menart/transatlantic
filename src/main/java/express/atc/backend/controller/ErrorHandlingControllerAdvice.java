@@ -3,6 +3,7 @@ package express.atc.backend.controller;
 import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
+import express.atc.backend.exception.BadRequestException;
 import express.atc.backend.exception.TrackNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -59,6 +60,14 @@ public class ErrorHandlingControllerAdvice {
     public ErrorResponseDto handleApiException(ApiException ex) {
         return new ErrorResponseDto(HttpStatus.NOT_FOUND.getReasonPhrase(),
                 Collections.singletonList(ex.getMessage()));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    ErrorResponseDto onApiException(Exception e) {
+        log.warn("Exception ", e);
+        return new ErrorResponseDto(HttpStatus.BAD_REQUEST.name(), Collections.singletonList(e.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
