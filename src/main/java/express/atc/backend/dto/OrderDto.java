@@ -1,5 +1,9 @@
 package express.atc.backend.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import express.atc.backend.serializer.MoneyDeserializer;
+import express.atc.backend.serializer.MoneySerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +20,9 @@ public class OrderDto {
     @Schema(description = "Количество товара")
     private String quantity;
     @Schema(description = "Стоимость товара")
-    private String price;
+    @JsonSerialize(using = MoneySerializer.class)
+    @JsonDeserialize(using = MoneyDeserializer.class)
+    private Long price;
     @Schema(description = "Вес товара")
     private String weight;
 }

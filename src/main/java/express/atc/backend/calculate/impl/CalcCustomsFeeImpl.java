@@ -132,7 +132,7 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
                 .rates(rateDtoSet.stream().filter(Objects::nonNull).toList())
                 .tax(fixedOurTax.longValue());
         if (calcWeight.equals(BigDecimal.ZERO) && calcPrice.equals(BigDecimal.ZERO)) {
-            return calculate.build();
+            return null;
         }
         String type = calcWeight.compareTo(calcPrice) > 0
                 ? "Расчет по весу"
