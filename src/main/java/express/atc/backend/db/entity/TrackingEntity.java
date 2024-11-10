@@ -1,6 +1,5 @@
 package express.atc.backend.db.entity;
 
-import express.atc.backend.dto.OrderDto;
 import express.atc.backend.dto.OrdersDto;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +8,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -31,6 +30,9 @@ public class TrackingEntity {
     private String userPhone;
 
     @Column
+    private Long orderId;
+
+    @Column
     private String orderNumber;
 
     @Column
@@ -48,4 +50,7 @@ public class TrackingEntity {
 
     @Column
     private LocalDateTime orderDatetime;
+
+    @OneToMany(mappedBy = "tracking")
+    private Set<TrackingRouteEntity> routes;
 }

@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import java.time.LocalDateTime;
+import java.util.TreeSet;
 
 @Data
 @Accessors(chain = true)
@@ -22,6 +23,8 @@ public class TrackingDto {
 
     @JsonIgnore
     private String phone;
+    @Schema(description = "Id заказа")
+    private Long orderId;
     @Schema(description = "Номер заказа")
     private String orderNumber;
     @Schema(description = "Номер трека отслеживания")
@@ -38,4 +41,6 @@ public class TrackingDto {
     private LocalDateTime orderDatetime;
     @Schema(description = "Сумма таможенного платежа")
     private CalculateDto calculate;
+    @Schema(description = "Список маршрутов")
+    private TreeSet<TrackingRouteDto> routes;
 }

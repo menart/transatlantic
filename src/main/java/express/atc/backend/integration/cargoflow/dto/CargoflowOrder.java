@@ -19,7 +19,7 @@ import java.util.TimeZone;
 @NoArgsConstructor
 public class CargoflowOrder {
 
-    private String id;
+    private Long id;
     private String reference;
     private String trackingNumber;
 

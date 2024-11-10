@@ -1,6 +1,6 @@
 package express.atc.backend.integration.cargoflow.dto;
 
-public record RequestOrderDto(
+public record RequestDto(
         FilterDto filter,
         String view
 ) {

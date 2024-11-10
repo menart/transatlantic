@@ -21,15 +21,15 @@ import java.util.List;
 @Configuration
 @Slf4j
 public class CargoflowConfig {
+
     @Value("${cargoflow.cuba.rest.endpoint}")
     private String cargoflowAuthUrl;
     @Value("${cargoflow.cuba.rest.client.id}")
     private String clientId;
     @Value("${cargoflow.cuba.rest.client.secret}")
     private String clientSecret;
-
-    @Value("${cargoflow.order.endpoint}")
-    private String cargoflowOrderUrl;
+    @Value("${cargoflow.entity.endpoint}")
+    private String cargoflowEntityUrl;
 
     @Bean("cargoflowAuthWebClient")
     public WebClient cargoflowAuthWebClient() throws SSLException {
@@ -55,7 +55,7 @@ public class CargoflowConfig {
                 .build();
     }
 
-    @Bean("cargoflowOrderWebClient")
+    @Bean("cargoflowEntityWebClient")
     public WebClient cargoflowOrderWebClient() throws SSLException {
         SslContext sslContext = SslContextBuilder
                 .forClient()
@@ -70,7 +70,7 @@ public class CargoflowConfig {
 
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .baseUrl(cargoflowOrderUrl)
+                .baseUrl(cargoflowEntityUrl)
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                     httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));

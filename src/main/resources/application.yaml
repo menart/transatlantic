@@ -75,15 +75,16 @@ cargoflow:
   url: ${CARGOFLOW_URL}
   username: ${CARGOFLOW_USERNAME}
   password: ${CARGOFLOW_PASSWORD}
-  order:
-    endpoint: ${cargoflow.url}${CARGOFLOW_ORDER_ENDPOINT}
+  entity:
+    endpoint: ${cargoflow.url}${CARGOFLOW_ENTITY_ENDPOINT}
+    order: ${CARGOFLOW_ENTITY_ORDER}
+    order_history: ${CARGOFLOW_ENTITY_ORDER_HISTORY}
   cuba:
     rest:
       endpoint: ${cargoflow.url}${CARGOFLOW_AUTH_ENDPOINT}
       client:
         id: ${CUBA_REST_CLIENT_ID}
         secret: ${CUBA_REST_CLIENT_SECRET}
-
 #CBRF
 cbrf:
   url: ${CBRF_URL}

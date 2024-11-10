@@ -13,5 +13,4 @@ public interface TrackingMapper extends EntityMapper<TrackingDto, TrackingEntity
 
     @Mapping(target = "phone", source = "userPhone")
     TrackingDto toDto(TrackingEntity entity);
-
 }
