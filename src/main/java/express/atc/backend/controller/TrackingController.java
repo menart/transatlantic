@@ -47,6 +47,21 @@ public class TrackingController extends PrivateController {
         return trackingService.find(trackNumber, userPhone);
     }
 
+    @Operation(summary = "Запросить расчет оплаты для отправлении")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Информация об оплате",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CalculateDto.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "404",
+                    description = "Трек-номер не найден",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
     @GetMapping("/calc/{trackNumber}")
     public CalculateDto calcTrack(@PathVariable String trackNumber) throws TrackNotFoundException {
         var token = getToken();
