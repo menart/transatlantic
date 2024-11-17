@@ -9,6 +9,8 @@ import lombok.Data;
 
 import java.util.List;
 
+import static express.atc.backend.Constants.*;
+
 @Data
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -16,13 +18,13 @@ public class CalculateDto {
 
     @Schema(description = "Тип расчета платежа")
     private String type;
-    @Schema(description = "Таможенная пошлина")
+    @Schema(description = STRING_FEE)
     @JsonSerialize(using = MoneySerializer.class)
     private Long fee;
-    @Schema(description = "Сбор за таможенное оформление")
+    @Schema(description = STRING_TAX)
     @JsonSerialize(using = MoneySerializer.class)
     private Long tax;
-    @Schema(description = "Компенсация эквайринга")
+    @Schema(description = STRING_COMPENSATION)
     @JsonSerialize(using = MoneySerializer.class)
     private Long compensation;
     @Schema(description = "Итоговая сумма")
@@ -30,4 +32,7 @@ public class CalculateDto {
     private Long paid;
     @Schema(description = "Список курсов")
     private List<RateDto> rates;
+    @Schema(description = "Ссылка для оплаты")
+    private String url;
+
 }

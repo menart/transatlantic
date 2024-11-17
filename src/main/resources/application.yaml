@@ -4,6 +4,7 @@ spring:
   #Jackson
   jackson:
     mapper:
+      accept-case-insensitive-values: true
       accept-case-insensitive-enums: true
   # JDBC Pooled Datasource
   jpa:
@@ -99,3 +100,19 @@ customs-fee:
   fee-weight-by-kg: ${CUSTOMS_FEE_WEIGHT_BY_KG}
   fixed-our-tax: ${CUSTOMS_FEE_FIXED_OUR_TAX}
   percent-amends: ${CUSTOMS_FEE_PERCENT_AMENDS}
+#Robokassa
+robokassa:
+  url: ${ROBOKASSA_URL}
+  merchant_login: ${ROBOKASSA_MERCHANT_LOGIN}
+  description: ${ROBOKASSA_DESCRIPTION}
+  #none – Без НДС.
+  #vat0 – НДС по ставке 0%
+  #vat10 – НДС чека по ставке 10%
+  #vat110 – НДС чека по расчетной ставке 10/110
+  #vat20 – НДС чека по ставке 20%
+  #vat120 – НДС чека по расчетной ставке 20/120
+  tax: ${ROBOKASSA_TAX}
+  algorithm: ${ROBOKASSA_ALGORITHM}
+  password_1: ${ROBOKASSA_PASSWORD_1}
+  test: ${ROBOKASSA_TEST}
+  payment-url: ${ROBOKASSA_PAYMENT_URL}

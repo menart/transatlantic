@@ -1,6 +1,6 @@
 package express.atc.backend.exception;
 
-public class ApiException extends Exception{
+public class ApiException extends RuntimeException {
     public ApiException(String message) {
         super(message);
     }

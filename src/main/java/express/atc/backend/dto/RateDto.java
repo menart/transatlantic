@@ -7,6 +7,8 @@ import lombok.Data;
 @Data
 @Builder
 public class RateDto {
+    @Schema(description = "Индекс")
+    private int index;
     @Schema(description = "Наименование валюты")
     private String name;
     @Schema(description = "Код валюты")

@@ -5,22 +5,27 @@ import express.atc.backend.db.entity.TrackingEntity;
 import express.atc.backend.db.entity.TrackingRouteEntity;
 import express.atc.backend.db.repository.TrackingRepository;
 import express.atc.backend.db.repository.TrackingRouteRepository;
-import express.atc.backend.dto.TrackingDto;
+import express.atc.backend.dto.*;
 import express.atc.backend.exception.BadRequestException;
 import express.atc.backend.exception.TrackNotFoundException;
 import express.atc.backend.integration.cargoflow.service.CargoflowService;
+import express.atc.backend.integration.robokassa.service.RobokassaService;
 import express.atc.backend.mapper.TrackingMapper;
 import express.atc.backend.mapper.TrackingRouteMapper;
 import express.atc.backend.service.TrackingService;
+import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static express.atc.backend.Constants.*;
 
 @Slf4j
 @Service
@@ -33,18 +38,27 @@ public class TrackingServiceImpl implements TrackingService {
     private final TrackingMapper trackingMapper;
     private final TrackingRouteMapper trackingRouterMapper;
     private final CalcCustomsFee calcCustomsFee;
+    private final UserService userService;
+    private final RobokassaService robokassaService;
 
     @Override
     public TrackingDto find(String trackNumber, String userPhone) throws TrackNotFoundException {
         Optional<TrackingEntity> entity = trackingRepository.findByTrackNumber(trackNumber);
-        TrackingDto dto = trackingMapper.toDto(entity.isEmpty()
-                ? findByCargoFlow(trackNumber)
-                : updateRoute(entity.get()));
-        if (!dto.getPhone().equals(userPhone)) {
+        UserDto user = userService.findUserByPhone(userPhone);
+        TrackingDto dto = trackingMapper.toDto(
+                entity
+                        .map(this::updateRoute)
+                        .orElseGet(() -> findByCargoFlow(trackNumber))
+        );
+        if (user == null || !dto.getPhone().equals(user.getPhone())) {
             dto.setGoods(null);
         } else {
             try {
-                dto.setCalculate(calcCustomsFee.calculate(dto.getGoods()));
+                var calculate = calcCustomsFee.calculate(dto.getGoods());
+                if (calculate != null) {
+                    calculate.setUrl(makePaymentUrl(dto.getOrderId(), calculate, user));
+                }
+                dto.setCalculate(calculate);
             } catch (BadRequestException exception) {
                 log.error(exception.getMessage());
             }
@@ -88,5 +102,34 @@ public class TrackingServiceImpl implements TrackingService {
         } else {
             return Optional.empty();
         }
+    }
+
+    private String makePaymentUrl(Long orderId, CalculateDto calculate, UserDto user) {
+        List<PaymentItemDto> items = new ArrayList<>();
+        items.add(PaymentItemDto.builder()
+                .name(STRING_FEE)
+                .quantity(1L)
+                .amount(calculate.getFee())
+                .build());
+        items.add(PaymentItemDto.builder()
+                .name(STRING_TAX)
+                .quantity(1L)
+                .amount(calculate.getTax())
+                .build());
+        items.add(PaymentItemDto.builder()
+                .name(STRING_COMPENSATION)
+                .quantity(1L)
+                .amount(calculate.getCompensation())
+                .build());
+        var payment = PaymentDto.builder()
+                .orderId(orderId)
+                .items(items)
+                .email(user.getEmail())
+                .amount(items.stream()
+                        .map(PaymentItemDto::getAmount)
+                        .reduce(0L, Long::sum)
+                )
+                .build();
+        return robokassaService.makePaymentUrl(payment);
     }
 }
