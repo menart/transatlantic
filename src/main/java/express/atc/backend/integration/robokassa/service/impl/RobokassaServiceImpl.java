@@ -12,12 +12,15 @@ import jakarta.xml.bind.DatatypeConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.yaml.snakeyaml.util.UriEncoder;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
+import static express.atc.backend.integration.robokassa.config.RobokassaConfig.ROBOKASSA_ERROR_RESPONSE;
 
 @Service
 @RequiredArgsConstructor
@@ -59,10 +62,10 @@ public class RobokassaServiceImpl implements RobokassaService {
             if (response != null && response.getErrorCode() == 0) {
                 return paymentUrl + response.getInvoiceID();
             } else {
-                throw new ApiException("нет ответа от Robokassa");
+                throw new ApiException(ROBOKASSA_ERROR_RESPONSE, HttpStatus.SERVICE_UNAVAILABLE);
             }
         } catch (Exception e) {
-            throw new ApiException(e.getMessage());
+            throw new ApiException(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
         }
     }
 
@@ -106,7 +109,7 @@ public class RobokassaServiceImpl implements RobokassaService {
                     .printHexBinary(md.digest()).toLowerCase();
         } catch (NoSuchAlgorithmException e) {
             log.error(e.getMessage());
-            throw new ApiException(e.getMessage());
+            throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

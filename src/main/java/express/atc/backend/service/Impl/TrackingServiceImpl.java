@@ -6,7 +6,6 @@ import express.atc.backend.db.entity.TrackingRouteEntity;
 import express.atc.backend.db.repository.TrackingRepository;
 import express.atc.backend.db.repository.TrackingRouteRepository;
 import express.atc.backend.dto.*;
-import express.atc.backend.exception.BadRequestException;
 import express.atc.backend.exception.TrackNotFoundException;
 import express.atc.backend.integration.cargoflow.service.CargoflowService;
 import express.atc.backend.integration.robokassa.service.RobokassaService;
@@ -43,28 +42,40 @@ public class TrackingServiceImpl implements TrackingService {
 
     @Override
     public TrackingDto find(String trackNumber, String userPhone) throws TrackNotFoundException {
-        Optional<TrackingEntity> entity = trackingRepository.findByTrackNumber(trackNumber);
         UserDto user = userService.findUserByPhone(userPhone);
-        TrackingDto dto = trackingMapper.toDto(
+        var dto = findTrack(trackNumber);
+        if (user == null || !dto.getPhone().equals(user.getPhone())) {
+            dto.setGoods(null);
+        } else {
+            dto.setCalculate(calcTrack(dto.getGoods(), dto.getOrderId(), user));
+        }
+        return dto;
+    }
+
+    @Override
+    public CalculateDto calc(String trackNumber, String userPhone) throws TrackNotFoundException {
+        UserDto user = userService.findUserByPhone(userPhone);
+        var dto = findTrack(trackNumber);
+        return calcTrack(dto.getGoods(), dto.getOrderId(), user);
+    }
+
+    private TrackingDto findTrack(String trackNumber) throws TrackNotFoundException {
+        Optional<TrackingEntity> entity = trackingRepository.findByTrackNumber(trackNumber);
+        return trackingMapper.toDto(
                 entity
                         .map(this::updateRoute)
                         .orElseGet(() -> findByCargoFlow(trackNumber))
         );
-        if (user == null || !dto.getPhone().equals(user.getPhone())) {
-            dto.setGoods(null);
-        } else {
-            try {
-                var calculate = calcCustomsFee.calculate(dto.getGoods());
-                if (calculate != null) {
-                    calculate.setUrl(makePaymentUrl(dto.getOrderId(), calculate, user));
-                }
-                dto.setCalculate(calculate);
-            } catch (BadRequestException exception) {
-                log.error(exception.getMessage());
-            }
-        }
-        return dto;
     }
+
+    private CalculateDto calcTrack(OrdersDto goods, long OrderId, UserDto user) {
+        var calculate = calcCustomsFee.calculate(goods);
+        if (calculate != null) {
+            calculate.setUrl(makePaymentUrl(OrderId, calculate, user));
+        }
+        return calculate;
+    }
+
 
     private TrackingEntity updateRoute(TrackingEntity entity) {
         var maxRouteId = entity.getRoutes().stream()

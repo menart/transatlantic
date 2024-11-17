@@ -9,6 +9,7 @@ import express.atc.backend.exception.ApiException;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
@@ -30,7 +31,7 @@ public class ReceiptDto {
             return mapper.writeValueAsString(this);
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
-            throw new ApiException(e.getMessage());
+            throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

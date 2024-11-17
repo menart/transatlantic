@@ -3,10 +3,10 @@ package express.atc.backend.controller;
 import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
-import express.atc.backend.exception.BadRequestException;
 import express.atc.backend.exception.TrackNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -62,10 +62,9 @@ public class ErrorHandlingControllerAdvice {
                 Collections.singletonList(ex.getMessage()));
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ApiException.class)
     @ResponseBody
-    ErrorResponseDto onApiException(Exception e) {
+    public ErrorResponseDto onApiException(Exception e) {
         log.warn("Exception ", e);
         return new ErrorResponseDto(HttpStatus.BAD_REQUEST.name(), Collections.singletonList(e.getMessage()));
     }
@@ -73,10 +72,11 @@ public class ErrorHandlingControllerAdvice {
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    ErrorResponseDto onException(Exception e) {
-        log.warn("Exception ", e);
-        return new ErrorResponseDto("error", Collections.singletonList(e.getMessage()));
+    public ResponseEntity<ErrorResponseDto> onException(ApiException exception) {
+        log.warn("Exception ", exception);
+        return new ResponseEntity<>(
+                new ErrorResponseDto("error", Collections.singletonList(exception.getMessage())),
+                exception.getStatus());
     }
-
 
 }

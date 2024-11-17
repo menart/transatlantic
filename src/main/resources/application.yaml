@@ -104,7 +104,7 @@ customs-fee:
 robokassa:
   url: ${ROBOKASSA_URL}
   merchant_login: ${ROBOKASSA_MERCHANT_LOGIN}
-  description: ${ROBOKASSA_DESCRIPTION}
+  description: ${ROBOKASSA_DESCRIPTION:оплата тестовых платежей}
   #none – Без НДС.
   #vat0 – НДС по ставке 0%
   #vat10 – НДС чека по ставке 10%

@@ -4,7 +4,6 @@ import express.atc.backend.calculate.CalcCustomsFee;
 import express.atc.backend.dto.CalculateDto;
 import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.dto.OrdersDto;
-import express.atc.backend.exception.BadRequestException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,7 +34,7 @@ public class CalculateController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @PostMapping("customs-fee")
-    public CalculateDto calcCustomersFee(@RequestBody OrdersDto orders) throws BadRequestException {
+    public CalculateDto calcCustomersFee(@RequestBody OrdersDto orders) {
         return calcCustomsFee.calculate(orders);
     }
 }

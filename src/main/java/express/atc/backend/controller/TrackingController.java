@@ -1,5 +1,6 @@
 package express.atc.backend.controller;
 
+import express.atc.backend.dto.CalculateDto;
 import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.dto.TrackingDto;
 import express.atc.backend.exception.TrackNotFoundException;
@@ -44,5 +45,12 @@ public class TrackingController extends PrivateController {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
         return trackingService.find(trackNumber, userPhone);
+    }
+
+    @GetMapping("/calc/{trackNumber}")
+    public CalculateDto calcTrack(@PathVariable String trackNumber) throws TrackNotFoundException {
+        var token = getToken();
+        String userPhone = token != null ? jwtService.extractPhone(token) : null;
+        return trackingService.calc(trackNumber, userPhone);
     }
 }
