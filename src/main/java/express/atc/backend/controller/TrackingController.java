@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import static express.atc.backend.integration.robokassa.config.RobokassaConfig.ROBOKASSA_ERROR_RESPONSE;
+
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
@@ -39,6 +41,10 @@ public class TrackingController extends PrivateController {
                     description = "Трек-номер не найден",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "503",
+                    description = ROBOKASSA_ERROR_RESPONSE,
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @GetMapping("/find/{trackNumber}")
     public TrackingDto findTrack(@PathVariable String trackNumber) throws TrackNotFoundException {
@@ -59,6 +65,10 @@ public class TrackingController extends PrivateController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
             @ApiResponse(responseCode = "404",
                     description = "Трек-номер не найден",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "503",
+                    description = ROBOKASSA_ERROR_RESPONSE,
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
