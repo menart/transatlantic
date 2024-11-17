@@ -16,6 +16,8 @@ import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -47,7 +49,7 @@ public class TrackingServiceImpl implements TrackingService {
         if (user == null || !dto.getPhone().equals(user.getPhone())) {
             dto.setGoods(null);
         } else {
-            dto.setCalculate(calcTrack(dto.getGoods(), dto.getOrderId(), user));
+            dto.setIsNeedPay(calcTrack(dto.getGoods(), dto.getOrderId(), user) != null);
         }
         return dto;
     }
@@ -57,6 +59,24 @@ public class TrackingServiceImpl implements TrackingService {
         UserDto user = userService.findUserByPhone(userPhone);
         var dto = findTrack(trackNumber);
         return calcTrack(dto.getGoods(), dto.getOrderId(), user);
+    }
+
+    @Override
+    public PageDto<TrackingDto> list(Integer page, int count, String userPhone) {
+        UserDto user = userService.findUserByPhone(userPhone);
+        Pageable pageable = PageRequest.of(page, count);
+        return new PageDto<TrackingDto>()
+                .setList(trackingRepository.findAllByUserPhone(userPhone, pageable)
+                        .stream()
+                        .map(this::updateRoute)
+                        .map(trackingMapper::toDto)
+                        .peek(dto -> dto.setIsNeedPay(calcTrack(dto.getGoods(), dto.getOrderId(), user) != null))
+                        .toList())
+                .setPageNumber(page)
+                .setQuantityPerPage(count)
+                .setNumberOfPage(
+                        (int) Math.ceil(trackingRepository.countByUserPhone(userPhone) / (double) count)
+                );
     }
 
     private TrackingDto findTrack(String trackNumber) throws TrackNotFoundException {

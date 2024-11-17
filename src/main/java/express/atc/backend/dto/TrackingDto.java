@@ -39,8 +39,8 @@ public class TrackingDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime orderDatetime;
-    @Schema(description = "Сумма таможенного платежа")
-    private CalculateDto calculate;
+    @Schema(description = "Необходимость оплаты")
+    private Boolean isNeedPay;
     @Schema(description = "Список маршрутов")
     private TreeSet<TrackingRouteDto> routes;
 }

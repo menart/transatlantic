@@ -2,11 +2,13 @@ package express.atc.backend.controller;
 
 import express.atc.backend.dto.CalculateDto;
 import express.atc.backend.dto.ErrorResponseDto;
+import express.atc.backend.dto.PageDto;
 import express.atc.backend.dto.TrackingDto;
 import express.atc.backend.exception.TrackNotFoundException;
 import express.atc.backend.service.JwtService;
 import express.atc.backend.service.TrackingService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -47,7 +49,9 @@ public class TrackingController extends PrivateController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @GetMapping("/find/{trackNumber}")
-    public TrackingDto findTrack(@PathVariable String trackNumber) throws TrackNotFoundException {
+    public TrackingDto findTrack(
+            @Parameter(description = "Трек-номер заказа") @PathVariable String trackNumber)
+            throws TrackNotFoundException {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
         return trackingService.find(trackNumber, userPhone);
@@ -73,9 +77,41 @@ public class TrackingController extends PrivateController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @GetMapping("/calc/{trackNumber}")
-    public CalculateDto calcTrack(@PathVariable String trackNumber) throws TrackNotFoundException {
+    public CalculateDto calcTrack(
+            @Parameter(description = "Трек-номер заказа") @PathVariable String trackNumber)
+            throws TrackNotFoundException {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
         return trackingService.calc(trackNumber, userPhone);
+    }
+
+    @Operation(summary = "Запросить список страниц")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Информация об оплате",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = CalculateDto.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "404",
+                    description = "Трек-номер не найден",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "503",
+                    description = ROBOKASSA_ERROR_RESPONSE,
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
+    @GetMapping("/list")
+    public PageDto<TrackingDto> listTrack(
+            @Parameter(description = "Номер страницы, начиная с 0")
+            @RequestParam(name = "page", defaultValue = "0", required = false) Integer page,
+            @Parameter(description = "Количество на странице")
+            @RequestParam(name = "count", defaultValue = "10", required = false) Integer count) {
+        var token = getToken();
+        String userPhone = token != null ? jwtService.extractPhone(token) : null;
+        return trackingService.list(page, count <= 0 ? 1 : count, userPhone);
     }
 }

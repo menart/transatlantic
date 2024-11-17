@@ -1,5 +1,6 @@
 package express.atc.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import express.atc.backend.serializer.MoneyDeserializer;
@@ -12,7 +13,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderDto {
+    @Schema(description = "index")
+    private int index;
     @Schema(description = "Наименование товара")
     private String name;
     @Schema(description = "Ссылка на товар")

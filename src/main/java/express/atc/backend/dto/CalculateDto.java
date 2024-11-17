@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static express.atc.backend.Constants.*;
 
@@ -35,4 +36,10 @@ public class CalculateDto {
     @Schema(description = "Ссылка для оплаты")
     private String url;
 
+    public List<RateDto> getRates() {
+        AtomicInteger index = new AtomicInteger();
+        return rates.stream()
+                .peek(item -> item.setIndex(index.getAndIncrement()))
+                .toList();
+    }
 }

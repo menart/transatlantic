@@ -7,10 +7,10 @@ import express.atc.backend.serializer.MoneySerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Data
 @AllArgsConstructor
@@ -26,4 +26,11 @@ public class OrdersDto {
     private long weight;
     @Schema(description = "Список товаров")
     List<OrderDto> items;
+
+    public List<OrderDto> getItems() {
+        AtomicInteger index = new AtomicInteger();
+       return items.stream()
+                .peek(item -> item.setIndex(index.getAndIncrement()))
+                .toList();
+    }
 }
