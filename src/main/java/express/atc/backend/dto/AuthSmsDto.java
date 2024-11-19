@@ -7,8 +7,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import static express.atc.backend.exception.ValidationMessage.DISAGREE;
-import static express.atc.backend.exception.ValidationMessage.PHONE_NOT_VALID;
+import static express.atc.backend.Constants.DISAGREE;
+import static express.atc.backend.Constants.PHONE_NOT_VALID;
 
 @AllArgsConstructor
 @NoArgsConstructor

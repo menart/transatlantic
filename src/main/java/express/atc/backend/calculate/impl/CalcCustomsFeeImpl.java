@@ -20,8 +20,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import static express.atc.backend.Constants.GRAMS_PER_KG;
-import static express.atc.backend.Constants.LOCATE_CURRENCY;
+import static express.atc.backend.Constants.*;
 
 @Slf4j
 @Component
@@ -136,8 +135,8 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
             return null;
         }
         String type = calcWeight.compareTo(calcPrice) > 0
-                ? "Расчет по весу"
-                : "Расчет по сумме";
+                ? CALC_WEIGHT
+                : CALC_AMOUNT;
         BigDecimal fee =
                 convertCalcToLocateCurrency(
                         calcWeight.compareTo(calcPrice) > 0 ? calcWeight : calcPrice)

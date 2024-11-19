@@ -1,9 +1,6 @@
 package express.atc.backend.controller;
 
-import express.atc.backend.dto.CalculateDto;
-import express.atc.backend.dto.ErrorResponseDto;
-import express.atc.backend.dto.PageDto;
-import express.atc.backend.dto.TrackingDto;
+import express.atc.backend.dto.*;
 import express.atc.backend.exception.TrackNotFoundException;
 import express.atc.backend.service.JwtService;
 import express.atc.backend.service.TrackingService;
@@ -89,8 +86,9 @@ public class TrackingController extends PrivateController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Информация об оплате",
+                    useReturnTypeSchema = true,
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CalculateDto.class))}),
+                            schema = @Schema(implementation = TrackingPageDto.class))}),
             @ApiResponse(responseCode = "400",
                     description = "Невалидные параметры в запросе",
                     content = {@Content(mediaType = "application/json",

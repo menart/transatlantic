@@ -20,7 +20,7 @@ import lombok.experimental.Accessors;
 
 import java.time.LocalDate;
 
-import static express.atc.backend.exception.ValidationMessage.*;
+import static express.atc.backend.Constants.*;
 
 @Data
 @Builder

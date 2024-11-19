@@ -21,8 +21,8 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-import static express.atc.backend.exception.ValidationMessage.DATE_NOT_VALID;
-import static express.atc.backend.exception.ValidationMessage.DOC_TYPE_NOT_VALID;
+import static express.atc.backend.Constants.DATE_NOT_VALID;
+import static express.atc.backend.Constants.DOC_TYPE_NOT_VALID;
 
 @Data
 @Builder
