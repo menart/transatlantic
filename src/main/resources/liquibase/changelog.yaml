@@ -12,3 +12,5 @@ databaseChangeLog:
       file: liquibase/changeset/table/tracking.yaml
   - include:
       file: liquibase/changeset/table/tracking_route.yaml
+  - include:
+      file: liquibase/changeset/table/feedback.yaml

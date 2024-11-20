@@ -45,12 +45,13 @@ public class UserEntity {
     private String inn;
     @Column
     private String email;
-    @CreationTimestamp
-    @Column(updatable = false, name = "created_at")
-    private LocalDateTime updatedAt;
     @UpdateTimestamp
     @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
     private LocalDateTime createdAt;
+
 
     public boolean isFullInfo(){
         return Objects.nonNull(surname)

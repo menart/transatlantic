@@ -1,0 +1,55 @@
+---
+databaseChangeLog:
+  - changeSet:
+      id: feedback:create
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: feedback
+      changes:
+        - createTable:
+            tableName: feedback
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: feedback_id_pkey
+                  name: id
+                  type: bigint
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(10)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: feedback
+                  type: jsonb
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+        - createIndex:
+            columns:
+              - column:
+                  name: user_id
+            indexName:  idx_feedback_user
+            tableName: feedback
+        - createSequence:
+            - cacheSize: 1
+            - cycle: false
+            - dataType: bigint
+            - incrementBy: 1
+            - maxValue: 9223372036854775807
+            - minValue: 1
+            - sequenceName: feedback_id_seq
+            - startValue: 1
