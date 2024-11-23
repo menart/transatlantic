@@ -15,6 +15,7 @@ public class Constants {
 
     //Exception message
     public static final String TRACK_NOT_FOUND = "трек номер не найден";
+    public static final String EMAIL_NOT_GIVEN = "email не заполнен";
 
     //Validation message
     public static final String PHONE_NOT_VALID =

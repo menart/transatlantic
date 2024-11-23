@@ -26,9 +26,8 @@ public class FeedbackEntity {
     @SequenceGenerator(name = "feedback_id_seq",
             sequenceName = "feedback_id_seq", allocationSize = 1)
     private Long id;
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+    @Column
+    private Long userId;
     @Column
     @Enumerated(EnumType.STRING)
     private FeedbackType type;

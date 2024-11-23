@@ -9,5 +9,6 @@ import org.mapstruct.Mapping;
 public interface UserMapper extends EntityMapper<UserDto, UserEntity> {
     @Override
     @Mapping(target = "agree", expression = "java(true)")
+    @Mapping(target = "full", expression = "java(entity.isFullInfo())")
     UserDto toDto(UserEntity entity);
 }

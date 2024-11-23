@@ -5,6 +5,6 @@ import org.springframework.http.HttpStatus;
 public class AuthSmsException extends ApiException{
 
     public AuthSmsException(String message) {
-        super(message, HttpStatus.BAD_REQUEST);
+        super(message, HttpStatus.UNAUTHORIZED);
     }
 }

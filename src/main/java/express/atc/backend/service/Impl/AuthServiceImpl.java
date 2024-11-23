@@ -66,6 +66,7 @@ public class AuthServiceImpl implements AuthService {
         var user = userService.findOrCreateByPhone(validateSms.getPhone());
         return JwtAuthenticationResponse.builder()
                 .token(jwt.generateToken(userDetailMapper.toUserDetail(user)))
+                .isFull(user.isFull())
                 .build();
     }
 

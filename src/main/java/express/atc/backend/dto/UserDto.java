@@ -56,7 +56,6 @@ public class UserDto {
     @Valid
     private DocumentDto document;
     @Schema(description = "ИНН, для физлиц 12 цифр")
-    @Size(min = 12, max = 12)
     @Pattern(regexp = "[0-9]{12}", message = INN_NOT_VALID)
     private String inn;
     @Schema(description = "Адрес электронной почты (максимальная длина поля 150)")

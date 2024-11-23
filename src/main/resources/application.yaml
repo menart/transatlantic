@@ -22,6 +22,24 @@ spring:
     url: ${spring.datasource.url}
     user: ${LIQUIBASE_DATASOURCE_USERNAME}
     password: ${LIQUIBASE_DATASOURCE_PASSWORD}
+# e-mail
+  mail:
+    host: ${EMAIL_HOST}
+    username: ${EMAIL_USER_SENDER}
+    password: ${EMAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          port: ${EMAIL_SMTP_PORT}
+          host: ${EMAIL_HOST}
+          username: ${EMAIL_USER_SENDER}
+          password: ${EMAIL_PASSWORD}
+          auth: true
+          starttls.enabled: false
+          ssl:
+            protocols: TLSv1.2
+            enable: true
+            trust: smtp.mail.ru
 
 server:
   port: 8080

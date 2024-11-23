@@ -1,4 +1,11 @@
 package express.atc.backend.dto;
 
-public class FeedbackFieldDto {
+import io.swagger.v3.oas.annotations.media.Schema;
+
+public record FeedbackFieldDto(
+        @Schema(description = "Имя отправителя")
+        String name,
+        @Schema(description = "Тело сообщения")
+        String body
+) {
 }
