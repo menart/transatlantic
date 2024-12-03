@@ -34,6 +34,11 @@
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+			<version>3.4.0</version>
+		</dependency>
+		<dependency>
 			<groupId>com.github.gavlyukovskiy</groupId>
 			<artifactId>datasource-proxy-spring-boot-starter</artifactId>
 			<version>1.9.1</version>
@@ -111,6 +116,17 @@
 			<groupId>org.telegram</groupId>
 			<artifactId>telegrambots</artifactId>
 			<version>6.9.7.1</version>
+		</dependency>
+		<!-- template -->
+		<dependency>
+			<groupId>org.thymeleaf</groupId>
+			<artifactId>thymeleaf</artifactId>
+			<version>3.1.2.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.thymeleaf</groupId>
+			<artifactId>thymeleaf-spring6</artifactId>
+			<version>3.1.2.RELEASE</version>
 		</dependency>
 		<!-- test -->
 		<dependency>

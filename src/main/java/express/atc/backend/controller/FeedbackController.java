@@ -39,7 +39,7 @@ public class FeedbackController extends PrivateController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @PostMapping
-    public FeedbackFieldDto saveFeedback(FeedbackFieldDto feedbackField) {
+    public FeedbackFieldDto saveFeedback(@RequestBody FeedbackFieldDto feedbackField) {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
         return feedbackService.saveFeedback(feedbackField, FeedbackType.QUESTION, userPhone);

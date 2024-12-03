@@ -27,6 +27,8 @@ spring:
     host: ${EMAIL_HOST}
     username: ${EMAIL_USER_SENDER}
     password: ${EMAIL_PASSWORD}
+    templates:
+      path: ${EMAIL_TEMPLATE_PATH}
     properties:
       mail:
         smtp:
@@ -40,6 +42,15 @@ spring:
             protocols: TLSv1.2
             enable: true
             trust: smtp.mail.ru
+  #RabbitMQ
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    virtual-host: ${RABBITMQ_VHOST}
+    password: ${RABBITMQ_PASSWORD}
+    username: ${RABBITMQ_USERNAME}
+    person-info-need:
+      queue: ${RABBITMQ_PERSON_INFO_NEED_QUEUE}
+
 
 server:
   port: 8080
@@ -134,3 +145,7 @@ robokassa:
   password_1: ${ROBOKASSA_PASSWORD_1}
   test: ${ROBOKASSA_TEST}
   payment-url: ${ROBOKASSA_PAYMENT_URL}
+#Feedback
+feedback:
+  title: ${FEEDBACK_TITLE}
+  template: ${FEEDBACK_TEMPLATE}

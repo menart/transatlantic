@@ -8,14 +8,20 @@ import express.atc.backend.exception.ApiException;
 import express.atc.backend.service.EmailService;
 import express.atc.backend.service.FeedbackService;
 import express.atc.backend.service.UserService;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static express.atc.backend.Constants.EMAIL_NOT_GIVEN;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
@@ -23,6 +29,11 @@ public class FeedbackServiceImpl implements FeedbackService {
     private final FeedbackRepository feedbackRepository;
     private final EmailService emailService;
     private final UserService userService;
+
+    @Value("${feedback.template}")
+    private String template;
+    @Value("${feedback.title}")
+    private String title;
 
     @Override
     public FeedbackFieldDto saveFeedback(FeedbackFieldDto feedbackField, FeedbackType feedbackType, String userPhone) {
@@ -35,7 +46,14 @@ public class FeedbackServiceImpl implements FeedbackService {
                 .type(feedbackType)
                 .feedback(feedbackField)
                 .build();
-        emailService.sendMessage(user.getEmail(), feedbackField.name(), feedbackField.body());
+        Map<String, Object> templateModel = new HashMap<>();
+        templateModel.put("name", feedbackField.name());
+        templateModel.put("text", feedbackField.body());
+        try {
+            emailService.sendMessageUsingTemplate(user.getEmail(), title, templateModel, template);
+        } catch (MessagingException exception) {
+            log.error(exception.getMessage());
+        }
         return feedbackRepository.save(entity).getFeedback();
     }
 
