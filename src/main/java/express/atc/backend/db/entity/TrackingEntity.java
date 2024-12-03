@@ -1,6 +1,7 @@
 package express.atc.backend.db.entity;
 
 import express.atc.backend.dto.OrdersDto;
+import express.atc.backend.enums.TrackingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
@@ -50,6 +51,10 @@ public class TrackingEntity {
 
     @Column
     private LocalDateTime orderDatetime;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private TrackingStatus status;
 
     @OneToMany(mappedBy = "tracking")
     private Set<TrackingRouteEntity> routes;

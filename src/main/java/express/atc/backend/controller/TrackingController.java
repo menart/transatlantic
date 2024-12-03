@@ -1,6 +1,7 @@
 package express.atc.backend.controller;
 
 import express.atc.backend.dto.*;
+import express.atc.backend.enums.TrackingStatus;
 import express.atc.backend.exception.TrackNotFoundException;
 import express.atc.backend.service.JwtService;
 import express.atc.backend.service.TrackingService;
@@ -107,9 +108,11 @@ public class TrackingController extends PrivateController {
             @Parameter(description = "Номер страницы, начиная с 0")
             @RequestParam(name = "page", defaultValue = "0", required = false) Integer page,
             @Parameter(description = "Количество на странице")
-            @RequestParam(name = "count", defaultValue = "10", required = false) Integer count) {
+            @RequestParam(name = "count", defaultValue = "10", required = false) Integer count,
+            @Parameter(description = "Фильтрация запросов")
+            @RequestParam(name = "filter", defaultValue = "active", required = false) TrackingStatus filter) {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
-        return trackingService.list(page, count <= 0 ? 1 : count, userPhone);
+        return trackingService.list(page <= 0 ? 0 : count, count <= 0 ? 1 : count, userPhone, filter);
     }
 }

@@ -5,6 +5,7 @@ import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.exception.TrackNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -21,6 +22,11 @@ import java.util.stream.Stream;
 @Slf4j
 @ControllerAdvice
 public class ErrorHandlingControllerAdvice {
+
+    @ExceptionHandler(ConversionFailedException.class)
+    public ResponseEntity<String> handleConflict(RuntimeException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -69,14 +75,18 @@ public class ErrorHandlingControllerAdvice {
         return new ErrorResponseDto(HttpStatus.BAD_REQUEST.name(), Collections.singletonList(e.getMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    public ResponseEntity<ErrorResponseDto> onException(ApiException exception) {
+    public ResponseEntity<ErrorResponseDto> onException(Exception exception) {
         log.warn("Exception ", exception);
         return new ResponseEntity<>(
-                new ErrorResponseDto("error", Collections.singletonList(exception.getMessage())),
-                exception.getStatus());
+                new ErrorResponseDto(
+                        "error",
+                        Collections.singletonList(exception.getMessage())
+                ),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
 
 }

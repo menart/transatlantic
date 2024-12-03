@@ -9,6 +9,4 @@ public record ErrorResponseDto(
         @Schema(description = "Тип ошибки")
         String status,
         @Schema(description = "Список сообщений об ошибках")
-        List<String> messages) implements Serializable {
-
-}
+        List<String> messages) implements Serializable {}

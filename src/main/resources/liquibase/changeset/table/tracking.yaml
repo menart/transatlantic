@@ -82,3 +82,14 @@ databaseChangeLog:
             - column:
                 name: order_id
                 type: bigint
+  - changeSet:
+      id: tracking:change-04
+      author: Artamonov Aleksander
+      changes:
+        - addColumn:
+            tableName: tracking
+            columns:
+              - column:
+                  name: status
+                  type: varchar(10)
+                  defaultValue: "ACTIVE"

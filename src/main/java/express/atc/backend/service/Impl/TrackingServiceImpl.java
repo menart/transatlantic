@@ -6,6 +6,7 @@ import express.atc.backend.db.entity.TrackingRouteEntity;
 import express.atc.backend.db.repository.TrackingRepository;
 import express.atc.backend.db.repository.TrackingRouteRepository;
 import express.atc.backend.dto.*;
+import express.atc.backend.enums.TrackingStatus;
 import express.atc.backend.exception.TrackNotFoundException;
 import express.atc.backend.integration.cargoflow.service.CargoflowService;
 import express.atc.backend.integration.robokassa.service.RobokassaService;
@@ -62,11 +63,11 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public PageDto<TrackingDto> list(Integer page, int count, String userPhone) {
+    public PageDto<TrackingDto> list(Integer page, int count, String userPhone, TrackingStatus filter) {
         UserDto user = userService.findUserByPhone(userPhone);
         Pageable pageable = PageRequest.of(page, count);
         return new PageDto<TrackingDto>()
-                .setList(trackingRepository.findAllByUserPhone(userPhone, pageable)
+                .setList(findAndFilterList(userPhone, pageable, filter)
                         .stream()
                         .map(this::updateRoute)
                         .map(trackingMapper::toDto)
@@ -162,5 +163,9 @@ public class TrackingServiceImpl implements TrackingService {
                 )
                 .build();
         return robokassaService.makePaymentUrl(payment);
+    }
+
+    private List<TrackingEntity> findAndFilterList(String userPhone, Pageable pageable, TrackingStatus filter) {
+        return trackingRepository.findAllByUserPhoneAndStatus(userPhone, filter, pageable);
     }
 }

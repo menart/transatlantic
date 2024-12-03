@@ -43,6 +43,14 @@ public class RobokassaServiceImpl implements RobokassaService {
     private boolean test;
     @Value("${robokassa.payment-url}")
     private String paymentUrl;
+    @Value("${robokassa.success-url}")
+    private String successUrl;
+    @Value("${robokassa.success-method}")
+    private String successMethod;
+    @Value("${robokassa.fail-url}")
+    private String failUrl;
+    @Value("${robokassa.fail-method}")
+    private String failMethod;
 
 
     @Override
@@ -54,6 +62,10 @@ public class RobokassaServiceImpl implements RobokassaService {
                     .get()
                     .uri(uriBuilder ->
                             request.getUribuilder(uriBuilder)
+                                    .queryParam("SuccessUrl2", successUrl)
+                                    .queryParam("SuccessUrl2Method", successMethod)
+                                    .queryParam("FailUrl2", failUrl)
+                                    .queryParam("FailUrl2Method", failMethod)
                                     .build())
                     .retrieve()
                     .bodyToMono(InvoiceDto.class)
@@ -102,6 +114,8 @@ public class RobokassaServiceImpl implements RobokassaService {
             MessageDigest md = MessageDigest.getInstance(algorithm);
             String encodingStr = dto.getMerchantLogin() + ":" + dto.getOutSum() + ":" + dto.getInvId()
                     + ":" + UriEncoder.encode(dto.getReceipt().toString())
+                    + ":" + successUrl + ":" + successMethod
+                    + ":" + failUrl + ":" + failMethod
                     + ":" + password;
             log.info(encodingStr);
             md.update(encodingStr.getBytes());
@@ -111,5 +125,11 @@ public class RobokassaServiceImpl implements RobokassaService {
             log.error(e.getMessage());
             throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String encodeUrl(String url) {
+        return url
+                .replaceAll("/", "%2F")
+                .replaceAll(":", "%3A");
     }
 }
