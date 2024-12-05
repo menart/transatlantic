@@ -154,3 +154,9 @@ robokassa:
 feedback:
   title: ${FEEDBACK_TITLE}
   template: ${FEEDBACK_TEMPLATE}
+
+#Landing
+landing:
+  delivery:
+    email: ${LANDING_DELIVERY_EMAIL}
+    template: ${LANDING_DELIVERY_TEMPLATE}

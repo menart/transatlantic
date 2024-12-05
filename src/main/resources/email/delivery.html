@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style>
+        ul {
+            background-color: #eee; border: 1px dotted black; padding: 5px; margin: 5px; border-radius: 5px
+        }
+    </style>
+</head>
+<body>
+<p>Получен заказ на доставку:</p>
+<ul>
+    <li>
+        ФИО: <span style="font-weight: bold" th:text="${delivery.fullName}"/>
+    </li>
+    <li>
+        Адрес электронной почты: <span style="font-weight: bold" th:text="${delivery.email}"/>
+    </li>
+    <li>
+        Наименование груза: <span style="font-weight: bold" th:text="${delivery.title}"/>
+    </li>
+    <li>
+        Вес груза: <span style="font-weight: bold" th:text="${delivery.weight}"/> кг
+    </li>
+    <li>
+        Количество мест: <span style="font-weight: bold" th:text="${delivery.count}"/>
+    </li>
+    <li>
+        <div>Габариты мест</div>
+        <table>
+            <thead>
+            <tr>
+                <th> Ширина</th>
+                <th> Длина</th>
+                <th> Высота</th>
+            </tr>
+            </thead>
+            <tr th:each="item : ${delivery.items}">
+                <td th:text="${item.width}"/>
+                <td th:text="${item.length}"/>
+                <td th:text="${item.height}"/>
+            </tr>
+        </table>
+    </li>
+    <li>
+        <span>Комментарий:</span> <span style="font-weight: bold" th:text="${delivery.description}"/>
+    </li>
+</ul>
+<p>
+    <em th:text="${senderName}"></em> <br/>
+</p>
+</body>
+</html>

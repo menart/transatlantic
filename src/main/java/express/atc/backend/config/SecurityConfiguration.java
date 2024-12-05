@@ -33,7 +33,8 @@ public class SecurityConfiguration {
             "/v3/**",
             "/api/tracking/find/**",
             "/api/calculate/**",
-            "/api/payment/**"
+            "/api/payment/**",
+            "/api/landing/**"
     );
 
     @Bean

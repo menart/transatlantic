@@ -4,6 +4,7 @@ import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.exception.TrackNotFoundException;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
@@ -68,14 +69,28 @@ public class ErrorHandlingControllerAdvice {
                 Collections.singletonList(ex.getMessage()));
     }
 
-    @ExceptionHandler(ApiException.class)
     @ResponseBody
-    public ErrorResponseDto onApiException(Exception e) {
-        log.warn("Exception ", e);
-        return new ErrorResponseDto(HttpStatus.BAD_REQUEST.name(), Collections.singletonList(e.getMessage()));
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    @ExceptionHandler(MessagingException.class)
+    public ErrorResponseDto handleMessagingException(MessagingException ex) {
+        return new ErrorResponseDto(HttpStatus.BAD_GATEWAY.getReasonPhrase(),
+                Collections.singletonList("Проблема при отправки почты: " + ex.getMessage()));
     }
 
-    @ExceptionHandler(Throwable.class)
+    @ExceptionHandler(ApiException.class)
+    @ResponseBody
+    public ResponseEntity<?> onApiException(ApiException e) {
+        log.warn("Exception ", e);
+        return new ResponseEntity<>(
+                new ErrorResponseDto(
+                        e.getStatus().name(),
+                        Collections.singletonList(e.getMessage())
+                ),
+                e.getStatus()
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
     public ResponseEntity<ErrorResponseDto> onException(Exception exception) {

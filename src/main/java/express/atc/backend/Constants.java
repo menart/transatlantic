@@ -21,6 +21,7 @@ public class Constants {
     public static final String PHONE_NOT_VALID =
             "Вы ввели неправильный номер, номер должен быть: +7 (___) ___ - __ - __, например: +7(999)888-44-55";
     public static final String DISAGREE = "Необходимо предоставить согласие";
+    public static final String NOT_VALID_SIZE_DELIVERY_ITEMS = "Не совпадает количество мест и список размеров";
 
     public static final String VALIDATE_CODE = "В коде должны быть только цифры";
     public static final String INN_NOT_VALID = "ИНН должен состоять из 12 цифр";

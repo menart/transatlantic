@@ -53,8 +53,8 @@ public class EmailServiceImpl implements EmailService {
                                          String templateName) throws MessagingException {
 
         Context thymeleafContext = new Context();
-        templateModel.put("senderName", senderUser);
         thymeleafContext.setVariables(templateModel);
+        thymeleafContext.setVariable("senderName", senderUser);
         String htmlBody = thymeleafTemplateEngine.process(templateName, thymeleafContext);
 
         sendHtmlMessage(to, subject, htmlBody);

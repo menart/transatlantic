@@ -113,6 +113,6 @@ public class TrackingController extends PrivateController {
             @RequestParam(name = "filter", defaultValue = "active", required = false) TrackingStatus filter) {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
-        return trackingService.list(page <= 0 ? 0 : count, count <= 0 ? 1 : count, userPhone, filter);
+        return trackingService.list(page <= 0 ? 0 : page, count <= 1 ? 1 : count, userPhone, filter);
     }
 }

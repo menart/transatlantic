@@ -126,10 +126,4 @@ public class RobokassaServiceImpl implements RobokassaService {
             throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    private String encodeUrl(String url) {
-        return url
-                .replaceAll("/", "%2F")
-                .replaceAll(":", "%3A");
-    }
 }
