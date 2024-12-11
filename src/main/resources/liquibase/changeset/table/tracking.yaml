@@ -93,3 +93,22 @@ databaseChangeLog:
                   name: status
                   type: varchar(10)
                   defaultValue: "ACTIVE"
+  - changeSet:
+      id: tracking:change-05
+      author: Artamonov Aleksander
+      changes:
+        - addColumn:
+            tableName: tracking
+            columns:
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueDate: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueDate: NOW()
+                  constraints:
+                    nullable: false

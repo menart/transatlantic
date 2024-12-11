@@ -42,10 +42,10 @@ public class DocumentEntity {
     private LocalDate issueDate;
     @Column
     private LocalDate expiredDate;
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime updatedAt;
-    @UpdateTimestamp
-    @Column
     private LocalDateTime createdAt;
 }

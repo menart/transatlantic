@@ -26,14 +26,14 @@ public interface CargoflowMapper {
     @Mapping(target = "address", source = "properties.buyer.address.detailAddress")
     @Mapping(target = "marketplace", source = "properties.sender.companyName")
     @Mapping(target = "goods",
-            expression = "java(toOrders(order.getProperties().getParcel()))")
+            expression = "java(toOrders(order.properties().parcel()))")
     TrackingDto toTracking(CargoflowOrder order);
 
     @Mapping(target = "price", source = "price")
     @Mapping(target = "weight", source = "suggestedWeight")
     @Mapping(target = "currency", source = "priceCurrency")
     @Mapping(target = "items",
-            expression = "java(toListItems(parcel.getGoodsList()))")
+            expression = "java(toListItems(parcel.goodsList()))")
     OrdersDto toOrders(OrderParcel parcel);
 
     List<OrderDto> toListItems(List<OrderGood> goods);
@@ -45,6 +45,6 @@ public interface CargoflowMapper {
 
     @Named("toLocalDateTime")
     default LocalDateTime toLocalDateTime(OrderHistory history) {
-        return LocalDateTime.ofInstant(history.getOpTime(), history.getOpTimezone().toZoneId());
+        return LocalDateTime.ofInstant(history.opTime(), history.opTimezone().toZoneId());
     }
 }

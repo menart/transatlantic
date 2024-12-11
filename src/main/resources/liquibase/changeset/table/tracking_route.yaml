@@ -61,3 +61,16 @@ databaseChangeLog:
             - minValue: 1
             - sequenceName: tracking_route_id_seq
             - startValue: 1
+  - changeSet:
+      id: tracking_route:change-01
+      author: Artamonov Aleksander
+      changes:
+        - addColumn:
+            tableName: tracking_route
+            columns:
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueDate: NOW()
+                  constraints:
+                    nullable: false

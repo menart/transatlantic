@@ -5,7 +5,9 @@ import express.atc.backend.enums.TrackingStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
@@ -58,4 +60,11 @@ public class TrackingEntity {
 
     @OneToMany(mappedBy = "tracking")
     private Set<TrackingRouteEntity> routes;
+    @Column
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
 }
