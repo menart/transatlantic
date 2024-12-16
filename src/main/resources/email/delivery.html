@@ -27,21 +27,7 @@
         Количество мест: <span style="font-weight: bold" th:text="${delivery.count}"/>
     </li>
     <li>
-        <div>Габариты мест</div>
-        <table>
-            <thead>
-            <tr>
-                <th> Ширина</th>
-                <th> Длина</th>
-                <th> Высота</th>
-            </tr>
-            </thead>
-            <tr th:each="item : ${delivery.items}">
-                <td th:text="${item.width}"/>
-                <td th:text="${item.length}"/>
-                <td th:text="${item.height}"/>
-            </tr>
-        </table>
+        Габариты мест: <span style="font-weight: bold" th:text="${delivery.items}"/>
     </li>
     <li>
         <span>Комментарий:</span> <span style="font-weight: bold" th:text="${delivery.description}"/>

@@ -7,8 +7,6 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
-import java.util.List;
-
 import static express.atc.backend.Constants.EMAIL_NOT_VALID;
 import static express.atc.backend.Constants.NOT_VALID_SIZE;
 
@@ -34,8 +32,7 @@ public record DeliveryDto(
         Integer count,
         @Schema(description = "Габариты мест")
         @NotNull(message = "Габариты мест: поле не может быть пустым")
-        @Size(min = 1, message = "Количество мест не может быть меньше 1")
-        List<DeliveryItemDto> items,
+        String items,
         @Schema(description = "Комментарий")
         @NotNull(message = "Комментарий: поле не может быть пустым")
         String description
