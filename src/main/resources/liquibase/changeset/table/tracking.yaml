@@ -112,3 +112,25 @@ databaseChangeLog:
                   defaultValueDate: NOW()
                   constraints:
                     nullable: false
+  - changeSet:
+      id: tracking:change-06
+      author: Artamonov Aleksander
+      changes:
+        - sql:
+            truncate tracking cascade;
+        - addColumn:
+            tableName: tracking
+            columns:
+              - column:
+                  name: logisticsOrderCode
+                  type: varchar(15)
+                  constraints:
+                    nullable: false
+        - createIndex:
+            clustered: true
+            columns:
+              - column:
+                  name: logisticsOrderCode
+            indexName: idx_logisticsOrderCode
+            tableName: tracking
+            unique: true

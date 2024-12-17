@@ -29,6 +29,8 @@ public class TrackingDto {
     private String orderNumber;
     @Schema(description = "Номер трека отслеживания")
     private String trackNumber;
+    @Schema(description = "Логистический код заказа")
+    private String logisticsOrderCode;
     @Schema(description = "Адрес получателя")
     private String address;
     @Schema(description = "Магазин")

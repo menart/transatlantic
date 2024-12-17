@@ -42,6 +42,9 @@ public class TrackingEntity {
     private String trackNumber;
 
     @Column
+    private String logisticsOrderCode;
+
+    @Column
     private String address;
 
     @Column
