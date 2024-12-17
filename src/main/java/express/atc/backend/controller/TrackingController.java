@@ -13,7 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import static express.atc.backend.integration.robokassa.config.RobokassaConfig.ROBOKASSA_ERROR_RESPONSE;
 
@@ -114,5 +116,22 @@ public class TrackingController extends PrivateController {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
         return trackingService.list(page <= 0 ? 0 : page, count <= 1 ? 1 : count, userPhone, filter);
+    }
+
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Загрузка документа в сервис",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))})
+    })
+    @PostMapping(path = "/upload/{trackNumber}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public boolean uploadDocuments(@RequestParam("file") MultipartFile file,
+                                   @Parameter(description = "Трек-номер заказа") @PathVariable String trackNumber) {
+        return trackingService.uploadFile(file, trackNumber);
     }
 }

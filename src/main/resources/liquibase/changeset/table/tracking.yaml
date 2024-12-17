@@ -122,15 +122,23 @@ databaseChangeLog:
             tableName: tracking
             columns:
               - column:
-                  name: logisticsOrderCode
-                  type: varchar(15)
+                  name: logistics_order_code
+                  type: varchar(30)
                   constraints:
                     nullable: false
         - createIndex:
             clustered: true
             columns:
               - column:
-                  name: logisticsOrderCode
-            indexName: idx_logisticsOrderCode
+                  name: logistics_order_code
+            indexName: idx_logistics_order_code
+            tableName: tracking
+            unique: true
+        - createIndex:
+            clustered: true
+            columns:
+              - column:
+                  name: track_number
+            indexName: idx_track_number
             tableName: tracking
             unique: true

@@ -15,7 +15,6 @@ public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> 
     Optional<TrackingEntity> findByTrackNumber(String trackingNumber);
 
     List<TrackingEntity> findAllByUserPhoneAndStatus(String phone, TrackingStatus status, Pageable pageable);
-//    List<TrackingEntity> findAllByUserPhone(String phone, Pageable pageable);
 
     int countByUserPhone(String phone);
 }

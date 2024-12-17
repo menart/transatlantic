@@ -7,6 +7,7 @@ import express.atc.backend.db.repository.TrackingRepository;
 import express.atc.backend.db.repository.TrackingRouteRepository;
 import express.atc.backend.dto.*;
 import express.atc.backend.enums.TrackingStatus;
+import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.TrackNotFoundException;
 import express.atc.backend.integration.cargoflow.service.CargoflowService;
 import express.atc.backend.integration.robokassa.service.RobokassaService;
@@ -19,7 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +81,14 @@ public class TrackingServiceImpl implements TrackingService {
                 .setNumberOfPage(
                         (int) Math.ceil(trackingRepository.countByUserPhone(userPhone) / (double) count)
                 );
+    }
+
+    public boolean uploadFile(MultipartFile file, String trackNumber) {
+        var logisticsOrderCode = trackingRepository.findByTrackNumber(trackNumber)
+                .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST))
+                .getLogisticsOrderCode();
+        cargoflowService.uploadFile(file, logisticsOrderCode);
+        return true;
     }
 
     private TrackingDto findTrack(String trackNumber) throws TrackNotFoundException {

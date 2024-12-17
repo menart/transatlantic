@@ -49,3 +49,13 @@ databaseChangeLog:
                   type: timestamp
                   constraints:
                     nullable: true
+  - changeSet:
+      id: files:drop
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: files
+      changes:
+        - dropTable:
+            tableName: files
