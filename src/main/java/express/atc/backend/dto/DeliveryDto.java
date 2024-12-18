@@ -26,15 +26,10 @@ public record DeliveryDto(
         @NotNull(message = "Вес груза: поле не может быть пустым")
         @Min(value = 1L, message = "Вес груза не может быть меньше 1")
         Integer weight,
-        @Schema(description = "Количество мест")
-        @NotNull(message = "Количество мест: поле не может быть пустым")
-        @Min(value = 1L, message = "Количество мест не может быть меньше 1")
-        Integer count,
         @Schema(description = "Габариты мест")
         @NotNull(message = "Габариты мест: поле не может быть пустым")
         String items,
         @Schema(description = "Комментарий")
-        @NotNull(message = "Комментарий: поле не может быть пустым")
         String description
 ) {
 }

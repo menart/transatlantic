@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
 
+import static express.atc.backend.Constants.SMS_CODE_MESSAGE;
+
 @Service
 @CrossOrigin
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class AuthServiceImpl implements AuthService {
                 .createdAt(LocalDateTime.now())
                 .build();
         authSmsRepository.save(authSmsEntity);
-        messageService.send(authSmsDto.getPhone(), code);
+        messageService.send(authSmsDto.getPhone(), String.format(SMS_CODE_MESSAGE, code));
         return TIME_HOLD_SMS;
     }
 

@@ -90,7 +90,7 @@ jwt:
 
 #SMS Aero
 sms-aero:
-  enable: false
+  enable: ${SMS_AERO_ENABLE}
   url: ${SMS_AERO_URL}
   sign: ${SMS_AERO_SIGN}
   token: ${SMS_AERO_TOKEN}
