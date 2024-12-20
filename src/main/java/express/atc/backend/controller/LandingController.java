@@ -33,7 +33,7 @@ public class LandingController {
                     description = "Невалидные параметры в запросе",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
-            @ApiResponse(responseCode = "502",
+            @ApiResponse(responseCode = "503",
                     description = "Проблемы с отправкой почты",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
