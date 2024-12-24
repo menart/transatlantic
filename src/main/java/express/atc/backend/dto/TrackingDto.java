@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import express.atc.backend.enums.TrackingStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,8 +20,7 @@ import java.util.TreeSet;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class TrackingDto {
-
+public class TrackingDto implements Comparable<TrackingDto> {
     @JsonIgnore
     private String phone;
     @Schema(description = "Id заказа")
@@ -41,8 +41,13 @@ public class TrackingDto {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime orderDatetime;
-    @Schema(description = "Необходимость оплаты")
-    private Boolean isNeedPay;
+    @Schema(description = "Статус заказа")
+    private TrackingStatus status;
     @Schema(description = "Список маршрутов")
     private TreeSet<TrackingRouteDto> routes;
+
+    @Override
+    public int compareTo(TrackingDto o) {
+        return orderId.compareTo(o.orderId);
+    }
 }

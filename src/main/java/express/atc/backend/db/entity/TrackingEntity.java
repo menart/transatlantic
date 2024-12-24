@@ -3,11 +3,10 @@ package express.atc.backend.db.entity;
 import express.atc.backend.dto.OrdersDto;
 import express.atc.backend.enums.TrackingStatus;
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.*;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
@@ -62,6 +61,7 @@ public class TrackingEntity {
     private TrackingStatus status;
 
     @OneToMany(mappedBy = "tracking")
+    @Fetch(FetchMode.JOIN)
     private Set<TrackingRouteEntity> routes;
     @Column
     @UpdateTimestamp

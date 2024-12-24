@@ -27,6 +27,7 @@ public class SecurityConfiguration {
 
     // Можно указать конкретный путь, * - 1 уровень вложенности, ** - любое количество уровней вложенности
     private final List<String> PATH_WITHOUT_AUTH = Arrays.asList(
+            "/actuator/**",
             "/api/auth/**",
             "/swagger-ui/**",
             "/swagger-resources/*",

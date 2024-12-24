@@ -91,7 +91,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: status
-                  type: varchar(10)
+                  type: varchar(15)
                   defaultValue: "ACTIVE"
   - changeSet:
       id: tracking:change-05

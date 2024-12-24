@@ -109,6 +109,7 @@ cargoflow:
     endpoint: ${cargoflow.url}${CARGOFLOW_ENTITY_ENDPOINT}
     order: ${CARGOFLOW_ENTITY_ORDER}
     order_history: ${CARGOFLOW_ENTITY_ORDER_HISTORY}
+    orders: ${cargoflow.url}${CARGOFLOW_ORDERS_ENDPOINT}
   upload:
     endpoint: ${cargoflow.url}${CARGOFLOW_UPLOAD_ENDPOINT}
     attach: ${cargoflow.url}${CARGOFLOW_ATTACH_ENDPOINT}

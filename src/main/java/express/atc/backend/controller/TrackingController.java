@@ -17,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Set;
+
 import static express.atc.backend.integration.robokassa.config.RobokassaConfig.ROBOKASSA_ERROR_RESPONSE;
 
 @RestController
@@ -106,18 +108,40 @@ public class TrackingController extends PrivateController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @GetMapping("/list")
-    public PageDto<TrackingDto> listTrack(
+    public TrackingPageDto listTrack(
             @Parameter(description = "Номер страницы, начиная с 0")
             @RequestParam(name = "page", defaultValue = "0", required = false) Integer page,
             @Parameter(description = "Количество на странице")
             @RequestParam(name = "count", defaultValue = "10", required = false) Integer count,
             @Parameter(description = "Фильтрация запросов")
-            @RequestParam(name = "filter", defaultValue = "active", required = false) TrackingStatus filter) {
+            @RequestParam(name = "filter", required = false) TrackingStatus filter) {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
         return trackingService.list(page <= 0 ? 0 : page, count <= 1 ? 1 : count, userPhone, filter);
     }
 
+    @Operation(summary = "Запросить список трек-номеров требующих внимания")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Список трек-номеров требующих внимания",
+                    useReturnTypeSchema = true,
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TrackingNeedingDto.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "503",
+                    description = ROBOKASSA_ERROR_RESPONSE,
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
+    @GetMapping("/need")
+    public TrackingNeedingDto needTrack() {
+        var token = getToken();
+        String userPhone = token != null ? jwtService.extractPhone(token) : null;
+        return trackingService.need(userPhone);
+    }
 
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -133,5 +157,10 @@ public class TrackingController extends PrivateController {
     public boolean uploadDocuments(@RequestParam("file") MultipartFile file,
                                    @Parameter(description = "Трек-номер заказа") @PathVariable String trackNumber) {
         return trackingService.uploadFile(file, trackNumber);
+    }
+
+    @GetMapping(path = "/all/{phoneNumber}")
+    public Set<TrackingDto> loadList(@PathVariable String phoneNumber) {
+        return trackingService.getAllTrackByPhone(phoneNumber);
     }
 }

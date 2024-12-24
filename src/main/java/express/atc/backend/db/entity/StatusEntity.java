@@ -1,5 +1,6 @@
 package express.atc.backend.db.entity;
 
+import express.atc.backend.enums.TrackingStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,7 +32,8 @@ public class StatusEntity {
     @Column
     private String descriptionEng;
     @Column
-    private String terminated;
+    @Enumerated(EnumType.STRING)
+    private TrackingStatus mapStatus;
     @Column
     @UpdateTimestamp
     private LocalDateTime updatedAt;

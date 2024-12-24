@@ -21,7 +21,7 @@ databaseChangeLog:
                   name: id
                   type: bigint
               - column:
-                  name: type
+                  name: status
                   type: varchar(50)
                   constraints:
                     nullable: false
@@ -32,9 +32,8 @@ databaseChangeLog:
                   name: description_eng
                   type: varchar(255)
               - column:
-                  name: terminate
-                  type: boolean
-                  defaultValueBoolean: false
+                  name: map_status
+                  type: varchar(20)
               - column:
                   name: updated_at
                   type: timestamp
@@ -47,13 +46,6 @@ databaseChangeLog:
                   defaultValueDate: NOW()
                   constraints:
                     nullable: false
-        - createIndex:
-            columns:
-              - column:
-                  name: type
-            indexName: idx_status_type
-            unique: true
-            tableName: statuses
         - createSequence:
             - cacheSize: 1
             - cycle: false
@@ -71,7 +63,7 @@ databaseChangeLog:
             columns:
               - column:
                   index: 0
-                  name: type
+                  name: status
               - column:
                   index: 1
                   name: description_rus
@@ -80,7 +72,7 @@ databaseChangeLog:
                   name: description_eng
               - column:
                   index: 3
-                  name: terminate
+                  name: map_status
             tableName: statuses
             encoding: UTF-8 # кодировка csv файла если она UTF-8 можно этот параметр не ставить
             separator: ';' # символ, разделяющий столбцы в файле. Если это запятая, то параметр можно пропустить

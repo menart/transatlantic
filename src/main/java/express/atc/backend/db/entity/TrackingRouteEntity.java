@@ -15,8 +15,7 @@ import java.time.LocalDateTime;
 @Table(name = "tracking_route")
 @AllArgsConstructor
 @NoArgsConstructor
-public class TrackingRouteEntity {
-
+public class TrackingRouteEntity implements Comparable<TrackingRouteEntity> {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tracking_route_id_seq")
     @SequenceGenerator(name = "tracking_route_id_seq",
@@ -36,4 +35,9 @@ public class TrackingRouteEntity {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @Override
+    public int compareTo(TrackingRouteEntity o) {
+        return routeId.compareTo(o.routeId);
+    }
 }

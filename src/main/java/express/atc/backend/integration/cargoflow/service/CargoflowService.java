@@ -6,10 +6,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 public interface CargoflowService {
 
     List<TrackingDto> getInfoByTrackNumber(String trackNumber);
+    TreeSet<TrackingDto> getSetInfoByPhone(String userPhone);
     Set<TrackingRouteDto> updateRoute(Long orderId, Long historyId);
 
     void uploadFile(MultipartFile file, String logisticsOrderCode);

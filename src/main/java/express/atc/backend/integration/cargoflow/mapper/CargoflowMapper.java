@@ -25,6 +25,7 @@ public interface CargoflowMapper {
     @Mapping(target = "orderNumber", source = "properties.epOrderId")
     @Mapping(target = "address", source = "properties.buyer.address.detailAddress")
     @Mapping(target = "marketplace", source = "properties.sender.companyName")
+    @Mapping(target = "status", expression = "java(null)")
     @Mapping(target = "goods",
             expression = "java(toOrders(order.properties().parcel()))")
     TrackingDto toTracking(CargoflowOrder order);

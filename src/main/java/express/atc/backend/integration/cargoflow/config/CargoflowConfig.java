@@ -34,6 +34,10 @@ public class CargoflowConfig {
     private String cargoflowUploadUrl;
     @Value("${cargoflow.upload.attach}")
     private String cargoflowAttachUrl;
+    @Value("${cargoflow.entity.orders}")
+    private String cargoflowListOrderUrl;
+
+
     @Bean
     public HttpClient httpClient() throws SSLException {
         SslContext sslContext = SslContextBuilder
@@ -65,6 +69,18 @@ public class CargoflowConfig {
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient()))
                 .baseUrl(cargoflowEntityUrl)
+                .defaultHeaders(httpHeaders -> {
+                    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
+                    httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+                })
+                .build();
+    }
+
+    @Bean("cargoflowListOrderWebClient")
+    public WebClient cargoflowListOrderWebClient() throws SSLException {
+        return WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(httpClient()))
+                .baseUrl(cargoflowListOrderUrl)
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                     httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));

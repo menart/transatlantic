@@ -13,6 +13,7 @@ import express.atc.backend.integration.cargoflow.service.CargoflowService;
 import express.atc.backend.integration.robokassa.service.RobokassaService;
 import express.atc.backend.mapper.TrackingMapper;
 import express.atc.backend.mapper.TrackingRouteMapper;
+import express.atc.backend.service.StatusService;
 import express.atc.backend.service.TrackingService;
 import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static express.atc.backend.Constants.*;
@@ -45,6 +43,7 @@ public class TrackingServiceImpl implements TrackingService {
     private final CalcCustomsFee calcCustomsFee;
     private final UserService userService;
     private final RobokassaService robokassaService;
+    private final StatusService statusService;
 
     @Override
     public TrackingDto find(String trackNumber, String userPhone) throws TrackNotFoundException {
@@ -52,8 +51,6 @@ public class TrackingServiceImpl implements TrackingService {
         var dto = findTrack(trackNumber);
         if (user == null || !dto.getPhone().equals(user.getPhone())) {
             dto.setGoods(null);
-        } else {
-            dto.setIsNeedPay(calcTrack(dto.getGoods(), dto.getOrderId(), user) != null);
         }
         return dto;
     }
@@ -66,21 +63,20 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public PageDto<TrackingDto> list(Integer page, int count, String userPhone, TrackingStatus filter) {
-        UserDto user = userService.findUserByPhone(userPhone);
+    public TrackingPageDto list(Integer page, int count, String userPhone, TrackingStatus filter) {
+        updateListTracking(userPhone);
         Pageable pageable = PageRequest.of(page, count);
-        return new PageDto<TrackingDto>()
-                .setList(findAndFilterList(userPhone, pageable, filter)
+        return new TrackingPageDto(
+                findAndFilterList(userPhone, pageable, filter)
                         .stream()
                         .map(this::updateRoute)
                         .map(trackingMapper::toDto)
-                        .peek(dto -> dto.setIsNeedPay(calcTrack(dto.getGoods(), dto.getOrderId(), user) != null))
-                        .toList())
-                .setPageNumber(page)
-                .setQuantityPerPage(count)
-                .setNumberOfPage(
-                        (int) Math.ceil(trackingRepository.countByUserPhone(userPhone) / (double) count)
-                );
+                        .toList(),
+                page,
+                count,
+                (int) Math.ceil(trackingRepository.countByUserPhone(userPhone) / (double) count),
+                need(userPhone)
+        );
     }
 
     public boolean uploadFile(MultipartFile file, String trackNumber) {
@@ -89,6 +85,31 @@ public class TrackingServiceImpl implements TrackingService {
                 .getLogisticsOrderCode();
         cargoflowService.uploadFile(file, logisticsOrderCode);
         return true;
+    }
+
+    public void updateListTracking(String userPhone) {
+        var list = cargoflowService.getSetInfoByPhone(userPhone).stream();
+        Long maxOrderId = trackingRepository.getMaxOrderIdByUserPhone(userPhone);
+        if (maxOrderId != null) {
+            list = list.filter(t -> t.getOrderId() > maxOrderId);
+        }
+        trackingRepository.saveAll(list
+                .map(trackingMapper::toEntity)
+                .toList()
+        );
+    }
+
+    @Override
+    public Set<TrackingDto> getAllTrackByPhone(String userPhone) {
+        updateListTracking(userPhone);
+        return cargoflowService.getSetInfoByPhone(userPhone);
+    }
+
+    @Override
+    public TrackingNeedingDto need(String userPhone) {
+        List<String> needPay = trackingRepository.findTrackNumberByNeed(TrackingStatus.NEED_PAYMENT);
+        List<String> needDocument = trackingRepository.findTrackNumberByNeed(TrackingStatus.NEED_DOCUMENT);
+        return new TrackingNeedingDto(needPay, needDocument);
     }
 
     private TrackingDto findTrack(String trackNumber) throws TrackNotFoundException {
@@ -123,6 +144,11 @@ public class TrackingServiceImpl implements TrackingService {
                         .map(trackingRouteRepository::save)
                         .collect(Collectors.toSet());
         entity.getRoutes().addAll(trackingRouters);
+        var lastRoute = new TreeSet<>(entity.getRoutes()).last();
+        if (!Objects.equals(maxRouteId, lastRoute.getRouteId())) {
+            entity.setStatus(statusService.getStatus(lastRoute.getStatus()).mapStatus());
+            trackingRepository.save(entity);
+        }
         return entity;
     }
 
@@ -133,7 +159,7 @@ public class TrackingServiceImpl implements TrackingService {
                 .map(trackingRouterMapper::toEntity)
                 .map(trackingRoute -> trackingRoute.setTracking(trackingEntity))
                 .map(trackingRouteRepository::save)
-                .collect(Collectors.toSet())
+                .collect(Collectors.toCollection(TreeSet::new))
         );
         return trackingEntity;
     }
@@ -177,6 +203,9 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     private List<TrackingEntity> findAndFilterList(String userPhone, Pageable pageable, TrackingStatus filter) {
+        if (filter == null) {
+            return trackingRepository.findAllByUserPhoneAndStatusNot(userPhone, TrackingStatus.ARCHIVE, pageable);
+        }
         return trackingRepository.findAllByUserPhoneAndStatus(userPhone, filter, pageable);
     }
 }
