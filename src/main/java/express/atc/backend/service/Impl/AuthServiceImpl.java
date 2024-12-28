@@ -12,8 +12,10 @@ import express.atc.backend.service.JwtService;
 import express.atc.backend.service.MessageService;
 import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,7 @@ import static express.atc.backend.Constants.SMS_CODE_MESSAGE;
 @Service
 @CrossOrigin
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final AuthSmsRepository authSmsRepository;
@@ -31,11 +34,11 @@ public class AuthServiceImpl implements AuthService {
     private final MessageService messageService;
     private final JwtService jwt;
 
-    @Value(value = "${constant.time_hold_sms}")
+    @Value(value = "${auth.time_hold_sms}")
     private int TIME_HOLD_SMS;
-    @Value(value = "${constant.count_number_code}")
+    @Value(value = "${auth.count_number_code}")
     private int COUNT_NUMBER_CODE;
-    @Value(value = "${constant.sms_code_live}")
+    @Value(value = "${auth.sms_code_live}")
     private int SMS_CODE_LIVE;
 
     @Override
@@ -77,6 +80,13 @@ public class AuthServiceImpl implements AuthService {
         return authSmsRepository.findFirstByPhoneOrderByCreatedAtDesc(phone)
                 .map(AuthSmsEntity::getCode)
                 .orElse("no find code");
+    }
+
+    @Override
+    @Transactional
+    public void clearAuthCode() {
+        LocalDateTime expireDate = LocalDateTime.now().minusSeconds(SMS_CODE_LIVE);
+        log.info("remove expired sms: {}", authSmsRepository.deleteByCreatedAtBefore(expireDate));
     }
 
     private String makeCodeForPhone() {

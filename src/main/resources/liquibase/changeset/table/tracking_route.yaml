@@ -35,7 +35,13 @@ databaseChangeLog:
                   type: timestamp
               - column:
                   name: status
-                  type: varchar(25)
+                  type: varchar(50)
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueDate: NOW()
+                  constraints:
+                    nullable: false
         - addForeignKeyConstraint:
             baseColumnNames: tracking_id
             baseTableName: tracking_route
@@ -61,16 +67,3 @@ databaseChangeLog:
             - minValue: 1
             - sequenceName: tracking_route_id_seq
             - startValue: 1
-  - changeSet:
-      id: tracking_route:change-01
-      author: Artamonov Aleksander
-      changes:
-        - addColumn:
-            tableName: tracking_route
-            columns:
-              - column:
-                  name: created_at
-                  type: timestamp
-                  defaultValueDate: NOW()
-                  constraints:
-                    nullable: false

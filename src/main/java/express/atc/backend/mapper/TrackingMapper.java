@@ -5,7 +5,7 @@ import express.atc.backend.dto.TrackingDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {TrackingRouteMapper.class})
 public interface TrackingMapper extends EntityMapper<TrackingDto, TrackingEntity> {
 
     @Mapping(target = "userPhone", source = "phone")

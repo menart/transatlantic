@@ -4,6 +4,7 @@ import express.atc.backend.dto.OrderDto;
 import express.atc.backend.dto.OrdersDto;
 import express.atc.backend.dto.TrackingDto;
 import express.atc.backend.dto.TrackingRouteDto;
+import express.atc.backend.enums.TrackingStatus;
 import express.atc.backend.integration.cargoflow.dto.CargoflowOrder;
 import express.atc.backend.integration.cargoflow.dto.Order.OrderGood;
 import express.atc.backend.integration.cargoflow.dto.Order.OrderParcel;
@@ -25,7 +26,7 @@ public interface CargoflowMapper {
     @Mapping(target = "orderNumber", source = "properties.epOrderId")
     @Mapping(target = "address", source = "properties.buyer.address.detailAddress")
     @Mapping(target = "marketplace", source = "properties.sender.companyName")
-    @Mapping(target = "status", expression = "java(null)")
+    @Mapping(target = "status", expression = "java(setActiveStatus())")
     @Mapping(target = "goods",
             expression = "java(toOrders(order.properties().parcel()))")
     TrackingDto toTracking(CargoflowOrder order);
@@ -47,5 +48,9 @@ public interface CargoflowMapper {
     @Named("toLocalDateTime")
     default LocalDateTime toLocalDateTime(OrderHistory history) {
         return LocalDateTime.ofInstant(history.opTime(), history.opTimezone().toZoneId());
+    }
+
+    default TrackingStatus setActiveStatus(){
+        return TrackingStatus.ACTIVE;
     }
 }

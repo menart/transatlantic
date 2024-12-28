@@ -58,7 +58,7 @@ public class TrackingEntity {
 
     @Column
     @Enumerated(EnumType.STRING)
-    private TrackingStatus status;
+    private TrackingStatus status = TrackingStatus.ACTIVE;
 
     @OneToMany(mappedBy = "tracking")
     @Fetch(FetchMode.JOIN)

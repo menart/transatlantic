@@ -37,27 +37,39 @@ public class CargoflowServiceImpl implements CargoflowService {
 
     @Override
     public List<TrackingDto> getInfoByTrackNumber(String trackNumber) {
-        return getTrackingInfoFromCargoflow(trackNumber);
+        return getInfoFromCargoflowByTrackNumber(trackNumber);
+    }
+
+    @Override
+    public List<TrackingDto> getInfoByLogisticsOrderCode(String logisticsOrderCode) {
+        return getInfoFromCargoflowByLogisticsOrderCode(logisticsOrderCode);
     }
 
     @Override
     public TreeSet<TrackingDto> getSetInfoByPhone(String userPhone) {
         return cargoflowClient.getFromCargoflowListOrders(userPhone).stream()
                 .map(cargoflowMapper::toTracking)
-                .map(trackingDto -> trackingDto.setRoutes(new TreeSet<>(getRoute(trackingDto.getOrderId()))))
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private List<TrackingDto> getTrackingInfoFromCargoflow(String trackNumber) {
+    private List<TrackingDto> getInfoFromCargoflowByTrackNumber(String trackNumber) {
         var condition = new ConditionDto(CONDITION_ORDER_PROPERTY, CONDITION_OPERATOR_EQ, trackNumber);
         var cargoflowOrders = cargoflowClient.getFromCargoflowEntity(List.of(condition), orderEntity, CargoflowOrder.class);
         log.info("{}", cargoflowOrders);
         return cargoflowOrders.stream()
                 .map(cargoflowMapper::toTracking)
-                .map(trackingDto ->
-                        trackingDto.setRoutes(new TreeSet<>(getRoute(trackingDto.getOrderId()))))
                 .toList();
     }
+
+    private List<TrackingDto> getInfoFromCargoflowByLogisticsOrderCode(String logisticsOrderCode) {
+        var condition = new ConditionDto(CONDITION_ORDER_LOGISTIC_CODE, CONDITION_OPERATOR_EQ, logisticsOrderCode);
+        var cargoflowOrders = cargoflowClient.getFromCargoflowEntity(List.of(condition), orderEntity, CargoflowOrder.class);
+        log.info("{}", cargoflowOrders);
+        return cargoflowOrders.stream()
+                .map(cargoflowMapper::toTracking)
+                .toList();
+    }
+
 
     public Set<TrackingRouteDto> updateRoute(Long orderId, Long orderHistoryId) {
         List<OrderHistory> routes = getTrackingRouteInfoFromCargoflow(orderId, orderHistoryId);

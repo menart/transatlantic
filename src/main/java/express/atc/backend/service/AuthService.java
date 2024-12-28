@@ -12,4 +12,6 @@ public interface AuthService {
     JwtAuthenticationResponse validateCode(ValidateSmsDto validateSms) throws AuthSmsException;
 
     String getSms(String phone);
+
+    void clearAuthCode();
 }

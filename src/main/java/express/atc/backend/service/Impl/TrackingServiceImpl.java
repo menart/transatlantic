@@ -13,6 +13,7 @@ import express.atc.backend.integration.cargoflow.service.CargoflowService;
 import express.atc.backend.integration.robokassa.service.RobokassaService;
 import express.atc.backend.mapper.TrackingMapper;
 import express.atc.backend.mapper.TrackingRouteMapper;
+import express.atc.backend.service.MessageService;
 import express.atc.backend.service.StatusService;
 import express.atc.backend.service.TrackingService;
 import express.atc.backend.service.UserService;
@@ -23,6 +24,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -44,6 +46,7 @@ public class TrackingServiceImpl implements TrackingService {
     private final UserService userService;
     private final RobokassaService robokassaService;
     private final StatusService statusService;
+    private final MessageService messageService;
 
     @Override
     public TrackingDto find(String trackNumber, String userPhone) throws TrackNotFoundException {
@@ -73,8 +76,8 @@ public class TrackingServiceImpl implements TrackingService {
                         .map(trackingMapper::toDto)
                         .toList(),
                 page,
-                count,
                 (int) Math.ceil(trackingRepository.countByUserPhone(userPhone) / (double) count),
+                count,
                 need(userPhone)
         );
     }
@@ -97,6 +100,7 @@ public class TrackingServiceImpl implements TrackingService {
                 .map(trackingMapper::toEntity)
                 .toList()
         );
+        findAndFilterList(userPhone, null, null).forEach(this::updateRoute);
     }
 
     @Override
@@ -110,6 +114,21 @@ public class TrackingServiceImpl implements TrackingService {
         List<String> needPay = trackingRepository.findTrackNumberByNeed(TrackingStatus.NEED_PAYMENT);
         List<String> needDocument = trackingRepository.findTrackNumberByNeed(TrackingStatus.NEED_DOCUMENT);
         return new TrackingNeedingDto(needPay, needDocument);
+    }
+
+    @Override
+    @Transactional
+    public void updateByLogisticCode(String logisticsOrderCode) {
+        var entity = trackingRepository.findByLogisticsOrderCode(logisticsOrderCode)
+                .orElseGet(() -> {
+                    var dto = cargoflowService.getInfoByLogisticsOrderCode(logisticsOrderCode).getFirst();
+                    if (dto == null) {
+                        log.error("{} logisticsOrderCode: {}", ORDER_NOT_FOUND, logisticsOrderCode);
+                        throw new ApiException(ORDER_NOT_FOUND, HttpStatus.NOT_FOUND);
+                    }
+                    return trackingRepository.save(trackingMapper.toEntity(dto).setUserPhone(dto.getPhone()));
+                });
+        updateRoute(entity);
     }
 
     private TrackingDto findTrack(String trackNumber) throws TrackNotFoundException {
@@ -131,10 +150,12 @@ public class TrackingServiceImpl implements TrackingService {
 
 
     private TrackingEntity updateRoute(TrackingEntity entity) {
-        var maxRouteId = entity.getRoutes().stream()
+        var maxRouteId = entity.getRoutes() != null ?
+                entity.getRoutes().stream()
                 .map(TrackingRouteEntity::getRouteId)
                 .max(Long::compareTo)
-                .orElse(null);
+                        .orElse(null)
+                : null;
         var trackingRouters =
                 cargoflowService.updateRoute(entity.getOrderId(), maxRouteId)
                         .stream()
@@ -143,10 +164,20 @@ public class TrackingServiceImpl implements TrackingService {
                         .map(trackingRoute -> trackingRoute.setTracking(entity))
                         .map(trackingRouteRepository::save)
                         .collect(Collectors.toSet());
-        entity.getRoutes().addAll(trackingRouters);
+        if (entity.getRoutes() != null) {
+            entity.getRoutes().addAll(trackingRouters);
+        } else {
+            entity.setRoutes(trackingRouters);
+        }
         var lastRoute = new TreeSet<>(entity.getRoutes()).last();
         if (!Objects.equals(maxRouteId, lastRoute.getRouteId())) {
             entity.setStatus(statusService.getStatus(lastRoute.getStatus()).mapStatus());
+            if (entity.getStatus().equals(TrackingStatus.NEED_PAYMENT)) {
+                messageService.send(entity.getUserPhone(), String.format(SMS_NEED_PAYMENT, entity.getTrackNumber()));
+            }
+            if (entity.getStatus().equals(TrackingStatus.NEED_DOCUMENT)) {
+                messageService.send(entity.getUserPhone(), String.format(SMS_NEED_DOCUMENT, entity.getTrackNumber()));
+            }
             trackingRepository.save(entity);
         }
         return entity;
@@ -155,12 +186,7 @@ public class TrackingServiceImpl implements TrackingService {
     private TrackingEntity findByCargoFlow(String trackNumber) throws TrackNotFoundException {
         var dto = getInfoByTrackNumber(trackNumber).orElseThrow(TrackNotFoundException::new);
         var trackingEntity = trackingRepository.save(trackingMapper.toEntity(dto).setRoutes(null));
-        trackingEntity.setRoutes(dto.getRoutes().stream()
-                .map(trackingRouterMapper::toEntity)
-                .map(trackingRoute -> trackingRoute.setTracking(trackingEntity))
-                .map(trackingRouteRepository::save)
-                .collect(Collectors.toCollection(TreeSet::new))
-        );
+        updateRoute(trackingEntity);
         return trackingEntity;
     }
 

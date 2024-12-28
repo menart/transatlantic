@@ -77,10 +77,12 @@ logging:
       netty:
         http:
           client: DEBUG
-constant:
-  time_hold_sms: 60
-  count_number_code: 4
-  sms_code_live: 6000
+auth:
+  time_hold_sms: ${AUTH_TIME_HOLD_SMS}
+  count_number_code: ${AUTH_COUNT_NUMBER_CODE}
+  sms_code_live: ${AUTH_SMS_CODE_LIVE}
+  scheduler:
+    interval: ${AUTH_INTERVAL_CLEAN}
 
 #Jwt
 jwt:
@@ -119,6 +121,10 @@ cargoflow:
       client:
         id: ${CUBA_REST_CLIENT_ID}
         secret: ${CUBA_REST_CLIENT_SECRET}
+
+service:
+  tracking:
+    update: ${SERVICE_TRACKING_CRON}
 #CBRF
 cbrf:
   url: ${CBRF_URL}

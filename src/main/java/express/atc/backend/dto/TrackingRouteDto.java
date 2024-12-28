@@ -32,6 +32,8 @@ public class TrackingRouteDto implements Comparable<TrackingRouteDto> {
     private LocalDateTime routeTime;
     @Schema(description = "Статус маршрута")
     private String status;
+    @Schema(description = "Расшифровка статуса")
+    private MessageDto message;
 
     @Override
     public int compareTo(TrackingRouteDto o) {

@@ -1,3 +1,4 @@
+status;description_rus;description_eng;map_status
 PENDING;Validation pending;Заказ ожидает подтверждения;ACTIVE
 NEW;Order created;Заказ создан;ACTIVE
 CANCEL;Order cancelled;Заказ отменён;ACTIVE

@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static express.atc.backend.enums.UserRole.ROLE_USER;
 
@@ -67,6 +68,11 @@ public class UserServiceImpl implements UserService {
         var document = documentService.addOrUpdateDocument(userInfo.getDocument());
         user.setDocument(document);
         return user;
+    }
+
+    @Override
+    public Set<String> getBatchUserPhone(int batchSize) {
+        return usersRepository.findBatchPhone(batchSize);
     }
 
     private Optional<UserEntity> getUserByPhone(String phone) {

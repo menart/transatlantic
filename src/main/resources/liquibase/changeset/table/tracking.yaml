@@ -25,6 +25,9 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: order_id
+                  type: bigint
+              - column:
                   name: order_number
                   type: varchar(100)
                   constraints:
@@ -32,6 +35,9 @@ databaseChangeLog:
               - column:
                   name: track_number
                   type: varchar(100)
+              - column:
+                  name: logistics_order_code
+                  type: varchar(30)
                   constraints:
                     nullable: false
               - column:
@@ -43,63 +49,17 @@ databaseChangeLog:
                   name: marketplace
                   type: varchar(500)
               - column:
-                  name: items
+                  name: goods
                   type: jsonb
-        - createSequence:
-            - cacheSize: 1
-            - cycle: false
-            - dataType: bigint
-            - incrementBy: 1
-            - maxValue: 9223372036854775807
-            - minValue: 1
-            - sequenceName: tracking_id_seq
-            - startValue: 1
-  - changeSet:
-      id: tracking:change-01
-      author: Artamonov Aleksander
-      changes:
-        addColumn:
-          tableName: tracking
-          columns:
-            - column:
-                name: order_datetime
-                type: timestamp
-  - changeSet:
-      id: tracking:change-02
-      author: Artamonov Aleksander
-      changes:
-        - renameColumn:
-            tableName: tracking
-            newColumnName: goods
-            oldColumnName: items
-  - changeSet:
-      id: tracking:change-03
-      author: Artamonov Aleksander
-      changes:
-        addColumn:
-          tableName: tracking
-          columns:
-            - column:
-                name: order_id
-                type: bigint
-  - changeSet:
-      id: tracking:change-04
-      author: Artamonov Aleksander
-      changes:
-        - addColumn:
-            tableName: tracking
-            columns:
               - column:
                   name: status
                   type: varchar(15)
                   defaultValue: "ACTIVE"
-  - changeSet:
-      id: tracking:change-05
-      author: Artamonov Aleksander
-      changes:
-        - addColumn:
-            tableName: tracking
-            columns:
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_datetime
+                  type: timestamp
               - column:
                   name: updated_at
                   type: timestamp
@@ -112,20 +72,15 @@ databaseChangeLog:
                   defaultValueDate: NOW()
                   constraints:
                     nullable: false
-  - changeSet:
-      id: tracking:change-06
-      author: Artamonov Aleksander
-      changes:
-        - sql:
-            truncate tracking cascade;
-        - addColumn:
-            tableName: tracking
+        - createIndex:
+            clustered: true
             columns:
               - column:
-                  name: logistics_order_code
-                  type: varchar(30)
-                  constraints:
-                    nullable: false
+                  name: user_phone
+              - column:
+                  name: status
+            indexName: idx_phone_and_status
+            tableName: tracking
         - createIndex:
             clustered: true
             columns:
@@ -142,3 +97,12 @@ databaseChangeLog:
             indexName: idx_track_number
             tableName: tracking
             unique: true
+        - createSequence:
+            - cacheSize: 1
+            - cycle: false
+            - dataType: bigint
+            - incrementBy: 1
+            - maxValue: 9223372036854775807
+            - minValue: 1
+            - sequenceName: tracking_id_seq
+            - startValue: 1

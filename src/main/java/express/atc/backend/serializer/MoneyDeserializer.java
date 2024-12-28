@@ -11,6 +11,7 @@ public class MoneyDeserializer extends JsonDeserializer<Long> {
     @Override
     public Long deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         if (Objects.isNull(jsonParser) || Objects.isNull(jsonParser.getText())) return null;
-        return (long) Double.parseDouble(jsonParser.getText()) * 100;
+        String value = jsonParser.getText().replaceAll(" ","");
+        return (long) Double.parseDouble(value) * 100;
     }
 }

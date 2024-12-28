@@ -25,4 +25,6 @@ public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> 
 
     @Query(value = "select trackNumber from TrackingEntity where status = :trackingStatus")
     List<String> findTrackNumberByNeed(TrackingStatus trackingStatus);
+
+    Optional<TrackingEntity> findByLogisticsOrderCode(String logisticsOrderCode);
 }
