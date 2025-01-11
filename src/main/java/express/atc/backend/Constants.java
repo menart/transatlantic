@@ -29,6 +29,7 @@ public class Constants {
     public static final String DATE_NOT_VALID = "Не верный формат даты";
     public static final String DOC_TYPE_NOT_VALID = "Не верный тип документа";
     public static final String NOT_VALID_SIZE = "длина поля должно находиться в диапазоне между {min} и {max}";
+    public static final String MESSAGE_SMALL_INTERVAL = "Слишком маленький интервал запроса";
     //Send message
     public static final String SMS_CODE_MESSAGE = "Код: %s для входа в личный кабинет https://atc.express/";
     public static final String SMS_NEED_PAYMENT = "Заказ %s ожидает оплаты, https://atc.express/";

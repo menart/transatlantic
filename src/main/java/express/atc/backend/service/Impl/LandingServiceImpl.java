@@ -31,7 +31,7 @@ public class LandingServiceImpl implements LandingService {
         );
         emailService.sendMessageUsingTemplate(
                 delivery.email(),
-                delivery.fullName() + "Спасибо за ваш заказ ",
+                delivery.fullName() + " Спасибо за ваш заказ ",
                 Map.of("delivery", delivery),
                 deliveryTemplate
         );

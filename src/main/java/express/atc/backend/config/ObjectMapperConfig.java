@@ -20,7 +20,6 @@ public class ObjectMapperConfig {
         objectMapper.setConfig(objectMapper.getSerializationConfig()
                 .with(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY));
         JavaTimeModule javaTimeModule = new JavaTimeModule();
-//        javaTimeModule.addSerializer(ZonedDateTime.class, new ZonedDateTimeSerializer());
         objectMapper.registerModule(javaTimeModule);
         return objectMapper;
     }

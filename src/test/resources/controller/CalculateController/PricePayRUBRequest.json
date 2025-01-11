@@ -1,0 +1,10 @@
+{
+  "price": 25000,
+  "currency": "RUB",
+  "weight": 30000,
+  "items": [
+    {
+      "name": "123"
+    }
+  ]
+}

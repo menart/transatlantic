@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
 
+import static express.atc.backend.Constants.MESSAGE_SMALL_INTERVAL;
 import static express.atc.backend.Constants.SMS_CODE_MESSAGE;
 
 @Service
@@ -46,29 +47,29 @@ public class AuthServiceImpl implements AuthService {
         LocalDateTime timeHoldSms = LocalDateTime.now().minusSeconds(TIME_HOLD_SMS);
         var lastSendSms = authSmsRepository.countByIpaddressAndCreatedAtAfter(ipAddress, timeHoldSms);
         if (lastSendSms > 0) {
-            throw new AuthSmsException("Слишком маленький интервал запроса");
+            throw new AuthSmsException(MESSAGE_SMALL_INTERVAL);
         }
         String code = makeCodeForPhone();
         AuthSmsEntity authSmsEntity = AuthSmsEntity.builder()
                 .ipaddress(ipAddress)
                 .code(code)
-                .phone(authSmsDto.getPhone())
+                .phone(authSmsDto.phone())
                 .createdAt(LocalDateTime.now())
                 .build();
         authSmsRepository.save(authSmsEntity);
-        messageService.send(authSmsDto.getPhone(), String.format(SMS_CODE_MESSAGE, code));
+        messageService.send(authSmsDto.phone(), String.format(SMS_CODE_MESSAGE, code));
         return TIME_HOLD_SMS;
     }
 
     @Override
     public JwtAuthenticationResponse validateCode(ValidateSmsDto validateSms) throws AuthSmsException {
-        if (validateSms.getCode().length() != COUNT_NUMBER_CODE) {
+        if (validateSms.code().length() != COUNT_NUMBER_CODE) {
             throw new AuthSmsException("Не верная длина кода");
         }
-        if (!checkCode(validateSms.getCode(), validateSms.getPhone())) {
+        if (!checkCode(validateSms.code(), validateSms.phone())) {
             throw new AuthSmsException("Не верный код");
         }
-        var user = userService.findOrCreateByPhone(validateSms.getPhone());
+        var user = userService.findOrCreateByPhone(validateSms.phone());
         return JwtAuthenticationResponse.builder()
                 .token(jwt.generateToken(userDetailMapper.toUserDetail(user)))
                 .isFull(user.isFull())

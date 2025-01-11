@@ -46,7 +46,7 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
 
     private BigDecimal calcByWeight(BigDecimal weight) {
         var limit = new BigDecimal(limitWeight);
-        if (weight == null || weight.compareTo(limit) < 0) {
+        if (weight.compareTo(limit) < 0) {
             return BigDecimal.ZERO;
         }
         return weight
@@ -57,7 +57,7 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
 
     private BigDecimal calcByPrice(BigDecimal price) {
         var limit = new BigDecimal(limitPrice);
-        if (price == null || price.compareTo(limit) < 0) {
+        if (price.compareTo(limit) < 0) {
             return BigDecimal.ZERO;
         }
         return price
@@ -91,9 +91,6 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
         if (currency.equals(LOCATE_CURRENCY)) {
             return BigDecimal.ONE;
         }
-        if (!cbrfService.getCurrencyMap().containsKey(currency)) {
-            throw new ApiException("Данный тип валюты не найден в ЦБ РФ", HttpStatus.BAD_REQUEST);
-        }
         return BigDecimal.valueOf(cbrfService.getCurrencyMap().get(currency).getValueUnitRate());
     }
 
@@ -101,9 +98,6 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
         if (currency.equals(LOCATE_CURRENCY)) {
             return RateDto.builder()
                     .build();
-        }
-        if (!cbrfService.getCurrencyMap().containsKey(currency)) {
-            throw new ApiException("Данный тип валюты не найден в ЦБ РФ", HttpStatus.BAD_REQUEST);
         }
         CurrencyDto currencyInfo = cbrfService.getCurrencyMap().get(currency);
         return RateDto.builder()
@@ -116,6 +110,10 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
 
     @Override
     public CalculateDto calculate(OrdersDto ordersDto){
+        if (!LOCATE_CURRENCY.equals(ordersDto.getCurrency())
+                && !cbrfService.getCurrencyMap().containsKey(ordersDto.getCurrency())) {
+            throw new ApiException("Данный тип валюты не найден в ЦБ РФ", HttpStatus.BAD_REQUEST);
+        }
         var calcWeight = calcByWeight(new BigDecimal(ordersDto.getWeight()));
         log.info("weigth: {}", calcWeight);
         var calcPrice = calcByPrice(
@@ -129,7 +127,10 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
         rateDtoSet.add(getRateInfo(calcCurrency));
         rateDtoSet.add(getRateInfo(ordersDto.getCurrency()));
         var calculate = CalculateDto.builder()
-                .rates(rateDtoSet.stream().filter(Objects::nonNull).toList())
+                .rates(rateDtoSet.stream()
+                        .filter(Objects::nonNull)
+                        .filter(rate -> rate.getCode() != null && !rate.getCode().equals(LOCATE_CURRENCY))
+                        .toList())
                 .tax(fixedOurTax.longValue());
         if (calcWeight.equals(BigDecimal.ZERO) && calcPrice.equals(BigDecimal.ZERO)) {
             return null;

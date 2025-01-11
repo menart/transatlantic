@@ -111,8 +111,8 @@ public class TrackingServiceImpl implements TrackingService {
 
     @Override
     public TrackingNeedingDto need(String userPhone) {
-        List<String> needPay = trackingRepository.findTrackNumberByNeed(TrackingStatus.NEED_PAYMENT);
-        List<String> needDocument = trackingRepository.findTrackNumberByNeed(TrackingStatus.NEED_DOCUMENT);
+        List<String> needPay = trackingRepository.findTrackNumberByNeed(userPhone, TrackingStatus.NEED_PAYMENT);
+        List<String> needDocument = trackingRepository.findTrackNumberByNeed(userPhone, TrackingStatus.NEED_DOCUMENT);
         return new TrackingNeedingDto(needPay, needDocument);
     }
 
