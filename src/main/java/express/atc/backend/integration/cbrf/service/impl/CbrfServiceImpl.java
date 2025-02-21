@@ -43,7 +43,7 @@ public class CbrfServiceImpl implements CbrfService {
             xmlMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
             var listCurrency = xmlMapper.readValue(response, ListCurrencyDto.class);
             currencyMap = listCurrency.getCurrencyList().stream()
-                    .collect(Collectors.toMap(CurrencyDto::getCharCode, Function.identity()));
+                    .collect(Collectors.toMap(CurrencyDto::charCode, Function.identity()));
             log.info("{}", currencyMap);
         } catch (JsonProcessingException exception) {
             log.error("{}", (Object) exception.getStackTrace());

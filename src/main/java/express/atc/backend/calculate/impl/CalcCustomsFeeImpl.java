@@ -91,7 +91,7 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
         if (currency.equals(LOCATE_CURRENCY)) {
             return BigDecimal.ONE;
         }
-        return BigDecimal.valueOf(cbrfService.getCurrencyMap().get(currency).getValueUnitRate());
+        return BigDecimal.valueOf(cbrfService.getCurrencyMap().get(currency).valueUnitRate());
     }
 
     private RateDto getRateInfo(String currency) {
@@ -101,9 +101,9 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
         }
         CurrencyDto currencyInfo = cbrfService.getCurrencyMap().get(currency);
         return RateDto.builder()
-                .name(currencyInfo.getName())
-                .code(currencyInfo.getCharCode())
-                .rate(currencyInfo.getValueUnitRate())
+                .name(currencyInfo.name())
+                .code(currencyInfo.charCode())
+                .rate(currencyInfo.valueUnitRate())
                 .build();
     }
 

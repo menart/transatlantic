@@ -30,24 +30,24 @@ class CalculateControllerTest extends AbstractControllerTest {
 
     private void mockCbrfCurrency() {
         Map<String, CurrencyDto> currencyDtoMap = new HashMap<>();
-        currencyDtoMap.put("EUR", CurrencyDto.builder()
-                .id("R01239")
-                .numCode("978")
-                .charCode("EUR")
-                .nominal(1)
-                .name("Евро")
-                .value(106.8883)
-                .valueUnitRate(106.8883)
-                .build());
-        currencyDtoMap.put("USD", CurrencyDto.builder()
-                .id("R01235")
-                .numCode("840")
-                .charCode("USD")
-                .nominal(1)
-                .name("Доллар США")
-                .value(98.0562)
-                .valueUnitRate(98.0562)
-                .build());
+        currencyDtoMap.put("EUR", new CurrencyDto(
+                "R01239",
+                "978",
+                "EUR",
+                1,
+                "Евро",
+                106.8883,
+                106.8883)
+        );
+        currencyDtoMap.put("USD", new CurrencyDto(
+                "R01235",
+                "840",
+                "USD",
+                1,
+                "Доллар США",
+                98.0562,
+                98.0562)
+        );
         when(cbrfService.getCurrencyMap())
                 .thenReturn(currencyDtoMap);
     }

@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static express.atc.backend.Constants.*;
+import static express.atc.backend.enums.TrackingStatus.ACTIVE;
 
 @Slf4j
 @Service
@@ -229,7 +230,7 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     private List<TrackingEntity> findAndFilterList(String userPhone, Pageable pageable, TrackingStatus filter) {
-        if (filter == null) {
+        if (filter == null || ACTIVE.equals(filter)) {
             return trackingRepository.findAllByUserPhoneAndStatusNot(userPhone, TrackingStatus.ARCHIVE, pageable);
         }
         return trackingRepository.findAllByUserPhoneAndStatus(userPhone, filter, pageable);

@@ -6,24 +6,22 @@ import express.atc.backend.serializer.DoubleLocateDeserializer;
 import lombok.Builder;
 import lombok.Data;
 
-@Data
-@Builder
-public class CurrencyDto {
+public record CurrencyDto (
 
     @JacksonXmlProperty(isAttribute = true, localName = "ID")
-    private String id;
+    String id,
     @JacksonXmlProperty(localName = "NumCode")
-    private String numCode;
+    String numCode,
     @JacksonXmlProperty(localName = "CharCode")
-    private String charCode;
+    String charCode,
     @JacksonXmlProperty(localName = "Nominal")
-    private Integer nominal;
+    Integer nominal,
     @JacksonXmlProperty(localName = "Name")
-    private String name;
+    String name,
     @JacksonXmlProperty(localName = "Value")
     @JsonDeserialize(using = DoubleLocateDeserializer.class)
-    private Double value;
+    Double value,
     @JacksonXmlProperty(localName = "VunitRate")
     @JsonDeserialize(using = DoubleLocateDeserializer.class)
-    private Double valueUnitRate;
+    Double valueUnitRate){
 }
