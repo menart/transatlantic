@@ -171,3 +171,14 @@ landing:
   delivery:
     email: ${LANDING_DELIVERY_EMAIL}
     template: ${LANDING_DELIVERY_TEMPLATE}
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
