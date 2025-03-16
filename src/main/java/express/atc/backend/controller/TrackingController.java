@@ -163,4 +163,22 @@ public class TrackingController extends PrivateController {
     public Set<TrackingDto> loadList(@PathVariable String phoneNumber) {
         return trackingService.getAllTrackByPhone(phoneNumber);
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+            description = "Установка статуса ожидания подтверждение оплаты",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "404",
+                    description = "Трек-номер не найден",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))})
+    })
+    @GetMapping("/pay/{trackNumber}")
+    public boolean paymentConfirmation(@Parameter(description = "Трек-номер заказа") @PathVariable String trackNumber)
+            throws TrackNotFoundException {
+        var token = getToken();
+        String userPhone = token != null ? jwtService.extractPhone(token) : null;
+        return trackingService.paymentConfirmation(trackNumber, userPhone);
+    }
 }

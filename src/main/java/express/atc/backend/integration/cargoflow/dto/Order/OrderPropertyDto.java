@@ -7,7 +7,8 @@ public record OrderPropertyDto(
         OrderParticipant buyer,
         OrderParcel parcel,
         OrderParticipant sender,
-        Integer bizType,
+        OrderParticipant receiver,
+        String bizType,
         String epOrderId,
 //     String returnParcel,
         Integer parcelPickupType

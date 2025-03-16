@@ -80,3 +80,16 @@ databaseChangeLog:
             - minValue: 1
             - sequenceName: docs_id_seq
             - startValue: 1
+  - changeSet:
+      id: docs:change-01
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: WARN
+        - not:
+            - tableExists:
+                tableName: docs
+      changes:
+        - modifyDataType:
+            columnName: name_department
+            newDataType: varchar(1000)
+            tableName: docs

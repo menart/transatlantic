@@ -24,14 +24,14 @@ public class LandingServiceImpl implements LandingService {
     @Override
     public boolean deliveryRequest(DeliveryDto delivery) throws MessagingException {
         emailService.sendMessageUsingTemplate(
-                deliveryEmail,
-                "Получен новый заказ от " + delivery.fullName(),
+                delivery.email(),
+                delivery.fullName() + " Спасибо за ваш заказ ",
                 Map.of("delivery", delivery),
                 deliveryTemplate
         );
         emailService.sendMessageUsingTemplate(
-                delivery.email(),
-                delivery.fullName() + " Спасибо за ваш заказ ",
+                deliveryEmail,
+                "Получен новый заказ от " + delivery.fullName(),
                 Map.of("delivery", delivery),
                 deliveryTemplate
         );

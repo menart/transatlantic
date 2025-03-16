@@ -27,4 +27,6 @@ public interface TrackingService {
     void updateByLogisticCode(String logisticsOrderCode);
 
     void updateListTracking(String userPhone);
+
+    boolean paymentConfirmation(String trackNumber, String userPhone);
 }
