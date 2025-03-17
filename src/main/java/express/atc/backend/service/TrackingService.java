@@ -28,5 +28,5 @@ public interface TrackingService {
 
     void updateListTracking(String userPhone);
 
-    boolean paymentConfirmation(String trackNumber, String userPhone);
+    boolean paymentConfirmation(Long orderId, String userPhone);
 }

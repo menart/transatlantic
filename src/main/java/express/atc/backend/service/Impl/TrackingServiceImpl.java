@@ -105,8 +105,8 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public boolean paymentConfirmation(String trackNumber, String userPhone) {
-        var entity = trackingRepository.findByTrackNumber(trackNumber)
+    public boolean paymentConfirmation(Long orderId, String userPhone) {
+        var entity = trackingRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
         if (userPhone.equals(entity.getUserPhone()) && TrackingStatus.NEED_PAYMENT.equals(entity.getStatus())) {
             entity.setStatus(TrackingStatus.PAYMENT_CONFIRMATION);

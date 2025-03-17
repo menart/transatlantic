@@ -14,6 +14,8 @@ import java.util.Optional;
 public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> {
 
     Optional<TrackingEntity> findByTrackNumber(String trackingNumber);
+    Optional<TrackingEntity> findByOrderId(Long orderId);
+
 
     List<TrackingEntity> findAllByUserPhoneAndStatus(String phone, TrackingStatus status, Pageable pageable);
     List<TrackingEntity> findAllByUserPhoneAndStatusNot(String phone, TrackingStatus status, Pageable pageable);

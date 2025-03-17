@@ -174,11 +174,11 @@ public class TrackingController extends PrivateController {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponseDto.class))})
     })
-    @GetMapping("/pay/{trackNumber}")
-    public boolean paymentConfirmation(@Parameter(description = "Трек-номер заказа") @PathVariable String trackNumber)
+    @GetMapping("/pay/{orderId}")
+    public boolean paymentConfirmation(@Parameter(description = "Номер заказа") @PathVariable Long orderId)
             throws TrackNotFoundException {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
-        return trackingService.paymentConfirmation(trackNumber, userPhone);
+        return trackingService.paymentConfirmation(orderId, userPhone);
     }
 }
