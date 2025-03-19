@@ -24,7 +24,7 @@ public interface CargoflowMapper {
     @Mapping(target = "orderId", source = "id")
     @Mapping(target = "trackNumber", source = "trackingNumber")
     @Mapping(target = "orderDatetime", source = "createdAt")
-    @Mapping(target = "orderNumber", source = "properties.epOrderId")
+    @Mapping(target = "orderNumber", source = "reference")
     @Mapping(target = "address", expression = "java(getAddress(order.properties()))")
     @Mapping(target = "marketplace", source = "properties.sender.companyName")
     @Mapping(target = "status", expression = "java(setActiveStatus())")

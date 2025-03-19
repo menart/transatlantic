@@ -36,8 +36,8 @@ public class CargoflowServiceImpl implements CargoflowService {
     private final CargoflowClient cargoflowClient;
 
     @Override
-    public List<TrackingDto> getInfoByTrackNumber(String trackNumber) {
-        return getInfoFromCargoflowByTrackNumber(trackNumber);
+    public List<TrackingDto> getInfoByNumber(String number) {
+        return getInfoFromCargoflowByNumber(number);
     }
 
     @Override
@@ -52,9 +52,13 @@ public class CargoflowServiceImpl implements CargoflowService {
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
-    private List<TrackingDto> getInfoFromCargoflowByTrackNumber(String trackNumber) {
-        var condition = new ConditionDto(CONDITION_ORDER_PROPERTY, CONDITION_OPERATOR_EQ, trackNumber);
-        var cargoflowOrders = cargoflowClient.getFromCargoflowEntity(List.of(condition), orderEntity, CargoflowOrder.class);
+    private List<TrackingDto> getInfoFromCargoflowByNumber(String number) {
+        var condition = List.of(
+                new ConditionDto(CONDITION_ORDER_TRACK_NUMBER_PROPERTY, CONDITION_OPERATOR_EQ, number),
+                new ConditionDto(CONDITION_ORDER_REFERENCE_PROPERTY, CONDITION_OPERATOR_EQ, number)
+        );
+        var cargoflowOrders = cargoflowClient.getFromCargoflowEntity(List.of(new ConditionDto(condition, "OR")),
+                orderEntity, CargoflowOrder.class);
         log.info("{}", cargoflowOrders);
         return cargoflowOrders.stream()
                 .map(cargoflowMapper::toTracking)

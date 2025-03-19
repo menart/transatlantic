@@ -31,7 +31,7 @@ public class TrackingController extends PrivateController {
     private final TrackingService trackingService;
     private final JwtService jwtService;
 
-    @Operation(summary = "Запросить информацию об отправлении")
+    @Operation(summary = "Запросить информацию об отправлении по трек номеру или номеру заказа")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Информация об отправлении",
@@ -50,13 +50,13 @@ public class TrackingController extends PrivateController {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
-    @GetMapping("/find/{trackNumber}")
+    @GetMapping("/find/{number}")
     public TrackingDto findTrack(
-            @Parameter(description = "Трек-номер заказа") @PathVariable String trackNumber)
+            @Parameter(description = "Трек-номер или номер заказа") @PathVariable String number)
             throws TrackNotFoundException {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
-        return trackingService.find(trackNumber, userPhone);
+        return trackingService.find(number, userPhone);
     }
 
     @Operation(summary = "Запросить расчет оплаты для отправлении")

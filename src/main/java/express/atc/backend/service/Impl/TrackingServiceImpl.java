@@ -50,9 +50,9 @@ public class TrackingServiceImpl implements TrackingService {
     private final MessageService messageService;
 
     @Override
-    public TrackingDto find(String trackNumber, String userPhone) throws TrackNotFoundException {
+    public TrackingDto find(String number, String userPhone) throws TrackNotFoundException {
         UserDto user = userService.findUserByPhone(userPhone);
-        var dto = findTrack(trackNumber);
+        var dto = findTrack(number);
         if (user == null || !dto.getPhone().equals(user.getPhone())) {
             dto.setGoods(null);
         }
@@ -84,7 +84,7 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     public boolean uploadFile(MultipartFile file, String trackNumber) {
-        var logisticsOrderCode = trackingRepository.findByTrackNumber(trackNumber)
+        var logisticsOrderCode = trackingRepository.findByTrack(trackNumber)
                 .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST))
                 .getLogisticsOrderCode();
         cargoflowService.uploadFile(file, logisticsOrderCode);
@@ -143,12 +143,12 @@ public class TrackingServiceImpl implements TrackingService {
         updateRoute(entity);
     }
 
-    private TrackingDto findTrack(String trackNumber) throws TrackNotFoundException {
-        Optional<TrackingEntity> entity = trackingRepository.findByTrackNumber(trackNumber);
+    private TrackingDto findTrack(String number) throws TrackNotFoundException {
+        Optional<TrackingEntity> entity = trackingRepository.findByTrack(number);
         return trackingMapper.toDto(
                 entity
                         .map(this::updateRoute)
-                        .orElseGet(() -> findByCargoFlow(trackNumber))
+                        .orElseGet(() -> findByCargoFlow(number))
         );
     }
 
@@ -195,15 +195,15 @@ public class TrackingServiceImpl implements TrackingService {
         return entity;
     }
 
-    private TrackingEntity findByCargoFlow(String trackNumber) throws TrackNotFoundException {
-        var dto = getInfoByTrackNumber(trackNumber).orElseThrow(TrackNotFoundException::new);
+    private TrackingEntity findByCargoFlow(String number) throws TrackNotFoundException {
+        var dto = getInfoByTrackNumberOrOrderNumber(number).orElseThrow(TrackNotFoundException::new);
         var trackingEntity = trackingRepository.save(trackingMapper.toEntity(dto).setRoutes(null));
         updateRoute(trackingEntity);
         return trackingEntity;
     }
 
-    private Optional<TrackingDto> getInfoByTrackNumber(String trackNumber) {
-        List<TrackingDto> trackingDtoList = cargoflowService.getInfoByTrackNumber(trackNumber);
+    private Optional<TrackingDto> getInfoByTrackNumberOrOrderNumber(String number) {
+        List<TrackingDto> trackingDtoList = cargoflowService.getInfoByNumber(number);
         if (CollectionUtils.isNotEmpty(trackingDtoList)) {
             return Optional.of(trackingDtoList.getFirst());
         } else {
