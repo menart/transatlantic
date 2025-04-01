@@ -17,6 +17,12 @@ spring:
     url: jdbc:postgresql://${DATASOURCE_HOST}:${DATASOURCE_PORT}/${DATASOURCE_DATABASE}
     username: ${DATASOURCE_USERNAME}
     password: ${DATASOURCE_PASSWORD}
+    hikari:
+      pool-name: SpringBootHikariCP
+      auto-commit: false
+      connection-timeout: 30000
+      maximum-pool-size: 20
+      minimum-idle: 5
   liquibase:
     change-log: classpath:liquibase/changelog.yaml
     enabled: true

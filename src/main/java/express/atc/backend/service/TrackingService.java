@@ -12,7 +12,7 @@ import java.util.Set;
 
 public interface TrackingService {
 
-    TrackingDto find(String trackNumber, String userPhone) throws TrackNotFoundException;
+    TrackingDto find(String number, String userPhone) throws TrackNotFoundException;
 
     CalculateDto calc(String trackNumber, String userPhone);
 
@@ -27,4 +27,6 @@ public interface TrackingService {
     void updateByLogisticCode(String logisticsOrderCode);
 
     void updateListTracking(String userPhone);
+
+    boolean paymentConfirmation(Long orderId, String userPhone);
 }

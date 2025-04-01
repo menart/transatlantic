@@ -66,10 +66,10 @@ databaseChangeLog:
                   name: status
               - column:
                   index: 1
-                  name: description_rus
+                  name: description_eng
               - column:
                   index: 2
-                  name: description_eng
+                  name: description_rus
               - column:
                   index: 3
                   name: map_status

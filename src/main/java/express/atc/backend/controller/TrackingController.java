@@ -31,7 +31,7 @@ public class TrackingController extends PrivateController {
     private final TrackingService trackingService;
     private final JwtService jwtService;
 
-    @Operation(summary = "Запросить информацию об отправлении")
+    @Operation(summary = "Запросить информацию об отправлении по трек номеру или номеру заказа")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Информация об отправлении",
@@ -50,13 +50,13 @@ public class TrackingController extends PrivateController {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
-    @GetMapping("/find/{trackNumber}")
+    @GetMapping("/find/{number}")
     public TrackingDto findTrack(
-            @Parameter(description = "Трек-номер заказа") @PathVariable String trackNumber)
+            @Parameter(description = "Трек-номер или номер заказа") @PathVariable String number)
             throws TrackNotFoundException {
         var token = getToken();
         String userPhone = token != null ? jwtService.extractPhone(token) : null;
-        return trackingService.find(trackNumber, userPhone);
+        return trackingService.find(number, userPhone);
     }
 
     @Operation(summary = "Запросить расчет оплаты для отправлении")
@@ -162,5 +162,23 @@ public class TrackingController extends PrivateController {
     @GetMapping(path = "/all/{phoneNumber}")
     public Set<TrackingDto> loadList(@PathVariable String phoneNumber) {
         return trackingService.getAllTrackByPhone(phoneNumber);
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+            description = "Установка статуса ожидания подтверждение оплаты",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "404",
+                    description = "Трек-номер не найден",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))})
+    })
+    @GetMapping("/pay/{orderId}")
+    public boolean paymentConfirmation(@Parameter(description = "Номер заказа") @PathVariable Long orderId)
+            throws TrackNotFoundException {
+        var token = getToken();
+        String userPhone = token != null ? jwtService.extractPhone(token) : null;
+        return trackingService.paymentConfirmation(orderId, userPhone);
     }
 }

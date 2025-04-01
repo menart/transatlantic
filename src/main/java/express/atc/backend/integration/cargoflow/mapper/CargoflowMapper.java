@@ -8,6 +8,7 @@ import express.atc.backend.enums.TrackingStatus;
 import express.atc.backend.integration.cargoflow.dto.CargoflowOrder;
 import express.atc.backend.integration.cargoflow.dto.Order.OrderGood;
 import express.atc.backend.integration.cargoflow.dto.Order.OrderParcel;
+import express.atc.backend.integration.cargoflow.dto.Order.OrderPropertyDto;
 import express.atc.backend.integration.cargoflow.dto.OrderHistory;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,12 +20,12 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CargoflowMapper {
 
-    @Mapping(target = "phone", source = "properties.buyer.phone")
+    @Mapping(target = "phone", expression = "java(getPhone(order.properties()))")
     @Mapping(target = "orderId", source = "id")
     @Mapping(target = "trackNumber", source = "trackingNumber")
     @Mapping(target = "orderDatetime", source = "createdAt")
-    @Mapping(target = "orderNumber", source = "properties.epOrderId")
-    @Mapping(target = "address", source = "properties.buyer.address.detailAddress")
+    @Mapping(target = "orderNumber", source = "reference")
+    @Mapping(target = "address", expression = "java(getAddress(order.properties()))")
     @Mapping(target = "marketplace", source = "properties.sender.companyName")
     @Mapping(target = "status", expression = "java(setActiveStatus())")
     @Mapping(target = "goods",
@@ -53,4 +54,19 @@ public interface CargoflowMapper {
     default TrackingStatus setActiveStatus(){
         return TrackingStatus.ACTIVE;
     }
+
+    default String getPhone(OrderPropertyDto property){
+        String phone = property.buyer() != null ? property.buyer().phone() : property.receiver().phone();
+        if (phone != null && !phone.isEmpty()) {
+            phone = phone.replaceAll("[^0-9]", "");
+        }
+        return phone;
+    }
+
+    default String getAddress(OrderPropertyDto property){
+        return property.buyer() != null
+                ? property.buyer().address().detailAddress()
+                : property.receiver().address().detailAddress();
+    }
+
 }

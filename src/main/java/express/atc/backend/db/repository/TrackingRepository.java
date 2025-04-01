@@ -13,7 +13,10 @@ import java.util.Optional;
 @Repository
 public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> {
 
-    Optional<TrackingEntity> findByTrackNumber(String trackingNumber);
+    @Query("from TrackingEntity where trackNumber = :number or orderNumber = :number")
+    Optional<TrackingEntity> findByTrack(String number);
+    Optional<TrackingEntity> findByOrderId(Long orderId);
+
 
     List<TrackingEntity> findAllByUserPhoneAndStatus(String phone, TrackingStatus status, Pageable pageable);
     List<TrackingEntity> findAllByUserPhoneAndStatusNot(String phone, TrackingStatus status, Pageable pageable);
