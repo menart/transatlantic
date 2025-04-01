@@ -6,6 +6,8 @@ import express.atc.backend.rabbitmq.dto.PersonInfoNeedDto;
 import express.atc.backend.rabbitmq.service.RabbitMqService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.annotation.Argument;
+import org.springframework.amqp.rabbit.annotation.Queue;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -17,8 +19,14 @@ public class PersonInfoNeedListener {
     private final ObjectMapper objectMapper;
     private final RabbitMqService rabbitMqService;
 
-    @RabbitListener(queues = "${spring.rabbitmq.person-info-need.queue}")
-    public void listener(String message){
+    @RabbitListener(
+            queuesToDeclare = @Queue(
+                    name = "${spring.rabbitmq.person-info-need.queue}",
+                    durable = "true",
+                    arguments = @Argument(name = "x-queue-type", value = "classic")
+            )
+    )
+    public void listener(String message) {
         try {
             PersonInfoNeedDto dto = objectMapper.readValue(message, PersonInfoNeedDto.class);
             log.info("{}", dto);
