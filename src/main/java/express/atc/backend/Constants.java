@@ -17,6 +17,7 @@ public class Constants {
     public static final String TRACK_NOT_FOUND = "трек номер не найден";
     public static final String ORDER_NOT_FOUND = "Заказ не найден";
     public static final String EMAIL_NOT_GIVEN = "email не заполнен";
+    public static final String PAYMENT_NOT_EQUALS="Сумма платежа не совпадает";
 
     //Validation message
     public static final String PHONE_NOT_VALID =

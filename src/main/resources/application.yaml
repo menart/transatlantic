@@ -160,12 +160,19 @@ robokassa:
   tax: ${ROBOKASSA_TAX}
   algorithm: ${ROBOKASSA_ALGORITHM}
   password_1: ${ROBOKASSA_PASSWORD_1}
+  password_2: ${ROBOKASSA_PASSWORD_2}
   test: ${ROBOKASSA_TEST}
   payment-url: ${ROBOKASSA_PAYMENT_URL}
   success-url: ${ROBOKASSA_SUCCESS_URL}
   success-method: ${ROBOKASSA_SUCCESS_METHOD}
   fail-url: ${ROBOKASSA_FAIL_URL}
   fail-method: ${ROBOKASSA_FAIL_METHOD}
+
+#CFAPI
+cfapi:
+  url: ${CFAPI_URL}
+  token: ${CFAPI_TOKEN}
+  platformId: ${CFAPI_PLATFORM_ID}
 
 #Feedback
 feedback:

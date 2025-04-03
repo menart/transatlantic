@@ -19,6 +19,7 @@ import javax.net.ssl.SSLException;
 public class RobokassaConfig {
 
     public final static String ROBOKASSA_ERROR_RESPONSE = "Ошибка взаимодествия с robokassa";
+    public final static String ROBOKASSA_SIGN_NOT_VERIFY = "Ошибка подписи платежа";
 
     @Value("${robokassa.url}")
     private String robokassaurl;

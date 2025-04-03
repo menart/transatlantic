@@ -10,6 +10,7 @@ import express.atc.backend.enums.TrackingStatus;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.TrackNotFoundException;
 import express.atc.backend.integration.cargoflow.service.CargoflowService;
+import express.atc.backend.integration.cfapi.service.CfApiService;
 import express.atc.backend.integration.robokassa.service.RobokassaService;
 import express.atc.backend.mapper.TrackingMapper;
 import express.atc.backend.mapper.TrackingRouteMapper;
@@ -48,6 +49,7 @@ public class TrackingServiceImpl implements TrackingService {
     private final RobokassaService robokassaService;
     private final StatusService statusService;
     private final MessageService messageService;
+    private final CfApiService cfApiService;
 
     @Override
     public TrackingDto find(String number, String userPhone) throws TrackNotFoundException {
@@ -116,6 +118,19 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
+    public String paymentControl(Double outSum, Long orderId, String checkSum) {
+        var entity = trackingRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
+        var calc = calcTrack(entity.getGoods(), entity.getOrderId(), null);
+        if (!calc.getPaid().equals((long) (outSum * 100))) {
+            throw new ApiException(PAYMENT_NOT_EQUALS, HttpStatus.BAD_REQUEST);
+        }
+        String request = robokassaService.paymentResult(outSum, orderId, checkSum);
+        cfApiService.changeStatusToCargoflow(entity.getTrackNumber());
+        return request;
+    }
+
+    @Override
     public Set<TrackingDto> getAllTrackByPhone(String userPhone) {
         updateListTracking(userPhone);
         return cargoflowService.getSetInfoByPhone(userPhone);
@@ -154,7 +169,7 @@ public class TrackingServiceImpl implements TrackingService {
 
     private CalculateDto calcTrack(OrdersDto goods, long OrderId, UserDto user) {
         var calculate = calcCustomsFee.calculate(goods);
-        if (calculate != null) {
+        if (calculate != null && user != null) {
             calculate.setUrl(makePaymentUrl(OrderId, calculate, user));
         }
         return calculate;
@@ -164,8 +179,8 @@ public class TrackingServiceImpl implements TrackingService {
     private TrackingEntity updateRoute(TrackingEntity entity) {
         var maxRouteId = entity.getRoutes() != null ?
                 entity.getRoutes().stream()
-                .map(TrackingRouteEntity::getRouteId)
-                .max(Long::compareTo)
+                        .map(TrackingRouteEntity::getRouteId)
+                        .max(Long::compareTo)
                         .orElse(null)
                 : null;
         var trackingRouters =

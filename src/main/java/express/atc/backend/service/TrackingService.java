@@ -29,4 +29,6 @@ public interface TrackingService {
     void updateListTracking(String userPhone);
 
     boolean paymentConfirmation(Long orderId, String userPhone);
+
+    String paymentControl(Double outSum, Long orderId, String checkSum);
 }

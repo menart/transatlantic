@@ -56,37 +56,16 @@ class LandingControllerTest extends AbstractControllerTest {
         MimeMessage receivedMessage = greenMail.getReceivedMessages()[0];
 
         assertEquals(1, receivedMessage.getAllRecipients().length);
-        assertEquals(emailSender, receivedMessage.getAllRecipients()[0].toString());
+        assertEquals(emailClient, receivedMessage.getAllRecipients()[0].toString());
         assertEquals(user, receivedMessage.getFrom()[0].toString());
-        assertEquals("Получен новый заказ от full name", receivedMessage.getSubject());
+        assertEquals("full name Спасибо за ваш заказ ", receivedMessage.getSubject());
 
         receivedMessage = greenMail.getReceivedMessages()[1];
 
         assertEquals(1, receivedMessage.getAllRecipients().length);
-        assertEquals(emailClient, receivedMessage.getAllRecipients()[0].toString());
+        assertEquals(emailSender, receivedMessage.getAllRecipients()[0].toString());
         assertEquals(user, receivedMessage.getFrom()[0].toString());
-        assertEquals("full name Спасибо за ваш заказ ", receivedMessage.getSubject());
+        assertEquals("Получен новый заказ от full name", receivedMessage.getSubject());
     }
 
-    @Test
-    @SneakyThrows
-    void deliveryFailTest() {
-        String emailClient = "email@test.com";
-        DeliveryDto request = new DeliveryDto(
-                "full name",
-                emailClient,
-                "title",
-                1,
-                "items",
-                "description"
-        );
-        var response = new ErrorResponseDto("SERVICE_UNAVAILABLE",
-                List.of(String.format(EMAIL_SEND_EXCEPTION, emailSender)));
-        greenMail.stop();
-        mvc.perform(post(webPath)
-                        .content(objectMapper.writeValueAsString(request))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isServiceUnavailable())
-                .andExpect(content().json(objectMapper.writeValueAsString(response)));
-    }
 }

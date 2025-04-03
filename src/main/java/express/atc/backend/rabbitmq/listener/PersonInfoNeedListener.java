@@ -21,7 +21,7 @@ public class PersonInfoNeedListener {
     public void listener(String message){
         try {
             PersonInfoNeedDto dto = objectMapper.readValue(message, PersonInfoNeedDto.class);
-            log.info("{}", dto);
+            log.info("Rabbit MQ {}", dto);
             rabbitMqService.processing(dto);
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
