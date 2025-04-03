@@ -81,9 +81,9 @@ logging:
             JdbcTemplate: DEBUG
             StatementCreatorUtils: TRACE
     reactor:
-      netty:
-        http:
-          client: DEBUG
+      netty.http.client: DEBUG
+    express:
+      atc.backend.integration.cfapi.service.impl.CfApiServiceImpl: DEBUG
 auth:
   time_hold_sms: ${AUTH_TIME_HOLD_SMS}
   count_number_code: ${AUTH_COUNT_NUMBER_CODE}

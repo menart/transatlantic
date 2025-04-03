@@ -30,7 +30,7 @@ public class CfapiConfig {
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(cfApiUrl)
                 .defaultHeaders(httpHeaders -> {
-                    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+                    httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                     httpHeaders.set("msgId", UUID.randomUUID().toString());
                     httpHeaders.set("platformId", platformId);
                 })
