@@ -126,7 +126,9 @@ public class TrackingServiceImpl implements TrackingService {
             throw new ApiException(PAYMENT_NOT_EQUALS, HttpStatus.BAD_REQUEST);
         }
         String request = robokassaService.paymentResult(outSum, orderId, checkSum);
-        cfApiService.changeStatusToCargoflow(entity.getTrackNumber());
+        if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber())){
+            updateRoute(entity);
+        }
         return request;
     }
 
