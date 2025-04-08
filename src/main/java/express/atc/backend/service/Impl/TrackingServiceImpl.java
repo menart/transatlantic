@@ -148,19 +148,12 @@ public class TrackingServiceImpl implements TrackingService {
 
     @Override
     @Transactional
-    public void updateByLogisticCode(String logisticsOrderCode, String rawStatus) {
-        var entity = trackingRepository.findByLogisticsOrderCode(logisticsOrderCode)
-                .orElseGet(() -> {
-                    var dto = cargoflowService.getInfoByLogisticsOrderCode(logisticsOrderCode).getFirst();
-                    if (dto == null) {
-                        log.error("{} logisticsOrderCode: {}", ORDER_NOT_FOUND, logisticsOrderCode);
-                        throw new ApiException(ORDER_NOT_FOUND, HttpStatus.NOT_FOUND);
-                    }
-                    return trackingRepository.save(trackingMapper.toEntity(dto).setUserPhone(dto.getPhone()));
-                });
-        var statusModel = statusService.getStatus(rawStatus) ;
-        checkStatus(entity.setStatus(statusModel != null ? statusModel.mapStatus() : NEED_DOCUMENT));
+    public void updateByOrderCode(String orderCode, String rawStatus) {
+        var entity = trackingRepository.findByTrack(orderCode)
+                .orElseGet(() -> trackingRepository.save(findByCargoFlow(orderCode)));
         updateRoute(entity);
+        var statusModel = statusService.getStatus(rawStatus);
+        checkStatus(entity.setStatus(statusModel != null ? statusModel.mapStatus() : NEED_DOCUMENT));
     }
 
     private TrackingDto findTrack(String number) throws TrackNotFoundException {
