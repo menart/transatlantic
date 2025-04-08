@@ -1,6 +1,5 @@
 package express.atc.backend.serializer;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -12,9 +11,9 @@ import java.util.Objects;
 public class DocumentTypeDeserializer extends JsonDeserializer<DocumentType> {
 
     @Override
-    public DocumentType deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+    public DocumentType deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         return Objects.nonNull(jsonParser) && Objects.nonNull(jsonParser.getText())
-                ? DocumentType.getDocumentTypeById(Integer.parseInt(jsonParser.getText()))
+                ? DocumentType.getDocumentTypeByName(jsonParser.getText())
                 : null;
     }
 }

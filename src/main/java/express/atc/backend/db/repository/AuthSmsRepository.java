@@ -1,6 +1,7 @@
 package express.atc.backend.db.repository;
 
 import express.atc.backend.db.entity.AuthSmsEntity;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -19,4 +20,7 @@ public interface AuthSmsRepository extends CrudRepository<AuthSmsEntity, Long> {
     Optional<AuthSmsEntity> findFirstByPhoneAndCodeAndCreatedAtAfter(String phone, String code, LocalDateTime createdAt);
 
     Optional<AuthSmsEntity> findFirstByPhoneOrderByCreatedAtDesc(String phone);
+
+    @Modifying
+    long deleteByCreatedAtBefore(LocalDateTime expireDate);
 }

@@ -1,0 +1,39 @@
+auth:
+  time_hold_sms: 1
+
+sms-aero:
+  enable: false
+
+customs-fee:
+  currency: EUR
+  limit-price: 20000
+  fee-price-percent: 15.0
+  limit-weight: 31000
+  fee-weight-by-kg: 200
+  fixed-our-tax: 50000
+  percent-amends: 5.0
+
+spring:
+  mail:
+    host: 127.0.0.1
+    port: 3025
+    username: user
+    password: admin
+    properties:
+      mail:
+        smtp:
+          port: 3025
+          host: 127.0.01
+          username: user
+          password: admin
+          auth: true
+          starttls.enabled: false
+          ssl:
+            enable: false
+    protocol: smtp
+
+#Landing
+landing:
+  delivery:
+    email: sender@test.com
+#    template: ${LANDING_DELIVERY_TEMPLATE}

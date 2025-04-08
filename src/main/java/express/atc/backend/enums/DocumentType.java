@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Objects;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Getter
@@ -32,10 +31,13 @@ public enum DocumentType {
                 .orElse(null);
     }
 
-    public static final String regexpPattern(){
-        return "(" + Stream
-                .of(values())
-                .map(documentType -> documentType.id.toString())
-                .collect(Collectors.joining("|")) + ")";
+    public static DocumentType getDocumentTypeByName(String name) {
+        if (name == null) {
+            return null;
+        }
+        return Stream.of(values())
+                .filter(documentType -> Objects.equals(documentType.getName(), name))
+                .findFirst()
+                .orElse(null);
     }
 }

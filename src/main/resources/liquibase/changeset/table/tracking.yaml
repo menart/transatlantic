@@ -1,0 +1,108 @@
+---
+databaseChangeLog:
+  - changeSet:
+      id: tracking:create
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: tracking
+      changes:
+        - createTable:
+            tableName: tracking
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: tracking_id_pkey
+                  name: id
+                  type: bigint
+              - column:
+                  name: user_phone
+                  type: varchar(15)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_id
+                  type: bigint
+              - column:
+                  name: order_number
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: track_number
+                  type: varchar(100)
+              - column:
+                  name: logistics_order_code
+                  type: varchar(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: varchar(500)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: marketplace
+                  type: varchar(500)
+              - column:
+                  name: goods
+                  type: jsonb
+              - column:
+                  name: status
+                  type: varchar(15)
+                  defaultValue: "ACTIVE"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: order_datetime
+                  type: timestamp
+              - column:
+                  name: updated_at
+                  type: timestamp
+                  defaultValueDate: NOW()
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  defaultValueDate: NOW()
+                  constraints:
+                    nullable: false
+        - createIndex:
+            clustered: true
+            columns:
+              - column:
+                  name: user_phone
+              - column:
+                  name: status
+            indexName: idx_phone_and_status
+            tableName: tracking
+        - createIndex:
+            clustered: true
+            columns:
+              - column:
+                  name: logistics_order_code
+            indexName: idx_logistics_order_code
+            tableName: tracking
+            unique: true
+        - createIndex:
+            clustered: true
+            columns:
+              - column:
+                  name: track_number
+            indexName: idx_track_number
+            tableName: tracking
+            unique: true
+        - createSequence:
+            - cacheSize: 1
+            - cycle: false
+            - dataType: bigint
+            - incrementBy: 1
+            - maxValue: 9223372036854775807
+            - minValue: 1
+            - sequenceName: tracking_id_seq
+            - startValue: 1

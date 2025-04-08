@@ -1,8 +1,10 @@
 package express.atc.backend.exception;
 
-public class AuthSmsException extends Exception{
+import org.springframework.http.HttpStatus;
+
+public class AuthSmsException extends ApiException{
 
     public AuthSmsException(String message) {
-        super(message);
+        super(message, HttpStatus.UNAUTHORIZED);
     }
 }

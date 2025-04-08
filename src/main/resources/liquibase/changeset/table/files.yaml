@@ -1,0 +1,61 @@
+---
+databaseChangeLog:
+  - changeSet:
+      id: files:create
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: files
+      changes:
+        - createTable:
+            tableName: files
+            columns:
+              - column:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: files_id_pkey
+                  name: uuid
+                  type: UUID
+              - column:
+                  name: user_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: filename
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: size
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: upload_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deleted_at
+                  type: timestamp
+                  constraints:
+                    nullable: true
+  - changeSet:
+      id: files:drop
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: files
+      changes:
+        - dropTable:
+            tableName: files

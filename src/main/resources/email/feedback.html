@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+<p><span th:text="${name}"/>, Нами получен от вас отклик:</p>
+<p style="background-color: #eee; border: 1px dotted black; padding: 5px; margin: 5px; border-radius: 5px"
+   th:text="${text}"/>
+<p>
+    <em th:text="${senderName}"></em> <br/>
+</p>
+</body>
+</html>

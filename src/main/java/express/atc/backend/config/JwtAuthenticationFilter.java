@@ -20,8 +20,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static express.atc.backend.Constants.BEARER_PREFIX;
 import static express.atc.backend.Constants.AUTH_HEADER_NAME;
+import static express.atc.backend.Constants.BEARER_PREFIX;
 
 @Component
 @RequiredArgsConstructor

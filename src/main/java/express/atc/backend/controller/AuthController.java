@@ -6,6 +6,7 @@ import express.atc.backend.dto.JwtAuthenticationResponse;
 import express.atc.backend.dto.ValidateSmsDto;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.service.AuthService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,17 +16,22 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping(path = "/api/auth", produces = "application/json")
 @Tag(name = "Authentication controller", description = "Контроллер для работы авторизацией пользователя")
 public class AuthController {
 
     private final AuthService authService;
     private final HttpServletRequest request;
+
+    @Value("${sms-aero.enable}")
+    private boolean disabledGetSms;
 
     @Operation(summary = "Отправить сгенирированный код в смс пользователю")
     @ApiResponses(value = {
@@ -65,8 +71,10 @@ public class AuthController {
     }
 
     @GetMapping("/sms")
-    //@ConditionalOnExpression("${smsAero.enabled:false}!='true'")
-    public String getSms(@RequestParam String phone){
-        return authService.getSms(phone);
+    @Hidden
+    public ResponseEntity<String> getSms(@RequestParam String phone) {
+        return disabledGetSms
+                ? ResponseEntity.notFound().build()
+                : ResponseEntity.ok(authService.getSms(phone));
     }
 }
