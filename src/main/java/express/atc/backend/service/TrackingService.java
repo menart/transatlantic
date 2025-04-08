@@ -24,7 +24,7 @@ public interface TrackingService {
 
     TrackingNeedingDto need(String userPhone);
 
-    void updateByLogisticCode(String logisticsOrderCode);
+    void updateByLogisticCode(String logisticsOrderCode, String status);
 
     void updateListTracking(String userPhone);
 

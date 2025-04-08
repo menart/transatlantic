@@ -1,7 +1,9 @@
 package express.atc.backend.controller;
 
 import express.atc.backend.dto.ErrorResponseDto;
+import express.atc.backend.dto.LanguageDto;
 import express.atc.backend.dto.UserDto;
+import express.atc.backend.enums.Language;
 import express.atc.backend.service.JwtService;
 import express.atc.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,5 +67,47 @@ public class UserController extends PrivateController {
         String userPhone = jwtService.extractPhone(getToken());
         userInfo.setPhone(userPhone);
         return userService.updateFullUserInfo(userInfo);
+    }
+
+    @Operation(summary = "Получить информацию о языке для пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Язык пользователя",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LanguageDto.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "404",
+                    description = "Пользователь не найден в базе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
+    @GetMapping("/language")
+    public LanguageDto getUserLanguage() {
+        String userPhone = jwtService.extractPhone(getToken());
+        return userService.getLanguage(userPhone);
+    }
+
+    @Operation(summary = "Сменить язык для пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Язык пользователя",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = LanguageDto.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "404",
+                    description = "Пользователь не найден в базе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
+    @PostMapping("/language/{language}")
+    public LanguageDto setUserLanguage(@PathVariable Language language) {
+        String userPhone = jwtService.extractPhone(getToken());
+        return userService.setLanguage(userPhone, language);
     }
 }
