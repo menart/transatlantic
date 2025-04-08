@@ -5,4 +5,6 @@ import express.atc.backend.dto.PaymentDto;
 public interface RobokassaService {
 
     String makePaymentUrl(PaymentDto payment);
+
+    String paymentResult(Double outSum, Long orderId, String checkSum);
 }

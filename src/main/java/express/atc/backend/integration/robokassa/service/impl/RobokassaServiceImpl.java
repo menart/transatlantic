@@ -21,6 +21,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import static express.atc.backend.integration.robokassa.config.RobokassaConfig.ROBOKASSA_ERROR_RESPONSE;
+import static express.atc.backend.integration.robokassa.config.RobokassaConfig.ROBOKASSA_SIGN_NOT_VERIFY;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +40,8 @@ public class RobokassaServiceImpl implements RobokassaService {
     private String algorithm;
     @Value("${robokassa.password_1}")
     private String password;
+    @Value("${robokassa.password_2}")
+    private String passwordResult;
     @Value("${robokassa.test}")
     private boolean test;
     @Value("${robokassa.payment-url}")
@@ -78,6 +81,26 @@ public class RobokassaServiceImpl implements RobokassaService {
             }
         } catch (Exception e) {
             throw new ApiException(e.getMessage(), HttpStatus.SERVICE_UNAVAILABLE);
+        }
+    }
+
+    @Override
+    public String paymentResult(Double outSum, Long orderId, String checkSum) {
+        try {
+            String checksumVerify = outSum.toString() + ":" + orderId.toString() + ":" + passwordResult;
+            log.info("checksumVerify: {}", checksumVerify);
+            MessageDigest md = MessageDigest.getInstance(algorithm);
+            md.update(checksumVerify.getBytes());
+            var calcChecksumVerify = DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
+            log.info("calcChecksumVerify: {}", calcChecksumVerify);
+            if (calcChecksumVerify.equals(checkSum.toUpperCase())) {
+                return "OK" + orderId;
+            } else {
+                throw new ApiException(ROBOKASSA_SIGN_NOT_VERIFY, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NoSuchAlgorithmException e) {
+            log.error(e.getMessage());
+            throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

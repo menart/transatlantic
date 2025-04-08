@@ -55,7 +55,8 @@ public class CargoflowServiceImpl implements CargoflowService {
     private List<TrackingDto> getInfoFromCargoflowByNumber(String number) {
         var condition = List.of(
                 new ConditionDto(CONDITION_ORDER_TRACK_NUMBER_PROPERTY, CONDITION_OPERATOR_EQ, number),
-                new ConditionDto(CONDITION_ORDER_REFERENCE_PROPERTY, CONDITION_OPERATOR_EQ, number)
+                new ConditionDto(CONDITION_ORDER_REFERENCE_PROPERTY, CONDITION_OPERATOR_EQ, number),
+                new ConditionDto(CONDITION_ORDER_LOGISTIC_CODE, CONDITION_OPERATOR_EQ, number)
         );
         var cargoflowOrders = cargoflowClient.getFromCargoflowEntity(List.of(new ConditionDto(condition, "OR")),
                 orderEntity, CargoflowOrder.class);

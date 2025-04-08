@@ -56,7 +56,8 @@ spring:
     password: ${RABBITMQ_PASSWORD}
     username: ${RABBITMQ_USERNAME}
     person-info-need:
-      queue: ${RABBITMQ_PERSON_INFO_NEED_QUEUE}
+      queue-pd: ${RABBITMQ_PERSON_INFO_NEED_QUEUE_PD}
+      queue-status: ${RABBITMQ_PERSON_INFO_NEED_QUEUE_STATUS}
 
 
 server:
@@ -81,9 +82,9 @@ logging:
             JdbcTemplate: DEBUG
             StatementCreatorUtils: TRACE
     reactor:
-      netty:
-        http:
-          client: DEBUG
+      netty.http.client: DEBUG
+    express:
+      atc.backend.integration.cfapi.service.impl.CfApiServiceImpl: DEBUG
 auth:
   time_hold_sms: ${AUTH_TIME_HOLD_SMS}
   count_number_code: ${AUTH_COUNT_NUMBER_CODE}
@@ -160,12 +161,19 @@ robokassa:
   tax: ${ROBOKASSA_TAX}
   algorithm: ${ROBOKASSA_ALGORITHM}
   password_1: ${ROBOKASSA_PASSWORD_1}
+  password_2: ${ROBOKASSA_PASSWORD_2}
   test: ${ROBOKASSA_TEST}
   payment-url: ${ROBOKASSA_PAYMENT_URL}
   success-url: ${ROBOKASSA_SUCCESS_URL}
   success-method: ${ROBOKASSA_SUCCESS_METHOD}
   fail-url: ${ROBOKASSA_FAIL_URL}
   fail-method: ${ROBOKASSA_FAIL_METHOD}
+
+#CFAPI
+cfapi:
+  url: ${CFAPI_URL}
+  token: ${CFAPI_TOKEN}
+  platformId: ${CFAPI_PLATFORM_ID}
 
 #Feedback
 feedback:

@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 public class LandingController {
 
     private final LandingService landingService;
+
+    private final HttpServletRequest request;
 
     @Operation(summary = "Отправка заказа на доставку")
     @ApiResponses(value = {
@@ -40,6 +43,7 @@ public class LandingController {
     })
     @PostMapping("/delivery")
     public boolean delivery(@Valid @RequestBody DeliveryDto delivery) throws MessagingException {
+
         return landingService.deliveryRequest(delivery);
     }
 }

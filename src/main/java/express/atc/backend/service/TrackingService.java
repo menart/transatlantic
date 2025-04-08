@@ -24,9 +24,11 @@ public interface TrackingService {
 
     TrackingNeedingDto need(String userPhone);
 
-    void updateByLogisticCode(String logisticsOrderCode);
+    void updateByOrderCode(String orderCode, String status);
 
     void updateListTracking(String userPhone);
 
     boolean paymentConfirmation(Long orderId, String userPhone);
+
+    String paymentControl(Double outSum, Long orderId, String checkSum);
 }

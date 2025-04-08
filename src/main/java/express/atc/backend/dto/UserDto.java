@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import express.atc.backend.enums.Language;
 import express.atc.backend.enums.UserRole;
 import express.atc.backend.serializer.LocalDateValidDeserializer;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -62,6 +63,8 @@ public class UserDto {
     @Size(min = 5, max = 150, message = "Адрес электронной почты: " + NOT_VALID_SIZE)
     @Email(message = EMAIL_NOT_VALID)
     private String email;
+    @Schema(description = "Язык приложения для пользователя")
+    private Language language;
     @Schema(description =
             "Согласие \"Публичной офертой о заключении договора на предоставление " +
                     "услуг таможенного представительства для физических лиц\"")

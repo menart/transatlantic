@@ -1,5 +1,6 @@
 package express.atc.backend.db.entity;
 
+import express.atc.backend.enums.Language;
 import express.atc.backend.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.*;
@@ -45,6 +46,9 @@ public class UserEntity {
     private String inn;
     @Column
     private String email;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Language language;
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

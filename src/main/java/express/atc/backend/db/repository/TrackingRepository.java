@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> {
 
-    @Query("from TrackingEntity where trackNumber = :number or orderNumber = :number")
+    @Query("from TrackingEntity where trackNumber = :number or orderNumber = :number or logisticsOrderCode = :number")
     Optional<TrackingEntity> findByTrack(String number);
     Optional<TrackingEntity> findByOrderId(Long orderId);
 
@@ -28,6 +28,4 @@ public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> 
 
     @Query(value = "select trackNumber from TrackingEntity where userPhone = :userPhone and status = :trackingStatus")
     List<String> findTrackNumberByNeed(String userPhone, TrackingStatus trackingStatus);
-
-    Optional<TrackingEntity> findByLogisticsOrderCode(String logisticsOrderCode);
 }

@@ -19,18 +19,25 @@ public class PersonInfoNeedListener {
     private final ObjectMapper objectMapper;
     private final RabbitMqService rabbitMqService;
 
-    @RabbitListener(
-            queuesToDeclare = @Queue(
-                    name = "${spring.rabbitmq.person-info-need.queue}",
-                    durable = "true",
-                    arguments = @Argument(name = "x-queue-type", value = "classic")
-            )
-    )
-    public void listener(String message) {
+    @RabbitListener(queues = "${spring.rabbitmq.person-info-need.queue-pd}")
+    public void listenerPD(String message) {
+        log.info("RabbitMQ pd read message: {}", message);
+        processing(message);
+    }
+
+    @RabbitListener(queues = "${spring.rabbitmq.person-info-need.queue-status}")
+    public void listenerStatus(String message) {
+        log.info("RabbitMQ status read message: {}", message);
+        processing(message);
+    }
+
+    private void processing(String message) {
         try {
             PersonInfoNeedDto dto = objectMapper.readValue(message, PersonInfoNeedDto.class);
-            log.info("{}", dto);
-            rabbitMqService.processing(dto);
+            log.info("Rabbit MQ {}", dto);
+            if (dto.getLogisticsOrderCode() != null || dto.getTrackingNumber() != null) {
+                rabbitMqService.processing(dto);
+            }
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
         }
