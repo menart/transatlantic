@@ -1,45 +1,49 @@
 package express.atc.backend.integration.cargoflow.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import express.atc.backend.integration.cargoflow.dto.Order.OrderPropertyDto;
+import express.atc.backend.integration.cargoflow.serializer.CargoflowPropertyDeserializer;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.TimeZone;
 
-@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-@AllArgsConstructor
-@NoArgsConstructor
-public class CargoflowOrder {
-
-    private String id;
-    private String reference;
-    private String trackingNumber;
-
-    private String orderCollected;
-    private OffsetDateTime opTime;
-    private TimeZone opTimezone;
-    private String opLocation;
-
-    private Double weight;
-    private String hsCodeTime;
-    private String idInfo;
-    private Integer failureCount;
-    private String status;
-    private Integer code;
-    private String bizType;
-    private String trackingDescription;
-    private String logisticsOrderCode;
-    private String idValidationStatus;
-    private Long tariff;
-    private String properties;
-
-    private String lastmileInfo;
-    private String lastmileStatus;
-
-    private OffsetDateTime createdAt;
-    private OffsetDateTime updatedAt;
-    private OffsetDateTime hsCodeStatus;
+public record CargoflowOrder(
+        Long id,
+        String reference,
+        String trackingNumber,
+        String orderCollected,
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+        LocalDateTime opTime,
+        TimeZone opTimezone,
+        String opLocation,
+        Double weight,
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+        LocalDateTime hsCodeTime,
+        String idInfo,
+        Integer failureCount,
+        String status,
+        Integer code,
+        String bizType,
+        String trackingDescription,
+        String logisticsOrderCode,
+        String idValidationStatus,
+        Long tariff,
+    @JsonDeserialize(using = CargoflowPropertyDeserializer.class)
+        OrderPropertyDto properties,
+        String lastmileInfo,
+        String lastmileStatus,
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+        LocalDateTime createdAt,
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+        LocalDateTime updatedAt,
+        String hsCodeStatus
+) {
 }

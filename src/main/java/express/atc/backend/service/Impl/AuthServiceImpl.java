@@ -12,15 +12,21 @@ import express.atc.backend.service.JwtService;
 import express.atc.backend.service.MessageService;
 import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
 
+import static express.atc.backend.Constants.MESSAGE_SMALL_INTERVAL;
+import static express.atc.backend.Constants.SMS_CODE_MESSAGE;
+
 @Service
 @CrossOrigin
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final AuthSmsRepository authSmsRepository;
@@ -29,11 +35,11 @@ public class AuthServiceImpl implements AuthService {
     private final MessageService messageService;
     private final JwtService jwt;
 
-    @Value(value = "${constant.time_hold_sms}")
+    @Value(value = "${auth.time_hold_sms}")
     private int TIME_HOLD_SMS;
-    @Value(value = "${constant.count_number_code}")
+    @Value(value = "${auth.count_number_code}")
     private int COUNT_NUMBER_CODE;
-    @Value(value = "${constant.sms_code_live}")
+    @Value(value = "${auth.sms_code_live}")
     private int SMS_CODE_LIVE;
 
     @Override
@@ -41,31 +47,32 @@ public class AuthServiceImpl implements AuthService {
         LocalDateTime timeHoldSms = LocalDateTime.now().minusSeconds(TIME_HOLD_SMS);
         var lastSendSms = authSmsRepository.countByIpaddressAndCreatedAtAfter(ipAddress, timeHoldSms);
         if (lastSendSms > 0) {
-            throw new AuthSmsException("Слишком маленький интервал запроса");
+            throw new AuthSmsException(MESSAGE_SMALL_INTERVAL);
         }
         String code = makeCodeForPhone();
         AuthSmsEntity authSmsEntity = AuthSmsEntity.builder()
                 .ipaddress(ipAddress)
                 .code(code)
-                .phone(authSmsDto.getPhone())
+                .phone(authSmsDto.phone())
                 .createdAt(LocalDateTime.now())
                 .build();
         authSmsRepository.save(authSmsEntity);
-        messageService.send(authSmsDto.getPhone(), code);
+        messageService.send(authSmsDto.phone(), String.format(SMS_CODE_MESSAGE, code));
         return TIME_HOLD_SMS;
     }
 
     @Override
     public JwtAuthenticationResponse validateCode(ValidateSmsDto validateSms) throws AuthSmsException {
-        if (validateSms.getCode().length() != COUNT_NUMBER_CODE) {
+        if (validateSms.code().length() != COUNT_NUMBER_CODE) {
             throw new AuthSmsException("Не верная длина кода");
         }
-        if (!checkCode(validateSms.getCode(), validateSms.getPhone())) {
+        if (!checkCode(validateSms.code(), validateSms.phone())) {
             throw new AuthSmsException("Не верный код");
         }
-        var user = userService.findOrCreateByPhone(validateSms.getPhone());
+        var user = userService.findOrCreateByPhone(validateSms.phone());
         return JwtAuthenticationResponse.builder()
                 .token(jwt.generateToken(userDetailMapper.toUserDetail(user)))
+                .isFull(user.isFull())
                 .build();
     }
 
@@ -74,6 +81,13 @@ public class AuthServiceImpl implements AuthService {
         return authSmsRepository.findFirstByPhoneOrderByCreatedAtDesc(phone)
                 .map(AuthSmsEntity::getCode)
                 .orElse("no find code");
+    }
+
+    @Override
+    @Transactional
+    public void clearAuthCode() {
+        LocalDateTime expireDate = LocalDateTime.now().minusSeconds(SMS_CODE_LIVE);
+        log.info("remove expired sms: {}", authSmsRepository.deleteByCreatedAtBefore(expireDate));
     }
 
     private String makeCodeForPhone() {

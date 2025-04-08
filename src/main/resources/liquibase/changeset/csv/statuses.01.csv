@@ -1,0 +1,56 @@
+status;description_eng;description_rus;map_status
+PENDING;Validation pending;Заказ ожидает подтверждения;ACTIVE
+NEW;Order created;Заказ создан;ACTIVE
+CANCEL;Order cancelled;Заказ отменён;ACTIVE
+FIRSTMILE_PICKUP;Order pickup;Заказ получен у продавца;ACTIVE
+FIRSTMILE_DROPOFF;Order dropoff;Заказ передан на склад;ACTIVE
+WAREHOUSE_RETURN_READY;Order is ready for return at WH;Заказ подготовлен для возрата на склад;ACTIVE
+WAREHOUSE_RETURNED;Order returned by WH;Заказ возвращён на склад;ACTIVE
+WAREHOUSE_ARRIVAL;Processed at warehouse;Заказ прибыл на склад;ACTIVE
+WAREHOUSE_PARCEL_ACCEPTED;Measured and weighed at warehouse;Заказ измерен и взвешен на складе;ACTIVE
+WAREHOUSE_HANDOVER;Handover to warehouse;Заказ передан на склад;ACTIVE
+FIRSTMILE_REJECTED;Rejected by firstmile;Заказ изъят на первой миле;ACTIVE
+WAREHOUSE_DISPOSAL;Order Destroyed at WH;Заказ утилизирован на складе;ACTIVE
+CUSTOMS_READY;Ready to shipment;Заказ готов к отгрузке;ACTIVE
+WAREHOUSE_DEPARTURE;Departed from warehouse;Заказ отгружен со склада;ACTIVE
+LINEHAUL_TRANSIT_DEPARTURE;Departed froms transit warehouse;Заказ отправлен с транзитного склада;ACTIVE
+LINEHAUL_TRANSIT_ARRIVAL;Arrived to the transit warehouse;Заказ прибыл на транзитный склад;ACTIVE
+LINEHAUL_REJECTED;Rejected by linehaul;Заказ изъят магистральным перевозчиком;ACTIVE
+LINEHAUL_POSTCOLLECTION;Handover by postal operator of destination;Заказ передан почтовым оператором конечного пункта назначения;ACTIVE
+LINEHAUL_HANDOVER_CARRIER;Handover to carrier;Заказ передан перевозчику;ACTIVE
+LINEHAUL_HANDOVER;Handover to linehaul;Заказ передан магистральному перевозчику;ACTIVE
+LINEHAUL_DEPARTURE;Departed to the country of destination;Заказ отправлен в страну назначения;ACTIVE
+LINEHAUL_ARRIVAL;Arrived to the country of destination;Заказ прибыл в страну назначения;ACTIVE
+CUSTOMS_RELEASED;Customs clearance completed, order released;Таможенное оформление заказа окончено, заказ выпущен;ACTIVE
+CUSTOMS_WAITS_PAYMENT;Waits customs duties to be paid;Заказ ожидает оплаты таможенных пошлин;NEED_PAYMENT
+CUSTOMS_FEE_PAID;Customs duties have been paid;Таможенные пошлины оплачены;ACTIVE
+CUSTOMS_NEEDS_PAYMENT;Customs duties has to be paid;Таможенные пошлины должны быть оплачены;ACTIVE
+CUSTOMS_O_I_R;Order information received by customs;Информация по заказу получена таможенными органами;ACTIVE
+CUSTOMS_ID_CHECKING;ID requires additional verification;Требуется дополнительная подтверждение персональных данных;NEED_DOCUMENT
+CUSTOMS_HELD;Detained by customs;Заказ задержан таможенными органами;ACTIVE
+CUSTOMS_FEE_CANCELED;Customs duties have not been paid in time. Order is flagged for return.;Несвоевремменая оплата таможенных пошлин. Заказ помечен к возврату.;ACTIVE
+CUSTOMS_DENIAL;Refusal by customs to release;Отказ таможенными органами в выпуске заказа;ACTIVE
+CUSTOMS_TRANSIT_DEPARTURE;Order departed from customs transit warehouse;Заказ отправлен с транзитного таможенного склада;ACTIVE
+CUSTOMS_TRANSIT_ARRIVAL;Order arrived to customs transit warehouse;Заказ прибыл на транзитный таможенный склада;ACTIVE
+CUSTOMS_CLEARANCE;Order submitted to customs for release;Заказ передан для таможенного оформления;ACTIVE
+CUSTOMS_CHECK_OUT;Order shipped out from customs warehouse to lastmile;Заказ отправлен с таможенного склада;ACTIVE
+CUSTOMS_CHECK_IN;Order arrived to Customs Warehouse;Заказ прибыл на таможенный склад;ACTIVE
+LASTMILE_TERMINAL_ARRIVAL;Order arrived to last mile delivery terminal or PUDO point;Заказ прибыл на терминал для последующего транзита или доставки в ПВЗ;ACTIVE
+LASTMILE_PUDO_DELIVERED;Delivered via PUDO;Заказ доставлен в ПВЗ;ARCHIVE
+LASTMILE_DELIVERED;Order delivered by Courier;Заказ доставлен курьером;ARCHIVE
+LASTMILE_RETURN;Order flagged for return;Заказ помечен к возврату;ARCHIVE
+LASTMILE_OUT_FOR_DELIVERY;Order is out for delivery to courier;Заказ не передан курьеру;ARCHIVE
+LASTMILE_FAILED_ATTEMPT;Unsuccessful delivery attempt;Неудачная попытка доставки заказа;ARCHIVE
+LASTMILE_SORTING_WH_ARRIVAL;Order processed at last mile central warehouse;Заказ прибыл на центральный склад;ARCHIVE
+RESDES;Post destination acceptance;Заказ получателю для отправки почтой принят;ARCHIVE
+PREDES;Post despatch ready;;ARCHIVE
+EMI;Post final delivery;;ARCHIVE
+EMH;Post unsuccessful delivery attempt;;ARCHIVE
+EMG;Post office arrival;;ARCHIVE
+EMF;Post office of exchange out;;ARCHIVE
+EME;Post customs in;;ARCHIVE
+EMD;Post office of exchange import;;ARCHIVE
+EMC;Departure from outward office of exchange;;ARCHIVE
+EMA;Post acceptance;;ARCHIVE
+POST_DEPARTURE;Post departure to the destination;;ARCHIVE
+POST_ARRIVAL;Post arrival to the destination;;ARCHIVE

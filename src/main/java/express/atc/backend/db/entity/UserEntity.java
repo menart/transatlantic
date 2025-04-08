@@ -1,16 +1,16 @@
 package express.atc.backend.db.entity;
 
+import express.atc.backend.enums.Language;
 import express.atc.backend.enums.UserRole;
 import jakarta.persistence.*;
-import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.Accessors;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -46,12 +46,16 @@ public class UserEntity {
     private String inn;
     @Column
     private String email;
-    @CreationTimestamp
-    @Column(updatable = false, name = "created_at")
-    private LocalDateTime updatedAt;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private Language language;
     @UpdateTimestamp
     @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
     private LocalDateTime createdAt;
+
 
     public boolean isFullInfo(){
         return Objects.nonNull(surname)

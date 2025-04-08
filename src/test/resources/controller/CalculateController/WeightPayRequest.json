@@ -1,0 +1,10 @@
+{
+  "price": 190,
+  "currency": "EUR",
+  "weight": 32500,
+  "items": [
+    {
+      "name": "123"
+    }
+  ]
+}

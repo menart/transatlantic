@@ -1,9 +1,15 @@
 package express.atc.backend.controller;
 
 import express.atc.backend.dto.ErrorResponseDto;
+import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
+import express.atc.backend.exception.TrackNotFoundException;
+import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -17,6 +23,11 @@ import java.util.stream.Stream;
 @Slf4j
 @ControllerAdvice
 public class ErrorHandlingControllerAdvice {
+
+    @ExceptionHandler(ConversionFailedException.class)
+    public ResponseEntity<String> handleConflict(RuntimeException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 
     @ResponseBody
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -38,17 +49,59 @@ public class ErrorHandlingControllerAdvice {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(AuthSmsException.class)
     public ErrorResponseDto handleAuthSmsException(AuthSmsException ex) {
-        return new ErrorResponseDto(HttpStatus.BAD_REQUEST.getReasonPhrase(),
+        return new ErrorResponseDto(HttpStatus.UNAUTHORIZED.getReasonPhrase(),
                 Collections.singletonList(ex.getMessage()));
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ExceptionHandler(AuthenticationException.class)
+    public ErrorResponseDto handleForbidden() {
+        return new ErrorResponseDto(HttpStatus.FORBIDDEN.getReasonPhrase(),
+                Collections.singletonList("Доступ запрещен"));
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(TrackNotFoundException.class)
+    public ErrorResponseDto handleApiException(ApiException ex) {
+        return new ErrorResponseDto(HttpStatus.NOT_FOUND.getReasonPhrase(),
+                Collections.singletonList(ex.getMessage()));
+    }
+
+    @ResponseBody
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    @ExceptionHandler(MessagingException.class)
+    public ErrorResponseDto handleMessagingException(MessagingException ex) {
+        return new ErrorResponseDto(HttpStatus.BAD_GATEWAY.getReasonPhrase(),
+                Collections.singletonList("Проблема при отправки почты: " + ex.getMessage()));
+    }
+
+    @ExceptionHandler(ApiException.class)
+    @ResponseBody
+    public ResponseEntity<?> onApiException(ApiException e) {
+        log.warn("Exception ", e);
+        return new ResponseEntity<>(
+                new ErrorResponseDto(
+                        e.getStatus().name(),
+                        Collections.singletonList(e.getMessage())
+                ),
+                e.getStatus()
+        );
     }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    ErrorResponseDto onException(Exception e) {
-        log.warn("Exception ", e);
-        return new ErrorResponseDto("error", Collections.singletonList(e.getMessage()));
+    public ResponseEntity<ErrorResponseDto> onException(Exception exception) {
+        log.warn("Exception ", exception);
+        return new ResponseEntity<>(
+                new ErrorResponseDto(
+                        "error",
+                        Collections.singletonList(exception.getMessage())
+                ),
+                HttpStatus.INTERNAL_SERVER_ERROR
+        );
     }
-
 
 }

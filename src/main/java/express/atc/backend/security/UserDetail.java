@@ -1,6 +1,5 @@
 package express.atc.backend.security;
 
-import express.atc.backend.dto.UserDto;
 import express.atc.backend.enums.UserRole;
 import lombok.Builder;
 import lombok.Data;

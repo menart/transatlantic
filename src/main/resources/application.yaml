@@ -1,21 +1,12 @@
 spring:
   application:
     name: backend
+  output.ansi.enabled: ALWAYS
   #Jackson
   jackson:
     mapper:
+      accept-case-insensitive-values: true
       accept-case-insensitive-enums: true
-  # Cache/Redis
-  cache:
-    type: redis
-    default:
-      ttl: ${DEFAULT_TTL:3600}
-    batch:
-      size: ${CACHE_BATCH_SIZE:1000}
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
   # JDBC Pooled Datasource
   jpa:
     database: postgresql
@@ -23,15 +14,59 @@ spring:
     show-sql: ${SHOW_SQL:false}
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:5432}/${DATASOURCE_DATABASE:transatlantic}
-    username: ${DATASOURCE_USERNAME:postgres}
-    password: ${DATASOURCE_PASSWORD:postgres}
+    url: jdbc:postgresql://${DATASOURCE_HOST}:${DATASOURCE_PORT}/${DATASOURCE_DATABASE}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+    hikari:
+      pool-name: SpringBootHikariCP
+      auto-commit: false
+      connection-timeout: 30000
+      maximum-pool-size: 20
+      minimum-idle: 5
   liquibase:
     change-log: classpath:liquibase/changelog.yaml
     enabled: true
-    url: jdbc:postgresql://${DATASOURCE_HOST:localhost}:${DATASOURCE_PORT:5432}/${DATASOURCE_DATABASE:transatlantic}
-    user: ${LIQUIBASE_DATASOURCE_USERNAME:postgres}
-    password: ${LIQUIBASE_DATASOURCE_PASSWORD:postgres}
+    url: ${spring.datasource.url}
+    user: ${LIQUIBASE_DATASOURCE_USERNAME}
+    password: ${LIQUIBASE_DATASOURCE_PASSWORD}
+# e-mail
+  mail:
+    host: ${EMAIL_HOST}
+    username: ${EMAIL_USER_SENDER}
+    password: ${EMAIL_PASSWORD}
+    templates:
+      path: ${EMAIL_TEMPLATE_PATH}
+    properties:
+      mail:
+        smtp:
+          port: ${EMAIL_SMTP_PORT}
+          host: ${EMAIL_HOST}
+          username: ${EMAIL_USER_SENDER}
+          password: ${EMAIL_PASSWORD}
+          auth: true
+          starttls.enabled: false
+          ssl:
+            protocols: TLSv1.2
+            enable: true
+            trust: smtp.mail.ru
+  #RabbitMQ
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    virtual-host: ${RABBITMQ_VHOST}
+    password: ${RABBITMQ_PASSWORD}
+    username: ${RABBITMQ_USERNAME}
+    person-info-need:
+      queue-pd: ${RABBITMQ_PERSON_INFO_NEED_QUEUE_PD}
+      queue-status: ${RABBITMQ_PERSON_INFO_NEED_QUEUE_STATUS}
+
+
+server:
+  port: 8080
+  ssl:
+    key-store-type: ${SSL_KEY_STORE_TYPE}
+    key-store: ${SSL_KEY_STORE}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD}
+    key-alias: ${SSL_KEY_ALIAS}
 
 # Log
 logging:
@@ -46,11 +81,16 @@ logging:
           core:
             JdbcTemplate: DEBUG
             StatementCreatorUtils: TRACE
-
-constant:
-  time_hold_sms: 60
-  count_number_code: 4
-  sms_code_live: 6000
+    reactor:
+      netty.http.client: DEBUG
+    express:
+      atc.backend.integration.cfapi.service.impl.CfApiServiceImpl: DEBUG
+auth:
+  time_hold_sms: ${AUTH_TIME_HOLD_SMS}
+  count_number_code: ${AUTH_COUNT_NUMBER_CODE}
+  sms_code_live: ${AUTH_SMS_CODE_LIVE}
+  scheduler:
+    interval: ${AUTH_INTERVAL_CLEAN}
 
 #Jwt
 jwt:
@@ -60,8 +100,8 @@ jwt:
 
 #SMS Aero
 sms-aero:
-  enable: false
-  url: ${SMS_AERO_URL:https://gate.smsaero.ru/v2}
+  enable: ${SMS_AERO_ENABLE}
+  url: ${SMS_AERO_URL}
   sign: ${SMS_AERO_SIGN}
   token: ${SMS_AERO_TOKEN}
   login: ${SMS_AERO_LOGIN}
@@ -69,3 +109,90 @@ sms-aero:
 telegram:
   name: mrkvk_test_bot
   token: 5324532057:AAHffyV67hNNkZoPSG2CZFqdHJL5vryAoUo
+
+#Cargoflow
+cargoflow:
+  url: ${CARGOFLOW_URL}
+  username: ${CARGOFLOW_USERNAME}
+  password: ${CARGOFLOW_PASSWORD}
+  entity:
+    endpoint: ${cargoflow.url}${CARGOFLOW_ENTITY_ENDPOINT}
+    order: ${CARGOFLOW_ENTITY_ORDER}
+    order_history: ${CARGOFLOW_ENTITY_ORDER_HISTORY}
+    orders: ${cargoflow.url}${CARGOFLOW_ORDERS_ENDPOINT}
+  upload:
+    endpoint: ${cargoflow.url}${CARGOFLOW_UPLOAD_ENDPOINT}
+    attach: ${cargoflow.url}${CARGOFLOW_ATTACH_ENDPOINT}
+  cuba:
+    rest:
+      endpoint: ${cargoflow.url}${CARGOFLOW_AUTH_ENDPOINT}
+      client:
+        id: ${CUBA_REST_CLIENT_ID}
+        secret: ${CUBA_REST_CLIENT_SECRET}
+
+service:
+  tracking:
+    update: ${SERVICE_TRACKING_CRON}
+#CBRF
+cbrf:
+  url: ${CBRF_URL}
+  scheduler:
+    cron: ${CBRF_CRON}
+#FEE
+customs-fee:
+  currency: ${CUSTOMS_FEE_CURRENCY}
+  limit-price: ${CUSTOMS_FEE_LIMIT_PRICE}
+  fee-price-percent: ${CUSTOMS_FEE_PRICE_PERCENT}
+  limit-weight: ${CUSTOMS_FEE_LIMIT_WEIGHT}
+  fee-weight-by-kg: ${CUSTOMS_FEE_WEIGHT_BY_KG}
+  fixed-our-tax: ${CUSTOMS_FEE_FIXED_OUR_TAX}
+  percent-amends: ${CUSTOMS_FEE_PERCENT_AMENDS}
+#Robokassa
+robokassa:
+  url: ${ROBOKASSA_URL}
+  merchant_login: ${ROBOKASSA_MERCHANT_LOGIN}
+  description: ${ROBOKASSA_DESCRIPTION:оплата тестовых платежей}
+  #none – Без НДС.
+  #vat0 – НДС по ставке 0%
+  #vat10 – НДС чека по ставке 10%
+  #vat110 – НДС чека по расчетной ставке 10/110
+  #vat20 – НДС чека по ставке 20%
+  #vat120 – НДС чека по расчетной ставке 20/120
+  tax: ${ROBOKASSA_TAX}
+  algorithm: ${ROBOKASSA_ALGORITHM}
+  password_1: ${ROBOKASSA_PASSWORD_1}
+  password_2: ${ROBOKASSA_PASSWORD_2}
+  test: ${ROBOKASSA_TEST}
+  payment-url: ${ROBOKASSA_PAYMENT_URL}
+  success-url: ${ROBOKASSA_SUCCESS_URL}
+  success-method: ${ROBOKASSA_SUCCESS_METHOD}
+  fail-url: ${ROBOKASSA_FAIL_URL}
+  fail-method: ${ROBOKASSA_FAIL_METHOD}
+
+#CFAPI
+cfapi:
+  url: ${CFAPI_URL}
+  token: ${CFAPI_TOKEN}
+  platformId: ${CFAPI_PLATFORM_ID}
+
+#Feedback
+feedback:
+  title: ${FEEDBACK_TITLE}
+  template: ${FEEDBACK_TEMPLATE}
+
+#Landing
+landing:
+  delivery:
+    email: ${LANDING_DELIVERY_EMAIL}
+    template: ${LANDING_DELIVERY_TEMPLATE}
+
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus, metrics
+  metrics:
+    tags:
+      application: ${spring.application.name}
