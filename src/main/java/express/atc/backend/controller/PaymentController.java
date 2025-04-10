@@ -15,7 +15,7 @@ public class PaymentController {
     private final TrackingService trackingService;
 
     @GetMapping("ctrl")
-    public String payment(@RequestParam("out_summ") double outSum, @RequestParam("inv_id") long orderId,
+    public String payment(@RequestParam("out_summ") String outSum, @RequestParam("inv_id") long orderId,
                           @RequestParam("crc") String checkSum) {
         return trackingService.paymentControl(outSum, orderId, checkSum);
     }

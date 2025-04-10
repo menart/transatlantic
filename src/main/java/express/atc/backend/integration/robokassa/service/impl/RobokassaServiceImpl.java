@@ -85,9 +85,9 @@ public class RobokassaServiceImpl implements RobokassaService {
     }
 
     @Override
-    public String paymentResult(Double outSum, Long orderId, String checkSum) {
+    public String paymentResult(String outSum, Long orderId, String checkSum) {
         try {
-            String checksumVerify = outSum.toString() + ":" + orderId.toString() + ":" + passwordResult;
+            String checksumVerify = outSum + ":" + orderId.toString() + ":" + passwordResult;
             log.info("checksumVerify: {}", checksumVerify);
             MessageDigest md = MessageDigest.getInstance(algorithm);
             md.update(checksumVerify.getBytes());

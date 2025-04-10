@@ -119,12 +119,17 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public String paymentControl(Double outSum, Long orderId, String checkSum) {
+    public String paymentControl(String outSum, Long orderId, String checkSum) {
         var entity = trackingRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
         var calc = calcTrack(entity.getGoods(), entity.getOrderId(), null);
-        if (!calc.getPaid().equals((long) (outSum * 100))) {
-            throw new ApiException(PAYMENT_NOT_EQUALS, HttpStatus.BAD_REQUEST);
+        try {
+            if (!calc.getPaid().equals((long) (Double.parseDouble(outSum) * 100))) {
+                throw new ApiException(PAYMENT_NOT_EQUALS, HttpStatus.BAD_REQUEST);
+            }
+        }catch (NumberFormatException exception){
+            log.error("{}", exception.fillInStackTrace());
+            throw new ApiException(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
         String request = robokassaService.paymentResult(outSum, orderId, checkSum);
         if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber())) {
