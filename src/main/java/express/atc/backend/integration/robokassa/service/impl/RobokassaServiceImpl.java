@@ -66,9 +66,9 @@ public class RobokassaServiceImpl implements RobokassaService {
                     .uri(uriBuilder ->
                             request.getUribuilder(uriBuilder)
                                     .queryParam("SuccessUrl2", successUrl)
-                                    .queryParam("SuccessUrl2Method", successMethod)
+                                    .queryParam("SuccessUrl2Method", successMethod.toUpperCase())
                                     .queryParam("FailUrl2", failUrl)
-                                    .queryParam("FailUrl2Method", failMethod)
+                                    .queryParam("FailUrl2Method", failMethod.toUpperCase())
                                     .build())
                     .retrieve()
                     .bodyToMono(InvoiceDto.class)
@@ -85,9 +85,10 @@ public class RobokassaServiceImpl implements RobokassaService {
     }
 
     @Override
-    public String paymentResult(String outSum, Long orderId, String checkSum) {
+    public String paymentResult(String outSum, Long orderId, String trackingNumber, String checkSum) {
         try {
-            String checksumVerify = outSum + ":" + orderId.toString() + ":" + passwordResult;
+            String checksumVerify = outSum + ":" + orderId.toString() + ":" + passwordResult
+                    + ":Shp_TrackingNumber=" + trackingNumber;
             log.info("checksumVerify: {}", checksumVerify);
             MessageDigest md = MessageDigest.getInstance(algorithm);
             md.update(checksumVerify.getBytes());
@@ -111,6 +112,7 @@ public class RobokassaServiceImpl implements RobokassaService {
                 .description(description)
                 .invId(payment.getOrderId())
                 .email(payment.getEmail())
+                .trackingNumber(payment.getTrackingNumber())
                 .receipt(ReceiptDto.builder()
                         .items(payment.getItems().stream()
                                 .map(this::mappingItem)
@@ -139,7 +141,8 @@ public class RobokassaServiceImpl implements RobokassaService {
                     + ":" + UriEncoder.encode(dto.getReceipt().toString())
                     + ":" + successUrl + ":" + successMethod
                     + ":" + failUrl + ":" + failMethod
-                    + ":" + password;
+                    + ":" + password
+                    + ":Shp_TrackingNumber=" + dto.getTrackingNumber();
             log.info(encodingStr);
             md.update(encodingStr.getBytes());
             return DatatypeConverter

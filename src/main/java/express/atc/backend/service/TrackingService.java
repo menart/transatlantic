@@ -30,5 +30,5 @@ public interface TrackingService {
 
     boolean paymentConfirmation(Long orderId, String userPhone);
 
-    String paymentControl(String outSum, Long orderId, String checkSum);
+    String paymentControl(String outSum, Long orderId, String trackingNumber, String checkSum);
 }
