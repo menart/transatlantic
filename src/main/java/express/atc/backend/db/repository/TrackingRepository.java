@@ -13,7 +13,8 @@ import java.util.Optional;
 @Repository
 public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> {
 
-    @Query("from TrackingEntity where trackNumber = :number or orderNumber = :number or logisticsOrderCode = :number")
+    @Query("from TrackingEntity where trackNumber = :number or orderNumber = :number" +
+            " or logisticsOrderCode = :number or orderId = cast(:number as biginteger)")
     Optional<TrackingEntity> findByTrack(String number);
     Optional<TrackingEntity> findByOrderId(Long orderId);
 
