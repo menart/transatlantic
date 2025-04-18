@@ -159,6 +159,22 @@ public class TrackingController extends PrivateController {
         return trackingService.uploadFile(file, trackNumber);
     }
 
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Загрузка документов в сервис",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Boolean.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))})
+    })
+    @PostMapping(path = "/uploads/{trackNumber}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public boolean uploadsDocuments(@RequestBody MultipartFile[] files,
+                                   @Parameter(description = "Трек-номер заказа") @PathVariable String trackNumber) {
+        return trackingService.uploadFiles(files, trackNumber);
+    }
+
     @GetMapping(path = "/all/{phoneNumber}")
     public Set<TrackingDto> loadList(@PathVariable String phoneNumber) {
         return trackingService.getAllTrackByPhone(phoneNumber);

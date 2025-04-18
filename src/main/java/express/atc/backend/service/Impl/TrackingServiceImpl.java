@@ -94,6 +94,17 @@ public class TrackingServiceImpl implements TrackingService {
         return true;
     }
 
+    @Override
+    public boolean uploadFiles(MultipartFile[] files, String trackNumber) {
+        var logisticsOrderCode = trackingRepository.findByTrack(trackNumber)
+                .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST))
+                .getLogisticsOrderCode();
+        for (var file : files) {
+            cargoflowService.uploadFile(file, logisticsOrderCode);
+        }
+        return true;
+    }
+
     public void updateListTracking(String userPhone) {
         var list = cargoflowService.getSetInfoByPhone(userPhone).stream();
         Long maxOrderId = trackingRepository.getMaxOrderIdByUserPhone(userPhone);

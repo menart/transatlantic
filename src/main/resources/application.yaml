@@ -58,7 +58,10 @@ spring:
     person-info-need:
       queue-pd: ${RABBITMQ_PERSON_INFO_NEED_QUEUE_PD}
       queue-status: ${RABBITMQ_PERSON_INFO_NEED_QUEUE_STATUS}
-
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 
 server:
   port: 8080

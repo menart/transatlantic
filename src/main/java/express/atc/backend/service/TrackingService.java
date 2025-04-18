@@ -19,6 +19,7 @@ public interface TrackingService {
     TrackingPageDto list(Integer page, int count, String userPhone, TrackingStatus filter);
 
     boolean uploadFile(MultipartFile file, String trackNumber);
+    boolean uploadFiles(MultipartFile[] file, String trackNumber);
 
     Set<TrackingDto> getAllTrackByPhone(String phoneNumber);
 
