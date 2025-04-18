@@ -97,10 +97,6 @@ public class CargoflowServiceImpl implements CargoflowService {
         }
     }
 
-    private Set<TrackingRouteDto> getRoute(Long orderId) {
-        return updateRoute(orderId, null);
-    }
-
     private List<OrderHistory> getTrackingRouteInfoFromCargoflow(Long orderId, Long orderHistoryId) {
         var condition = new ArrayList<ConditionDto>();
         condition.add(new ConditionDto(CONDITION_ROUTE_PROPERTY, CONDITION_OPERATOR_EQ, orderId.toString()));

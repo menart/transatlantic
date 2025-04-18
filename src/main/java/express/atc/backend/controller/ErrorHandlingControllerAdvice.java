@@ -4,6 +4,7 @@ import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.exception.TrackNotFoundException;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.convert.ConversionFailedException;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @ControllerAdvice
+@Hidden
 public class ErrorHandlingControllerAdvice {
 
     @ExceptionHandler(ConversionFailedException.class)
