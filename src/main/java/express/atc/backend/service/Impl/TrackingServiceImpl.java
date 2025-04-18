@@ -66,7 +66,7 @@ public class TrackingServiceImpl implements TrackingService {
     public CalculateDto calc(String trackNumber, String userPhone) throws TrackNotFoundException {
         UserDto user = userService.findUserByPhone(userPhone);
         var dto = findTrack(trackNumber);
-        return calcTrack(dto.getGoods(), dto.getOrderId(), user);
+        return calcTrack(dto.getGoods(), dto.getOrderId(), dto.getTrackNumber(), user);
     }
 
     @Override
@@ -119,14 +119,19 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public String paymentControl(Double outSum, Long orderId, String checkSum) {
+    public String paymentControl(String outSum, Long orderId, String trackingNumber, String checkSum) {
         var entity = trackingRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
-        var calc = calcTrack(entity.getGoods(), entity.getOrderId(), null);
-        if (!calc.getPaid().equals((long) (outSum * 100))) {
-            throw new ApiException(PAYMENT_NOT_EQUALS, HttpStatus.BAD_REQUEST);
+        var calc = calcTrack(entity.getGoods(), entity.getOrderId(), trackingNumber, null);
+        try {
+            if (!calc.getPaid().equals((long) (Double.parseDouble(outSum) * 100))) {
+                throw new ApiException(PAYMENT_NOT_EQUALS, HttpStatus.BAD_REQUEST);
+            }
+        } catch (NumberFormatException exception) {
+            log.error("{}", exception.fillInStackTrace());
+            throw new ApiException(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        String request = robokassaService.paymentResult(outSum, orderId, checkSum);
+        String request = robokassaService.paymentResult(outSum, orderId, trackingNumber, checkSum);
         if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber())) {
             updateRoute(entity);
         }
@@ -165,10 +170,10 @@ public class TrackingServiceImpl implements TrackingService {
         );
     }
 
-    private CalculateDto calcTrack(OrdersDto goods, long OrderId, UserDto user) {
+    private CalculateDto calcTrack(OrdersDto goods, long OrderId, String trackingNumber, UserDto user) {
         var calculate = calcCustomsFee.calculate(goods);
         if (calculate != null && user != null) {
-            calculate.setUrl(makePaymentUrl(OrderId, calculate, user));
+            calculate.setUrl(makePaymentUrl(OrderId, calculate, trackingNumber, user));
         }
         return calculate;
     }
@@ -227,7 +232,7 @@ public class TrackingServiceImpl implements TrackingService {
         }
     }
 
-    private String makePaymentUrl(Long orderId, CalculateDto calculate, UserDto user) {
+    private String makePaymentUrl(Long orderId, CalculateDto calculate, String trackingNumber, UserDto user) {
         List<PaymentItemDto> items = new ArrayList<>();
         items.add(PaymentItemDto.builder()
                 .name(STRING_FEE)
@@ -246,6 +251,7 @@ public class TrackingServiceImpl implements TrackingService {
                 .build());
         var payment = PaymentDto.builder()
                 .orderId(orderId)
+                .trackingNumber(trackingNumber)
                 .items(items)
                 .email(user.getEmail())
                 .amount(items.stream()

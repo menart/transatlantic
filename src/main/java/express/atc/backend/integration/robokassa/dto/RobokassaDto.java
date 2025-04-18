@@ -21,6 +21,7 @@ public class RobokassaDto {
     private String description;
     private Long invId;
     private String email;
+    private String trackingNumber;
     private ReceiptDto receipt;
     private String signatureValue;
     private Integer isTest;
@@ -31,6 +32,7 @@ public class RobokassaDto {
         builder.queryParam("Description", description);
         builder.queryParam("InvId", invId);
         builder.queryParam("Email", email);
+        builder.queryParam("Shp_TrackingNumber", trackingNumber);
         builder.queryParam("Receipt", UriEncoder.encode(receipt.toString()));
         if (isTest != null && isTest == 1) {
             builder.queryParam("IsTest", "1");

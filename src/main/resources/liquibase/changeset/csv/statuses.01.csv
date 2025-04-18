@@ -24,9 +24,10 @@ LINEHAUL_ARRIVAL;Arrived to the country of destination;Заказ прибыл �
 CUSTOMS_RELEASED;Customs clearance completed, order released;Таможенное оформление заказа окончено, заказ выпущен;ACTIVE
 CUSTOMS_WAITS_PAYMENT;Waits customs duties to be paid;Заказ ожидает оплаты таможенных пошлин;NEED_PAYMENT
 CUSTOMS_FEE_PAID;Customs duties have been paid;Таможенные пошлины оплачены;ACTIVE
-CUSTOMS_NEEDS_PAYMENT;Customs duties has to be paid;Таможенные пошлины должны быть оплачены;ACTIVE
+CUSTOMS_NEEDS_PAYMENT;Customs duties has to be paid;Таможенные пошлины должны быть оплачены;NEED_PAYMENT
 CUSTOMS_O_I_R;Order information received by customs;Информация по заказу получена таможенными органами;ACTIVE
 CUSTOMS_ID_CHECKING;ID requires additional verification;Требуется дополнительная подтверждение персональных данных;NEED_DOCUMENT
+CUSTOMS_ID_COLLECTED;ID received;Персональные данные получены;ACTIVE
 CUSTOMS_HELD;Detained by customs;Заказ задержан таможенными органами;ACTIVE
 CUSTOMS_FEE_CANCELED;Customs duties have not been paid in time. Order is flagged for return.;Несвоевремменая оплата таможенных пошлин. Заказ помечен к возврату.;ACTIVE
 CUSTOMS_DENIAL;Refusal by customs to release;Отказ таможенными органами в выпуске заказа;ACTIVE
