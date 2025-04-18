@@ -89,7 +89,7 @@ public class CargoflowServiceImpl implements CargoflowService {
     @Override
     public void uploadFile(MultipartFile file, String logisticsOrderCode) {
         try {
-            var fileDto = cargoflowClient.uploadFileToCargoflow(file.getName(), file.getResource());
+            var fileDto = cargoflowClient.uploadFileToCargoflow(file.getOriginalFilename(), file.getResource());
             cargoflowClient.attachFileToCargoflow(new FileAttachDto(logisticsOrderCode, fileDto.id()));
         } catch (Exception e) {
             log.error(e.getMessage(), e);
