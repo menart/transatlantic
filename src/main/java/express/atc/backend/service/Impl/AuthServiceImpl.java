@@ -4,6 +4,7 @@ import express.atc.backend.db.entity.AuthSmsEntity;
 import express.atc.backend.db.repository.AuthSmsRepository;
 import express.atc.backend.dto.AuthSmsDto;
 import express.atc.backend.dto.JwtAuthenticationResponse;
+import express.atc.backend.dto.LoginDto;
 import express.atc.backend.dto.ValidateSmsDto;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.mapper.UserDetailMapper;
@@ -88,6 +89,15 @@ public class AuthServiceImpl implements AuthService {
     public void clearAuthCode() {
         LocalDateTime expireDate = LocalDateTime.now().minusSeconds(SMS_CODE_LIVE);
         log.info("remove expired sms: {}", authSmsRepository.deleteByCreatedAtBefore(expireDate));
+    }
+
+    @Override
+    public JwtAuthenticationResponse login(LoginDto login) throws AuthSmsException {
+        var user = userService.authenticate(login);
+        return JwtAuthenticationResponse.builder()
+                .token(jwt.generateToken(userDetailMapper.toUserDetail(user)))
+                .isFull(user.isFull())
+                .build();
     }
 
     private String makeCodeForPhone() {
