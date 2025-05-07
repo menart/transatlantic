@@ -1,5 +1,6 @@
 package express.atc.backend.controller;
 
+import express.atc.backend.dto.ChangePasswordDto;
 import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.dto.LanguageDto;
 import express.atc.backend.dto.UserDto;
@@ -109,5 +110,47 @@ public class UserController extends PrivateController {
     public LanguageDto setUserLanguage(@PathVariable Language language) {
         String userPhone = jwtService.extractPhone(getToken());
         return userService.setLanguage(userPhone, language);
+    }
+
+    @Operation(summary = "Сменить пароль для авторизованного пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Информация о пользователе в базе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "404",
+                    description = "Пользователь не найден в базе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
+    @PostMapping("/change-password")
+    public UserDto changePassword(@Valid @RequestBody ChangePasswordDto changePassword) {
+        String userPhone = jwtService.extractPhone(getToken());
+        return userService.changePassword(userPhone, changePassword);
+    }
+
+    @Operation(summary = "Сменить логин для авторизованного пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Информация о пользователе в базе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UserDto.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "404",
+                    description = "Пользователь не найден в базе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
+    @GetMapping("/change-login")
+    public UserDto changeLogin(@RequestParam String login) {
+        String userPhone = jwtService.extractPhone(getToken());
+        return userService.changeLogin(userPhone, login);
     }
 }

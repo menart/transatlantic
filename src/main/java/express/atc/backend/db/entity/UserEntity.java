@@ -30,6 +30,8 @@ public class UserEntity {
     @Column
     private String phone;
     @Column
+    private String login;
+    @Column
     @Enumerated(EnumType.STRING)
     private UserRole role;
     @Column
@@ -46,6 +48,8 @@ public class UserEntity {
     private String inn;
     @Column
     private String email;
+    @Column
+    private String password;
     @Column
     @Enumerated(EnumType.STRING)
     private Language language;
