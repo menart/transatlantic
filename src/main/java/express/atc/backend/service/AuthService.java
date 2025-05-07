@@ -2,6 +2,7 @@ package express.atc.backend.service;
 
 import express.atc.backend.dto.AuthSmsDto;
 import express.atc.backend.dto.JwtAuthenticationResponse;
+import express.atc.backend.dto.LoginDto;
 import express.atc.backend.dto.ValidateSmsDto;
 import express.atc.backend.exception.AuthSmsException;
 
@@ -14,4 +15,6 @@ public interface AuthService {
     String getSms(String phone);
 
     void clearAuthCode();
+
+    JwtAuthenticationResponse login(LoginDto login) throws AuthSmsException;
 }

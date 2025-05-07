@@ -106,3 +106,21 @@ databaseChangeLog:
                   name: language
                   type: varchar(10)
                   defaultValue: 'RU'
+  - changeSet:
+      id: users:change-03
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: WARN
+        - not:
+            - tableExists:
+                tableName: users
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: login
+                  type: varchar(255)
+              - column:
+                  name: password
+                  type: varchar(72)
