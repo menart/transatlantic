@@ -53,6 +53,8 @@ public class UserEntity {
     @Column
     @Enumerated(EnumType.STRING)
     private Language language;
+    @Column
+    private boolean confirmationEmail;
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

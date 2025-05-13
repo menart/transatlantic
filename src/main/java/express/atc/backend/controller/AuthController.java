@@ -1,6 +1,7 @@
 package express.atc.backend.controller;
 
 import express.atc.backend.dto.*;
+import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.service.AuthService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -75,8 +76,28 @@ public class AuthController {
                 : ResponseEntity.ok(authService.getSms(phone));
     }
 
+    @Operation(summary = "Аутентификация по email/номеру телефона и паролю")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Сгенирированый JWT токен",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = JwtAuthenticationResponse.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "401",
+                    description = " Ошибка авторизации, неверный код",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
     @PostMapping("/auth")
     public JwtAuthenticationResponse auth(@RequestBody @Valid LoginDto login) throws AuthSmsException {
         return authService.login(login);
+    }
+
+    @PostMapping("/registration")
+    public UserDto registration(@RequestBody @Valid RegistrationDto registration) throws ApiException {
+        return authService.registration(registration);
     }
 }

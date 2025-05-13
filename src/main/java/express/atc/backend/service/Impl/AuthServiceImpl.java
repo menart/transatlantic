@@ -2,10 +2,7 @@ package express.atc.backend.service.Impl;
 
 import express.atc.backend.db.entity.AuthSmsEntity;
 import express.atc.backend.db.repository.AuthSmsRepository;
-import express.atc.backend.dto.AuthSmsDto;
-import express.atc.backend.dto.JwtAuthenticationResponse;
-import express.atc.backend.dto.LoginDto;
-import express.atc.backend.dto.ValidateSmsDto;
+import express.atc.backend.dto.*;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.mapper.UserDetailMapper;
 import express.atc.backend.service.AuthService;
@@ -98,6 +95,11 @@ public class AuthServiceImpl implements AuthService {
                 .token(jwt.generateToken(userDetailMapper.toUserDetail(user)))
                 .isFull(user.isFull())
                 .build();
+    }
+
+    @Override
+    public UserDto registration(RegistrationDto registration) {
+        return null;
     }
 
     private String makeCodeForPhone() {

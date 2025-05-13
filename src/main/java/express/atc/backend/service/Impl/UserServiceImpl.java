@@ -123,14 +123,6 @@ public class UserServiceImpl implements UserService {
         return returnFullUserInfo(usersRepository.save(entity));
     }
 
-    @Override
-    public UserDto changeLogin(String userPhone, String login) {
-        UserEntity entity = getUserByPhone(userPhone)
-                .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND));
-        entity.setLogin(login);
-        return returnFullUserInfo(usersRepository.save(entity));
-    }
-
     private Optional<UserEntity> getUserByPhone(String phone) {
         return usersRepository.findByPhone(phone);
     }

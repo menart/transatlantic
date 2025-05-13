@@ -5,7 +5,6 @@ import express.atc.backend.dto.LanguageDto;
 import express.atc.backend.dto.LoginDto;
 import express.atc.backend.dto.UserDto;
 import express.atc.backend.enums.Language;
-import jakarta.validation.Valid;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.Set;
@@ -29,6 +28,4 @@ public interface UserService {
     UserDto authenticate(LoginDto login);
 
     UserDto changePassword(String userPhone, ChangePasswordDto changePassword);
-
-    UserDto changeLogin(String userPhone, String login);
 }
