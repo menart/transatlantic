@@ -5,7 +5,6 @@ import express.atc.backend.dto.LanguageDto;
 import express.atc.backend.dto.LoginDto;
 import express.atc.backend.dto.UserDto;
 import express.atc.backend.enums.Language;
-import jakarta.validation.Valid;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 import java.util.Set;

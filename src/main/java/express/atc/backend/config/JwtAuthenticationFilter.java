@@ -1,5 +1,8 @@
 package express.atc.backend.config;
 
+import express.atc.backend.dto.RequestInfo;
+import express.atc.backend.dto.UserDto;
+import express.atc.backend.enums.Language;
 import express.atc.backend.mapper.UserDetailMapper;
 import express.atc.backend.service.JwtService;
 import express.atc.backend.service.UserService;
@@ -20,8 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-import static express.atc.backend.Constants.AUTH_HEADER_NAME;
-import static express.atc.backend.Constants.BEARER_PREFIX;
+import static express.atc.backend.Constants.*;
 
 @Component
 @RequiredArgsConstructor
@@ -29,6 +31,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserService userService;
     private final UserDetailMapper userDetailMapper;
+    private final RequestInfo requestInfo;
 
     @Override
     protected void doFilterInternal(
@@ -39,6 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // Получаем токен из заголовка
         var authHeader = request.getHeader(AUTH_HEADER_NAME);
+        var langHeader = request.getHeader(LANG_HEADER_NAME);
         if (StringUtils.isEmpty(authHeader) || !StringUtils.startsWith(authHeader, BEARER_PREFIX)) {
             filterChain.doFilter(request, response);
             return;
@@ -49,7 +53,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         var phone = jwtService.extractPhone(jwt);
 
         if (StringUtils.isNotEmpty(phone) && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailMapper.toUserDetail(userService.findUserByPhone(phone));
+            UserDto userDto = userService.findUserByPhone(phone);
+            UserDetails userDetails = userDetailMapper.toUserDetail(userDto);
 
             // Если токен валиден, то аутентифицируем пользователя
             if (jwtService.isTokenValid(jwt, userDetails)) {
@@ -64,6 +69,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 context.setAuthentication(authToken);
                 SecurityContextHolder.setContext(context);
+                requestInfo.setUser(userDto);
+                requestInfo.setLanguage(langHeader == null ? userDto.getLanguage() : Language.getLanguage(langHeader));
             }
         }
         filterChain.doFilter(request, response);
