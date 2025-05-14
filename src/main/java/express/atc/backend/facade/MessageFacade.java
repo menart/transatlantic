@@ -1,6 +1,8 @@
 package express.atc.backend.facade;
 
+import express.atc.backend.enums.TrackingStatus;
+
 public interface MessageFacade {
 
-    boolean send(String phone, String message);
+    void sendTrackingInfo(String userPhone, TrackingStatus status, String trackNumber, String marketplace);
 }
