@@ -31,13 +31,13 @@ public class CfApiServiceImpl implements CfApiService {
     private final WebClient cfApiWebClient;
     private final ObjectMapper objectMapper;
 
-    public Boolean changeStatusToCargoflow(String trackingNumber){
+    public Boolean changeStatusToCargoflow(String trackingNumber, OrderStatus status) {
         var date = LocalDateTime.now();
         ZoneId zone = ZoneId.of("Europe/Moscow");
         ZonedDateTime zonedDateTime = date.atZone(zone);
         var msg = new ChangeStatusDto(
                 trackingNumber,
-                OrderStatus.CUSTOMS_FEE_PAID,
+                status,
                 "",
                 date.atZone(zone).toLocalDateTime(),
                 zonedDateTime.getOffset().toString(),

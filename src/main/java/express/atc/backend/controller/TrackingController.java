@@ -146,7 +146,7 @@ public class TrackingController extends PrivateController {
     @PostMapping(path = "/upload/{trackNumber}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public boolean uploadDocuments(@RequestParam("file") MultipartFile file,
                                    @Parameter(description = "Трек-номер заказа") @PathVariable String trackNumber) {
-        return trackingService.uploadFile(file, trackNumber);
+        return trackingService.uploadOneFile(file, trackNumber);
     }
 
     @ApiResponses(value = {
