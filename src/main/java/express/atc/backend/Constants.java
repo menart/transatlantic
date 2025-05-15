@@ -3,6 +3,7 @@ package express.atc.backend;
 public class Constants {
     public static final String BEARER_PREFIX = "Bearer ";
     public static final String AUTH_HEADER_NAME = "Authorization";
+    public static final String LANG_HEADER_NAME = "Current-Language";
     public static final String LOCATE_CURRENCY = "RUB";
     public static final long GRAMS_PER_KG = 1000;
 
@@ -35,8 +36,15 @@ public class Constants {
     public static final String MESSAGE_SMALL_INTERVAL = "Слишком маленький интервал запроса";
     //Send message
     public static final String SMS_CODE_MESSAGE = "Код: %s для входа в личный кабинет https://atc.express/";
-    public static final String SMS_NEED_PAYMENT = "Заказ %s ожидает оплаты, https://atc.express/";
-    public static final String SMS_NEED_DOCUMENT = "По заказу %s необходимо загрузить документы, https://atc.express/";
+    public static final String SMS_NEED_PAYMENT = "Уважаемый клиент!\n" +
+            "Для получения экспресс-груза %s, приобретённого в %s, " +
+            "необходимо оплатить таможенные пошлины. Оплата доступна на сайте %s в разделе заказы";
+    public static final String SMS_NEED_DOCUMENT = "Уважаемый клиент!\n" +
+            "Для получения экспресс-груза %s, приобретённого в %s, Вам необходимо предоставить документы и сведения на сайте %s.";
+
+    //Email title
+    public static final String EMAIL_TITLE_NEED_DOCUMENT = "Предоставление документов для получения экспресс-груза  %s,  приобретённого в %s";
+    public static final String EMAIL_TITLE_NEED_PAYMENT = "Оплата таможенных пошлин по экспресс-грузу %s, приобретённого в %s";
 
     public static final String EMAIL_SEND_EXCEPTION = "Ошибка отправки почты на %s";
 }
