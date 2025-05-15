@@ -16,6 +16,6 @@ public interface UsersRepository extends CrudRepository<UserEntity, Long> {
     @Query("select phone from UserEntity")
     Set<String> findBatchPhone(int batchSize);
 
-    @Query("from UserEntity where login ilike :login or phone = :login")
+    @Query("from UserEntity where email ilike :login or phone = :login")
     Optional<UserEntity> findByLogin(String login);
 }

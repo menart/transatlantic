@@ -124,3 +124,24 @@ databaseChangeLog:
               - column:
                   name: password
                   type: varchar(72)
+  - changeSet:
+      id: users:change-04
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: WARN
+        - not:
+            - tableExists:
+                tableName: users
+      changes:
+        - dropColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: login
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: confirmation_email
+                  type: boolean
+                  defaultValueBoolean:  false

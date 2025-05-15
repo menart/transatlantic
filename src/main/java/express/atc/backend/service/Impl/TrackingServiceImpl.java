@@ -179,7 +179,7 @@ public class TrackingServiceImpl implements TrackingService {
         messageFacade.sendTrackingInfo(
                 entity.getUserPhone(),
                 entity.setStatus(statusModel != null ? statusModel.mapStatus() : NEED_DOCUMENT).getStatus(),
-                entity.getTrackNumber(),
+                entity.getOrderNumber(),
                 entity.getMarketplace()
         );
     }
@@ -227,7 +227,7 @@ public class TrackingServiceImpl implements TrackingService {
             messageFacade.sendTrackingInfo(
                     entity.getUserPhone(),
                     entity.getStatus(),
-                    entity.getTrackNumber(),
+                    entity.getOrderNumber(),
                     entity.getMarketplace());
             trackingRepository.save(entity);
         }

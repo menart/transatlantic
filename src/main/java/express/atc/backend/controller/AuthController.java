@@ -1,6 +1,7 @@
 package express.atc.backend.controller;
 
 import express.atc.backend.dto.*;
+import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.service.AuthService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -30,7 +31,7 @@ public class AuthController {
     @Value("${sms-aero.enable}")
     private boolean disabledGetSms;
 
-    @Operation(summary = "Отправить сгенирированный код в смс пользователю")
+    @Operation(summary = "Отправить сгенерированный код в смс пользователю")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
                     description = "Ответ количество секунд, через которые можно повторно отправить SMS",
@@ -50,7 +51,7 @@ public class AuthController {
     @Operation(summary = "Проверка СМС")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Сгенирированый JWT токен",
+                    description = "Сгенерированный JWT токен",
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = JwtAuthenticationResponse.class))}),
             @ApiResponse(responseCode = "400",
@@ -75,8 +76,60 @@ public class AuthController {
                 : ResponseEntity.ok(authService.getSms(phone));
     }
 
+    @Operation(summary = "Аутентификация по email/номеру телефона и паролю")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Сгенерированный JWT токен",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = JwtAuthenticationResponse.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "401",
+                    description = " Ошибка авторизации, неверный код",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
     @PostMapping("/auth")
     public JwtAuthenticationResponse auth(@RequestBody @Valid LoginDto login) throws AuthSmsException {
         return authService.login(login);
+    }
+
+    @Operation(summary = "Регистрация пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Сгенерированный JWT токен",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = JwtAuthenticationResponse.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+            @ApiResponse(responseCode = "401",
+                    description = " Ошибка авторизации, неверный код",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
+    @PostMapping("/registration")
+    public JwtAuthenticationResponse registration(@RequestBody @Valid RegistrationDto registration) throws ApiException {
+        return authService.registration(registration);
+    }
+
+    @Operation(summary = "Проверить номер телефона пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Ответ количество секунд, через которые можно повторно отправить SMS",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Integer.class))}),
+            @ApiResponse(responseCode = "400",
+                    description = "Невалидные параметры в запросе",
+                    content = {@Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDto.class))}),
+    })
+    @PostMapping("/check-phone")
+    public int checkUserPhone(@RequestBody @Valid AuthSmsDto authSmsDto) throws AuthSmsException {
+        String ipAddress = request.getRemoteAddr();
+        return authService.checkUserPhone(ipAddress, authSmsDto);
     }
 }

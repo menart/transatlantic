@@ -16,6 +16,7 @@ public class Constants {
 
     //Exception message
     public static final String USER_NOT_FOUND = "Пользователь не найден";
+    public static final String USER_ALREADY_REGISTERED = "Пользователь уже зарегистрирован";
     public static final String PASSWORD_NOT_CONFIRMED = "Пароли не совпадают";
     public static final String TRACK_NOT_FOUND = "трек номер не найден";
     public static final String ORDER_NOT_FOUND = "Заказ не найден";
