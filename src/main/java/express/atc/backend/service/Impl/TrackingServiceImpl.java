@@ -9,15 +9,14 @@ import express.atc.backend.dto.*;
 import express.atc.backend.enums.TrackingStatus;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.TrackNotFoundException;
+import express.atc.backend.facade.MessageFacade;
 import express.atc.backend.integration.cargoflow.service.CargoflowService;
 import express.atc.backend.integration.cfapi.service.CfApiService;
 import express.atc.backend.integration.robokassa.service.RobokassaService;
 import express.atc.backend.mapper.TrackingMapper;
 import express.atc.backend.mapper.TrackingRouteMapper;
-import express.atc.backend.service.MessageService;
 import express.atc.backend.service.StatusService;
 import express.atc.backend.service.TrackingService;
-import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,8 +31,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static express.atc.backend.Constants.*;
-import static express.atc.backend.enums.TrackingStatus.ACTIVE;
-import static express.atc.backend.enums.TrackingStatus.NEED_DOCUMENT;
+import static express.atc.backend.enums.TrackingStatus.*;
+import static express.atc.backend.integration.cfapi.enums.OrderStatus.CUSTOMS_FEE_PAID;
+import static express.atc.backend.integration.cfapi.enums.OrderStatus.CUSTOMS_ID_COLLECTED;
 
 @Slf4j
 @Service
@@ -46,15 +46,15 @@ public class TrackingServiceImpl implements TrackingService {
     private final TrackingMapper trackingMapper;
     private final TrackingRouteMapper trackingRouterMapper;
     private final CalcCustomsFee calcCustomsFee;
-    private final UserService userService;
+    private final RequestInfo requestInfo;
     private final RobokassaService robokassaService;
     private final StatusService statusService;
-    private final MessageService messageService;
+    private final MessageFacade messageFacade;
     private final CfApiService cfApiService;
 
     @Override
-    public TrackingDto find(String number, String userPhone) throws TrackNotFoundException {
-        UserDto user = userService.findUserByPhone(userPhone);
+    public TrackingDto find(String number) throws TrackNotFoundException {
+        UserDto user = requestInfo.getUser();
         var dto = findTrack(number);
         if (user == null || !dto.getPhone().equals(user.getPhone())) {
             dto.setGoods(null);
@@ -63,14 +63,15 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public CalculateDto calc(String trackNumber, String userPhone) throws TrackNotFoundException {
-        UserDto user = userService.findUserByPhone(userPhone);
+    public CalculateDto calc(String trackNumber) throws TrackNotFoundException {
+        UserDto user = requestInfo.getUser();
         var dto = findTrack(trackNumber);
         return calcTrack(dto.getGoods(), dto.getOrderId(), dto.getTrackNumber(), user);
     }
 
     @Override
-    public TrackingPageDto list(Integer page, int count, String userPhone, TrackingStatus filter) {
+    public TrackingPageDto list(Integer page, int count, TrackingStatus filter) {
+        String userPhone = requestInfo.getUser().getPhone();
         updateListTracking(userPhone);
         Pageable pageable = PageRequest.of(page, count);
         return new TrackingPageDto(
@@ -82,15 +83,30 @@ public class TrackingServiceImpl implements TrackingService {
                 page,
                 (int) Math.ceil(trackingRepository.countByUserPhone(userPhone) / (double) count),
                 count,
-                need(userPhone)
+                need()
         );
     }
 
-    public boolean uploadFile(MultipartFile file, String trackNumber) {
-        var logisticsOrderCode = trackingRepository.findByTrack(trackNumber)
-                .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST))
-                .getLogisticsOrderCode();
-        cargoflowService.uploadFile(file, logisticsOrderCode);
+    public boolean uploadOneFile(MultipartFile file, String trackNumber) {
+        var entity = trackingRepository.findByTrack(trackNumber)
+                .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
+        cargoflowService.uploadFile(file, entity.getLogisticsOrderCode());
+        if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber(), CUSTOMS_ID_COLLECTED)) {
+            updateRoute(entity);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean uploadFiles(MultipartFile[] files, String trackNumber) {
+        var entity = trackingRepository.findByTrack(trackNumber)
+                .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
+        for (var file : files) {
+            cargoflowService.uploadFile(file, entity.getLogisticsOrderCode());
+        }
+        if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber(), CUSTOMS_ID_COLLECTED)) {
+            updateRoute(entity);
+        }
         return true;
     }
 
@@ -108,10 +124,11 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public boolean paymentConfirmation(Long orderId, String userPhone) {
+    public boolean paymentConfirmation(Long orderId) {
+        String userPhone = requestInfo.getUser().getPhone();
         var entity = trackingRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
-        if (userPhone.equals(entity.getUserPhone()) && TrackingStatus.NEED_PAYMENT.equals(entity.getStatus())) {
+        if (userPhone.equals(entity.getUserPhone()) && NEED_PAYMENT.equals(entity.getStatus())) {
             entity.setStatus(TrackingStatus.PAYMENT_CONFIRMATION);
             return true;
         }
@@ -132,7 +149,7 @@ public class TrackingServiceImpl implements TrackingService {
             throw new ApiException(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
         String request = robokassaService.paymentResult(outSum, orderId, trackingNumber, checkSum);
-        if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber())) {
+        if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber(), CUSTOMS_FEE_PAID)) {
             updateRoute(entity);
         }
         return request;
@@ -145,8 +162,9 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public TrackingNeedingDto need(String userPhone) {
-        List<String> needPay = trackingRepository.findTrackNumberByNeed(userPhone, TrackingStatus.NEED_PAYMENT);
+    public TrackingNeedingDto need() {
+        String userPhone = requestInfo.getUser().getPhone();
+        List<String> needPay = trackingRepository.findTrackNumberByNeed(userPhone, NEED_PAYMENT);
         List<String> needDocument = trackingRepository.findTrackNumberByNeed(userPhone, NEED_DOCUMENT);
         return new TrackingNeedingDto(needPay, needDocument);
     }
@@ -158,7 +176,12 @@ public class TrackingServiceImpl implements TrackingService {
                 .orElseGet(() -> trackingRepository.save(findByCargoFlow(orderCode)));
         updateRoute(entity);
         var statusModel = statusService.getStatus(rawStatus);
-        checkStatus(entity.setStatus(statusModel != null ? statusModel.mapStatus() : NEED_DOCUMENT));
+        messageFacade.sendTrackingInfo(
+                entity.getUserPhone(),
+                entity.setStatus(statusModel != null ? statusModel.mapStatus() : NEED_DOCUMENT).getStatus(),
+                entity.getTrackNumber(),
+                entity.getMarketplace()
+        );
     }
 
     private TrackingDto findTrack(String number) throws TrackNotFoundException {
@@ -200,20 +223,15 @@ public class TrackingServiceImpl implements TrackingService {
         }
         var lastRoute = new TreeSet<>(entity.getRoutes()).last();
         if (!Objects.equals(maxRouteId, lastRoute.getRouteId())) {
-            checkStatus(entity);
             entity.setStatus(statusService.getStatus(lastRoute.getStatus()).mapStatus());
+            messageFacade.sendTrackingInfo(
+                    entity.getUserPhone(),
+                    entity.getStatus(),
+                    entity.getTrackNumber(),
+                    entity.getMarketplace());
             trackingRepository.save(entity);
         }
         return entity;
-    }
-
-    private void checkStatus(TrackingEntity entity) {
-        if (entity.getStatus().equals(TrackingStatus.NEED_PAYMENT)) {
-            messageService.send(entity.getUserPhone(), String.format(SMS_NEED_PAYMENT, entity.getTrackNumber()));
-        }
-        if (entity.getStatus().equals(NEED_DOCUMENT)) {
-            messageService.send(entity.getUserPhone(), String.format(SMS_NEED_DOCUMENT, entity.getTrackNumber()));
-        }
     }
 
     private TrackingEntity findByCargoFlow(String number) throws TrackNotFoundException {

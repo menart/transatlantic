@@ -1,9 +1,6 @@
 package express.atc.backend.controller;
 
-import express.atc.backend.dto.AuthSmsDto;
-import express.atc.backend.dto.ErrorResponseDto;
-import express.atc.backend.dto.JwtAuthenticationResponse;
-import express.atc.backend.dto.ValidateSmsDto;
+import express.atc.backend.dto.*;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.service.AuthService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -76,5 +73,10 @@ public class AuthController {
         return disabledGetSms
                 ? ResponseEntity.notFound().build()
                 : ResponseEntity.ok(authService.getSms(phone));
+    }
+
+    @PostMapping("/auth")
+    public JwtAuthenticationResponse auth(@RequestBody @Valid LoginDto login) throws AuthSmsException {
+        return authService.login(login);
     }
 }

@@ -12,23 +12,24 @@ import java.util.Set;
 
 public interface TrackingService {
 
-    TrackingDto find(String number, String userPhone) throws TrackNotFoundException;
+    TrackingDto find(String number) throws TrackNotFoundException;
 
-    CalculateDto calc(String trackNumber, String userPhone);
+    CalculateDto calc(String trackNumber);
 
-    TrackingPageDto list(Integer page, int count, String userPhone, TrackingStatus filter);
+    TrackingPageDto list(Integer page, int count, TrackingStatus filter);
 
-    boolean uploadFile(MultipartFile file, String trackNumber);
+    boolean uploadOneFile(MultipartFile file, String trackNumber);
+    boolean uploadFiles(MultipartFile[] file, String trackNumber);
 
     Set<TrackingDto> getAllTrackByPhone(String phoneNumber);
 
-    TrackingNeedingDto need(String userPhone);
+    TrackingNeedingDto need();
 
     void updateByOrderCode(String orderCode, String status);
 
     void updateListTracking(String userPhone);
 
-    boolean paymentConfirmation(Long orderId, String userPhone);
+    boolean paymentConfirmation(Long orderId);
 
     String paymentControl(String outSum, Long orderId, String trackingNumber, String checkSum);
 }
