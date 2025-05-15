@@ -118,7 +118,7 @@ public class CalcCustomsFeeImpl implements CalcCustomsFee {
         log.info("weigth: {}", calcWeight);
         var calcPrice = calcByPrice(
                 convertToCalcCurrency(ordersDto.getCurrency(),
-                        new BigDecimal(ordersDto.getPrice())
+                        new BigDecimal(ordersDto.getPriceModel().getAmount())
                 )
         );
         log.info("price: {}", calcPrice);

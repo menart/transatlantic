@@ -2,10 +2,7 @@ package express.atc.backend.service.Impl;
 
 import express.atc.backend.db.entity.UserEntity;
 import express.atc.backend.db.repository.UsersRepository;
-import express.atc.backend.dto.ChangePasswordDto;
-import express.atc.backend.dto.LanguageDto;
-import express.atc.backend.dto.LoginDto;
-import express.atc.backend.dto.UserDto;
+import express.atc.backend.dto.*;
 import express.atc.backend.enums.Language;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.mapper.UserDetailMapper;
@@ -121,6 +118,18 @@ public class UserServiceImpl implements UserService {
         }
         entity.setPassword(passwordEncoder.encode(changePassword.password()));
         return returnFullUserInfo(usersRepository.save(entity));
+    }
+
+    @Override
+    public UserDto registrationUser(RegistrationDto registration) {
+        var user = getUserByPhone(registration.phone())
+                .orElseGet(() -> createNewUser(registration.phone()))
+                .setPhone(registration.phone())
+                .setRole(ROLE_USER)
+                .setEmail(registration.email())
+                .setEnable(true)
+                .setPassword(passwordEncoder.encode(registration.password()));
+        return userMapper.toDto(usersRepository.save(user));
     }
 
     private Optional<UserEntity> getUserByPhone(String phone) {

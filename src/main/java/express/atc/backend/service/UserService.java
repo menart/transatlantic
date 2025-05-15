@@ -1,9 +1,6 @@
 package express.atc.backend.service;
 
-import express.atc.backend.dto.ChangePasswordDto;
-import express.atc.backend.dto.LanguageDto;
-import express.atc.backend.dto.LoginDto;
-import express.atc.backend.dto.UserDto;
+import express.atc.backend.dto.*;
 import express.atc.backend.enums.Language;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -28,4 +25,6 @@ public interface UserService {
     UserDto authenticate(LoginDto login);
 
     UserDto changePassword(String userPhone, ChangePasswordDto changePassword);
+
+    UserDto registrationUser(RegistrationDto registration);
 }

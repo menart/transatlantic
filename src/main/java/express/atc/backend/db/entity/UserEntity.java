@@ -30,8 +30,6 @@ public class UserEntity {
     @Column
     private String phone;
     @Column
-    private String login;
-    @Column
     @Enumerated(EnumType.STRING)
     private UserRole role;
     @Column

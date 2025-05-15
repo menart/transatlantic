@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 public interface AuthService {
 
     int makeCode(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException;
+    int checkUserPhone(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException;
 
     JwtAuthenticationResponse validateCode(ValidateSmsDto validateSms) throws AuthSmsException;
 
@@ -16,5 +17,5 @@ public interface AuthService {
 
     JwtAuthenticationResponse login(LoginDto login) throws AuthSmsException;
 
-    UserDto registration(@Valid RegistrationDto registration);
+    JwtAuthenticationResponse registration(@Valid RegistrationDto registration);
 }

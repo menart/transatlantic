@@ -1,10 +1,7 @@
 package express.atc.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.AssertTrue;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import static express.atc.backend.Constants.*;
 
@@ -22,6 +19,10 @@ public record RegistrationDto(
                 "Согласие \"Публичной офертой о заключении договора на предоставление " +
                         "услуг таможенного представительства для физических лиц\"")
         @AssertTrue(message = DISAGREE)
-        Boolean agree
+        Boolean agree,
+        @Schema(description = "Код полученный в SMS")
+        @NotNull
+        @Pattern(regexp = "[0-9]{1,10}", message = VALIDATE_CODE)
+        String code
 ) {
 }

@@ -10,6 +10,7 @@ import express.atc.backend.integration.cargoflow.dto.Order.OrderGood;
 import express.atc.backend.integration.cargoflow.dto.Order.OrderParcel;
 import express.atc.backend.integration.cargoflow.dto.Order.OrderPropertyDto;
 import express.atc.backend.integration.cargoflow.dto.OrderHistory;
+import express.atc.backend.model.MoneyModel;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -32,12 +33,15 @@ public interface CargoflowMapper {
             expression = "java(toOrders(order.properties().parcel()))")
     TrackingDto toTracking(CargoflowOrder order);
 
-    @Mapping(target = "price", source = "price")
+    @Mapping(target = "priceModel", expression = "java(toMoneyModel(parcel.priceCurrency(), parcel.price()))")
     @Mapping(target = "weight", source = "suggestedWeight")
     @Mapping(target = "currency", source = "priceCurrency")
     @Mapping(target = "items",
             expression = "java(toListItems(parcel.goodsList()))")
     OrdersDto toOrders(OrderParcel parcel);
+
+    @Mapping(target = "priceModel", expression = "java(toMoneyModel(order.priceCurrency(), order.price()))")
+    OrderDto toOrder(OrderGood order);
 
     List<OrderDto> toListItems(List<OrderGood> goods);
 
@@ -69,4 +73,7 @@ public interface CargoflowMapper {
                 : property.receiver().address().detailAddress();
     }
 
+    default MoneyModel toMoneyModel(String currency, Long price){
+        return new MoneyModel(currency, price);
+    }
 }
