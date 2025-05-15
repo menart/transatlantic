@@ -32,6 +32,8 @@ import java.util.stream.Collectors;
 
 import static express.atc.backend.Constants.*;
 import static express.atc.backend.enums.TrackingStatus.*;
+import static express.atc.backend.integration.cfapi.enums.OrderStatus.CUSTOMS_FEE_PAID;
+import static express.atc.backend.integration.cfapi.enums.OrderStatus.CUSTOMS_ID_COLLECTED;
 
 @Slf4j
 @Service
@@ -85,21 +87,25 @@ public class TrackingServiceImpl implements TrackingService {
         );
     }
 
-    public boolean uploadFile(MultipartFile file, String trackNumber) {
-        var logisticsOrderCode = trackingRepository.findByTrack(trackNumber)
-                .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST))
-                .getLogisticsOrderCode();
-        cargoflowService.uploadFile(file, logisticsOrderCode);
+    public boolean uploadOneFile(MultipartFile file, String trackNumber) {
+        var entity = trackingRepository.findByTrack(trackNumber)
+                .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
+        cargoflowService.uploadFile(file, entity.getLogisticsOrderCode());
+        if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber(), CUSTOMS_ID_COLLECTED)) {
+            updateRoute(entity);
+        }
         return true;
     }
 
     @Override
     public boolean uploadFiles(MultipartFile[] files, String trackNumber) {
-        var logisticsOrderCode = trackingRepository.findByTrack(trackNumber)
-                .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST))
-                .getLogisticsOrderCode();
+        var entity = trackingRepository.findByTrack(trackNumber)
+                .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
         for (var file : files) {
-            cargoflowService.uploadFile(file, logisticsOrderCode);
+            cargoflowService.uploadFile(file, entity.getLogisticsOrderCode());
+        }
+        if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber(), CUSTOMS_ID_COLLECTED)) {
+            updateRoute(entity);
         }
         return true;
     }
@@ -143,7 +149,7 @@ public class TrackingServiceImpl implements TrackingService {
             throw new ApiException(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
         String request = robokassaService.paymentResult(outSum, orderId, trackingNumber, checkSum);
-        if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber())) {
+        if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber(), CUSTOMS_FEE_PAID)) {
             updateRoute(entity);
         }
         return request;
