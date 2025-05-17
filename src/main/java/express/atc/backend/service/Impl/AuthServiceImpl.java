@@ -12,6 +12,7 @@ import express.atc.backend.service.MessageService;
 import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -40,11 +41,13 @@ public class AuthServiceImpl implements AuthService {
     private int COUNT_NUMBER_CODE;
     @Value(value = "${auth.sms_code_live}")
     private int SMS_CODE_LIVE;
+    @Value(value="${project.url}")
+    private String PROJECT_URL;
 
     @Override
     public int makeCode(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException {
         var user = userService.findUserByPhone(authSmsDto.phone());
-        if(user != null && user.getEmail() != null) {
+        if(user != null && !Strings.isBlank(user.getEmail())) {
             return makeCodeSms(ipAddress, authSmsDto);
         } else {
             throw new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -65,14 +68,14 @@ public class AuthServiceImpl implements AuthService {
                 .createdAt(LocalDateTime.now())
                 .build();
         authSmsRepository.save(authSmsEntity);
-        messageService.send(authSmsDto.phone(), String.format(SMS_CODE_MESSAGE, code));
+        messageService.send(authSmsDto.phone(), String.format(SMS_CODE_MESSAGE, code, PROJECT_URL));
         return TIME_HOLD_SMS;
     }
 
     @Override
     public int checkUserPhone(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException {
         var user = userService.findUserByPhone(authSmsDto.phone());
-        if (user == null || user.getEmail() == null) {
+        if (user == null || Strings.isBlank(user.getEmail())) {
             return makeCodeSms(ipAddress, authSmsDto);
         } else {
             throw new ApiException(USER_ALREADY_REGISTERED, HttpStatus.BAD_REQUEST);

@@ -20,8 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.Set;
 
-import static express.atc.backend.Constants.PASSWORD_NOT_CONFIRMED;
-import static express.atc.backend.Constants.USER_NOT_FOUND;
+import static express.atc.backend.Constants.*;
 import static express.atc.backend.enums.UserRole.ROLE_USER;
 
 @Service
@@ -106,7 +105,7 @@ public class UserServiceImpl implements UserService {
     public UserDto authenticate(LoginDto login) {
         return returnFullUserInfo(usersRepository.findByLogin(login.login())
                 .filter(user -> passwordEncoder.matches(login.password(), user.getPassword()))
-                .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND)));
+                .orElseThrow(() -> new ApiException(USER_NOT_FOUND_OR_NOT_VALID_PASSWORD, HttpStatus.NOT_FOUND)));
     }
 
     @Override
@@ -130,6 +129,14 @@ public class UserServiceImpl implements UserService {
                 .setEnable(true)
                 .setPassword(passwordEncoder.encode(registration.password()));
         return userMapper.toDto(usersRepository.save(user));
+    }
+
+    @Override
+    public Boolean dropUser(String userPhone) {
+        var user = usersRepository.findByPhone(userPhone)
+                .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+        usersRepository.delete(user);
+        return Boolean.TRUE;
     }
 
     private Optional<UserEntity> getUserByPhone(String phone) {

@@ -14,7 +14,7 @@ public record RegistrationDto(
         @Email(message = EMAIL_NOT_VALID)
         String email,
         String password,
-        String conformation,
+        String confirmation,
         @Schema(description =
                 "Согласие \"Публичной офертой о заключении договора на предоставление " +
                         "услуг таможенного представительства для физических лиц\"")

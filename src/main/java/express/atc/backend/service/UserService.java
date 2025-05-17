@@ -27,4 +27,6 @@ public interface UserService {
     UserDto changePassword(String userPhone, ChangePasswordDto changePassword);
 
     UserDto registrationUser(RegistrationDto registration);
+
+    Boolean dropUser(String userPhone);
 }
