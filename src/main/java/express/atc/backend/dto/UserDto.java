@@ -65,12 +65,8 @@ public class UserDto {
     private String email;
     @Schema(description = "Язык приложения для пользователя")
     private Language language;
-    @Schema(description =
-            "Согласие \"Публичной офертой о заключении договора на предоставление " +
-                    "услуг таможенного представительства для физических лиц\"")
-    @AssertTrue(message = DISAGREE)
-    @Builder.Default
-    private boolean agree = true;
     @Builder.Default
     private boolean full = true;
+    @Schema(description = "Подтвержден email")
+    private boolean confirmationEmail;
 }
