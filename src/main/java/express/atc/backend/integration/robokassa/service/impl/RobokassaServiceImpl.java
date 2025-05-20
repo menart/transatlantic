@@ -30,6 +30,8 @@ public class RobokassaServiceImpl implements RobokassaService {
 
     private final WebClient robokassaWebClient;
 
+    public static final String PARAM_ORDER_NUMBER = "Shp_OrderNumber";
+
     @Value("${robokassa.merchant_login}")
     private String merchantLogin;
     @Value("${robokassa.description}")
@@ -85,10 +87,10 @@ public class RobokassaServiceImpl implements RobokassaService {
     }
 
     @Override
-    public String paymentResult(String outSum, Long orderId, String trackingNumber, String checkSum) {
+    public String paymentResult(String outSum, Long orderId, String orderNumber, String checkSum) {
         try {
             String checksumVerify = outSum + ":" + orderId.toString() + ":" + passwordResult
-                    + ":Shp_TrackingNumber=" + trackingNumber;
+                    + ":"+PARAM_ORDER_NUMBER+"=" + orderNumber;
             log.info("checksumVerify: {}", checksumVerify);
             MessageDigest md = MessageDigest.getInstance(algorithm);
             md.update(checksumVerify.getBytes());
@@ -112,7 +114,7 @@ public class RobokassaServiceImpl implements RobokassaService {
                 .description(description)
                 .invId(payment.getOrderId())
                 .email(payment.getEmail())
-                .trackingNumber(payment.getTrackingNumber())
+                .orderNumber(payment.getOrderNumber())
                 .receipt(ReceiptDto.builder()
                         .items(payment.getItems().stream()
                                 .map(this::mappingItem)
@@ -142,7 +144,7 @@ public class RobokassaServiceImpl implements RobokassaService {
                     + ":" + successUrl + ":" + successMethod
                     + ":" + failUrl + ":" + failMethod
                     + ":" + password
-                    + ":Shp_TrackingNumber=" + dto.getTrackingNumber();
+                    + ":"+PARAM_ORDER_NUMBER+"=" + dto.getOrderNumber();
             log.info(encodingStr);
             md.update(encodingStr.getBytes());
             return DatatypeConverter

@@ -12,6 +12,6 @@ public class PaymentDto {
     private List<PaymentItemDto> items;
     private long orderId;
     private long amount;
-    private String trackingNumber;
+    private String orderNumber;
     private String email;
 }

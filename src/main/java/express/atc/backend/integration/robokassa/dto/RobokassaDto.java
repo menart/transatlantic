@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriBuilder;
 import org.yaml.snakeyaml.util.UriEncoder;
 
+import static express.atc.backend.integration.robokassa.service.impl.RobokassaServiceImpl.PARAM_ORDER_NUMBER;
+
 @Slf4j
 @Data
 @Builder
@@ -21,7 +23,7 @@ public class RobokassaDto {
     private String description;
     private Long invId;
     private String email;
-    private String trackingNumber;
+    private String orderNumber;
     private ReceiptDto receipt;
     private String signatureValue;
     private Integer isTest;
@@ -32,7 +34,7 @@ public class RobokassaDto {
         builder.queryParam("Description", description);
         builder.queryParam("InvId", invId);
         builder.queryParam("Email", email);
-        builder.queryParam("Shp_TrackingNumber", trackingNumber);
+        builder.queryParam(PARAM_ORDER_NUMBER, orderNumber);
         builder.queryParam("Receipt", UriEncoder.encode(receipt.toString()));
         if (isTest != null && isTest == 1) {
             builder.queryParam("IsTest", "1");

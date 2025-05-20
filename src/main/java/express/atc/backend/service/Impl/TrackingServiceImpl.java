@@ -66,7 +66,7 @@ public class TrackingServiceImpl implements TrackingService {
     public CalculateDto calc(String trackNumber) throws TrackNotFoundException {
         UserDto user = requestInfo.getUser();
         var dto = findTrack(trackNumber);
-        return calcTrack(dto.getGoods(), dto.getOrderId(), dto.getTrackNumber(), user);
+        return calcTrack(dto.getGoods(), dto.getOrderId(), dto.getOrderNumber(), user);
     }
 
     @Override
@@ -136,10 +136,10 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public String paymentControl(String outSum, Long orderId, String trackingNumber, String checkSum) {
+    public String paymentControl(String outSum, Long orderId, String orderNumber, String checkSum) {
         var entity = trackingRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
-        var calc = calcTrack(entity.getGoods(), entity.getOrderId(), trackingNumber, null);
+        var calc = calcTrack(entity.getGoods(), entity.getOrderId(), orderNumber, null);
         try {
             if (!calc.getPaid().equals((long) (Double.parseDouble(outSum) * 100))) {
                 throw new ApiException(PAYMENT_NOT_EQUALS, HttpStatus.BAD_REQUEST);
@@ -148,7 +148,7 @@ public class TrackingServiceImpl implements TrackingService {
             log.error("{}", exception.fillInStackTrace());
             throw new ApiException(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        String request = robokassaService.paymentResult(outSum, orderId, trackingNumber, checkSum);
+        String request = robokassaService.paymentResult(outSum, orderId, orderNumber, checkSum);
         if (cfApiService.changeStatusToCargoflow(entity.getTrackNumber(), CUSTOMS_FEE_PAID)) {
             updateRoute(entity);
         }
@@ -164,8 +164,8 @@ public class TrackingServiceImpl implements TrackingService {
     @Override
     public TrackingNeedingDto need() {
         String userPhone = requestInfo.getUser().getPhone();
-        List<String> needPay = trackingRepository.findTrackNumberByNeed(userPhone, NEED_PAYMENT);
-        List<String> needDocument = trackingRepository.findTrackNumberByNeed(userPhone, NEED_DOCUMENT);
+        List<String> needPay = trackingRepository.findOrderNumberByNeed(userPhone, NEED_PAYMENT);
+        List<String> needDocument = trackingRepository.findOrderNumberByNeed(userPhone, NEED_DOCUMENT);
         return new TrackingNeedingDto(needPay, needDocument);
     }
 
@@ -193,10 +193,10 @@ public class TrackingServiceImpl implements TrackingService {
         );
     }
 
-    private CalculateDto calcTrack(OrdersDto goods, long OrderId, String trackingNumber, UserDto user) {
+    private CalculateDto calcTrack(OrdersDto goods, long OrderId, String orderNumber, UserDto user) {
         var calculate = calcCustomsFee.calculate(goods);
         if (calculate != null && user != null) {
-            calculate.setUrl(makePaymentUrl(OrderId, calculate, trackingNumber, user));
+            calculate.setUrl(makePaymentUrl(OrderId, calculate, orderNumber, user));
         }
         return calculate;
     }
@@ -250,7 +250,7 @@ public class TrackingServiceImpl implements TrackingService {
         }
     }
 
-    private String makePaymentUrl(Long orderId, CalculateDto calculate, String trackingNumber, UserDto user) {
+    private String makePaymentUrl(Long orderId, CalculateDto calculate, String orderNumber, UserDto user) {
         List<PaymentItemDto> items = new ArrayList<>();
         items.add(PaymentItemDto.builder()
                 .name(STRING_FEE)
@@ -269,7 +269,7 @@ public class TrackingServiceImpl implements TrackingService {
                 .build());
         var payment = PaymentDto.builder()
                 .orderId(orderId)
-                .trackingNumber(trackingNumber)
+                .orderNumber(orderNumber)
                 .items(items)
                 .email(user.getEmail())
                 .amount(items.stream()
