@@ -16,3 +16,5 @@ databaseChangeLog:
       file: liquibase/changeset/table/feedback.yaml
   - include:
       file: liquibase/changeset/table/statuses.yaml
+  - include:
+      file: liquibase/changeset/table/conformation.yaml

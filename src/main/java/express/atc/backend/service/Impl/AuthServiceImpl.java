@@ -2,10 +2,8 @@ package express.atc.backend.service.Impl;
 
 import express.atc.backend.db.entity.AuthSmsEntity;
 import express.atc.backend.db.repository.AuthSmsRepository;
-import express.atc.backend.dto.AuthSmsDto;
-import express.atc.backend.dto.JwtAuthenticationResponse;
-import express.atc.backend.dto.LoginDto;
-import express.atc.backend.dto.ValidateSmsDto;
+import express.atc.backend.dto.*;
+import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.mapper.UserDetailMapper;
 import express.atc.backend.service.AuthService;
@@ -14,15 +12,16 @@ import express.atc.backend.service.MessageService;
 import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
 
-import static express.atc.backend.Constants.MESSAGE_SMALL_INTERVAL;
-import static express.atc.backend.Constants.SMS_CODE_MESSAGE;
+import static express.atc.backend.Constants.*;
 
 @Service
 @CrossOrigin
@@ -42,9 +41,20 @@ public class AuthServiceImpl implements AuthService {
     private int COUNT_NUMBER_CODE;
     @Value(value = "${auth.sms_code_live}")
     private int SMS_CODE_LIVE;
+    @Value(value="${project.url}")
+    private String PROJECT_URL;
 
     @Override
     public int makeCode(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException {
+        var user = userService.findUserByPhone(authSmsDto.phone());
+        if(user != null && !Strings.isBlank(user.getEmail())) {
+            return makeCodeSms(ipAddress, authSmsDto);
+        } else {
+            throw new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    private int makeCodeSms(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException {
         LocalDateTime timeHoldSms = LocalDateTime.now().minusSeconds(TIME_HOLD_SMS);
         var lastSendSms = authSmsRepository.countByIpaddressAndCreatedAtAfter(ipAddress, timeHoldSms);
         if (lastSendSms > 0) {
@@ -58,8 +68,18 @@ public class AuthServiceImpl implements AuthService {
                 .createdAt(LocalDateTime.now())
                 .build();
         authSmsRepository.save(authSmsEntity);
-        messageService.send(authSmsDto.phone(), String.format(SMS_CODE_MESSAGE, code));
+        messageService.send(authSmsDto.phone(), String.format(SMS_CODE_MESSAGE, code, PROJECT_URL));
         return TIME_HOLD_SMS;
+    }
+
+    @Override
+    public int checkUserPhone(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException {
+        var user = userService.findUserByPhone(authSmsDto.phone());
+        if (user == null || Strings.isBlank(user.getEmail())) {
+            return makeCodeSms(ipAddress, authSmsDto);
+        } else {
+            throw new ApiException(USER_ALREADY_REGISTERED, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Override
@@ -98,6 +118,13 @@ public class AuthServiceImpl implements AuthService {
                 .token(jwt.generateToken(userDetailMapper.toUserDetail(user)))
                 .isFull(user.isFull())
                 .build();
+    }
+
+    @Override
+    public JwtAuthenticationResponse registration(RegistrationDto registration) {
+        var token = validateCode(new ValidateSmsDto(registration.phone(), registration.code()));
+        userService.registrationUser(registration);
+        return token;
     }
 
     private String makeCodeForPhone() {

@@ -2,10 +2,7 @@ package express.atc.backend.service.Impl;
 
 import express.atc.backend.db.entity.UserEntity;
 import express.atc.backend.db.repository.UsersRepository;
-import express.atc.backend.dto.ChangePasswordDto;
-import express.atc.backend.dto.LanguageDto;
-import express.atc.backend.dto.LoginDto;
-import express.atc.backend.dto.UserDto;
+import express.atc.backend.dto.*;
 import express.atc.backend.enums.Language;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.mapper.UserDetailMapper;
@@ -23,8 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.Set;
 
-import static express.atc.backend.Constants.PASSWORD_NOT_CONFIRMED;
-import static express.atc.backend.Constants.USER_NOT_FOUND;
+import static express.atc.backend.Constants.*;
 import static express.atc.backend.enums.UserRole.ROLE_USER;
 
 @Service
@@ -109,7 +105,7 @@ public class UserServiceImpl implements UserService {
     public UserDto authenticate(LoginDto login) {
         return returnFullUserInfo(usersRepository.findByLogin(login.login())
                 .filter(user -> passwordEncoder.matches(login.password(), user.getPassword()))
-                .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND)));
+                .orElseThrow(() -> new ApiException(USER_NOT_FOUND_OR_NOT_VALID_PASSWORD, HttpStatus.NOT_FOUND)));
     }
 
     @Override
@@ -124,11 +120,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto changeLogin(String userPhone, String login) {
-        UserEntity entity = getUserByPhone(userPhone)
+    public UserDto registrationUser(RegistrationDto registration) {
+        var user = getUserByPhone(registration.phone())
+                .orElseGet(() -> createNewUser(registration.phone()))
+                .setPhone(registration.phone())
+                .setRole(ROLE_USER)
+                .setEmail(registration.email())
+                .setEnable(true)
+                .setPassword(passwordEncoder.encode(registration.password()));
+        return userMapper.toDto(usersRepository.save(user));
+    }
+
+    @Override
+    public Boolean dropUser(String userPhone) {
+        var user = usersRepository.findByPhone(userPhone)
                 .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND));
-        entity.setLogin(login);
-        return returnFullUserInfo(usersRepository.save(entity));
+        usersRepository.delete(user);
+        return Boolean.TRUE;
     }
 
     private Optional<UserEntity> getUserByPhone(String phone) {

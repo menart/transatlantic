@@ -1,14 +1,13 @@
 package express.atc.backend.service;
 
-import express.atc.backend.dto.AuthSmsDto;
-import express.atc.backend.dto.JwtAuthenticationResponse;
-import express.atc.backend.dto.LoginDto;
-import express.atc.backend.dto.ValidateSmsDto;
+import express.atc.backend.dto.*;
 import express.atc.backend.exception.AuthSmsException;
+import jakarta.validation.Valid;
 
 public interface AuthService {
 
     int makeCode(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException;
+    int checkUserPhone(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException;
 
     JwtAuthenticationResponse validateCode(ValidateSmsDto validateSms) throws AuthSmsException;
 
@@ -17,4 +16,6 @@ public interface AuthService {
     void clearAuthCode();
 
     JwtAuthenticationResponse login(LoginDto login) throws AuthSmsException;
+
+    JwtAuthenticationResponse registration(@Valid RegistrationDto registration);
 }

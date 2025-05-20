@@ -16,6 +16,8 @@ public class Constants {
 
     //Exception message
     public static final String USER_NOT_FOUND = "Пользователь не найден";
+    public static final String USER_NOT_FOUND_OR_NOT_VALID_PASSWORD = "Пользователь не найден или не верный пароль";
+    public static final String USER_ALREADY_REGISTERED = "Пользователь уже зарегистрирован";
     public static final String PASSWORD_NOT_CONFIRMED = "Пароли не совпадают";
     public static final String TRACK_NOT_FOUND = "трек номер не найден";
     public static final String ORDER_NOT_FOUND = "Заказ не найден";
@@ -35,12 +37,12 @@ public class Constants {
     public static final String NOT_VALID_SIZE = "длина поля должно находиться в диапазоне между {min} и {max}";
     public static final String MESSAGE_SMALL_INTERVAL = "Слишком маленький интервал запроса";
     //Send message
-    public static final String SMS_CODE_MESSAGE = "Код: %s для входа в личный кабинет https://atc.express/";
+    public static final String SMS_CODE_MESSAGE = "Код: %s для входа в личный кабинет %s";
     public static final String SMS_NEED_PAYMENT = "Уважаемый клиент!\n" +
             "Для получения экспресс-груза %s, приобретённого в %s, " +
-            "необходимо оплатить таможенные пошлины. Оплата доступна на сайте %s в разделе заказы";
+            "необходимо оплатить таможенные пошлины. Оплата доступна на сайте %s/auth в разделе заказы";
     public static final String SMS_NEED_DOCUMENT = "Уважаемый клиент!\n" +
-            "Для получения экспресс-груза %s, приобретённого в %s, Вам необходимо предоставить документы и сведения на сайте %s.";
+            "Для получения экспресс-груза %s, приобретённого в %s, Вам необходимо предоставить документы и сведения на сайте %s/auth";
 
     //Email title
     public static final String EMAIL_TITLE_NEED_DOCUMENT = "Предоставление документов для получения экспресс-груза  %s,  приобретённого в %s";

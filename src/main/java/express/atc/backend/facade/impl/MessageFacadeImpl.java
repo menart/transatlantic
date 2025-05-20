@@ -22,28 +22,28 @@ import static express.atc.backend.Constants.*;
 public class MessageFacadeImpl implements MessageFacade {
 
     private final UserService userService;
-    private final MessageService messageService;
-    private final EmailService emailService;
+    private final MessageService smsMessageService;
+    private final EmailService emailMessageService;
 
     @Value("${project.url}")
     private String ourUrl;
 
     @Override
     @Async
-    public void sendTrackingInfo(String userPhone, TrackingStatus status, String trackNumber, String marketplace) {
+    public void sendTrackingInfo(String userPhone, TrackingStatus status, String orderNumber, String marketplace) {
         Map<String, Object> emailInfo = new HashMap<>();
-        emailInfo.put("trackNumber", trackNumber);
+        emailInfo.put("trackNumber", orderNumber);
         emailInfo.put("marketplace", marketplace);
         emailInfo.put("ourUrl", ourUrl);
         try {
             switch (status) {
                 case NEED_DOCUMENT -> {
                     var user = userService.findOrCreateByPhone(userPhone);
-                    messageService.send(user.getPhone(), String.format(SMS_NEED_DOCUMENT, trackNumber, marketplace, ourUrl));
+                    smsMessageService.send(user.getPhone(), String.format(SMS_NEED_DOCUMENT, orderNumber, marketplace, ourUrl));
                     if (user.getEmail() != null) {
-                        emailService.sendMessageUsingTemplate(
+                        emailMessageService.sendMessageUsingTemplate(
                                 user.getEmail(),
-                                String.format(EMAIL_TITLE_NEED_DOCUMENT, trackNumber, marketplace),
+                                String.format(EMAIL_TITLE_NEED_DOCUMENT, orderNumber, marketplace),
                                 emailInfo,
                                 "need_document.html"
                         );
@@ -51,11 +51,11 @@ public class MessageFacadeImpl implements MessageFacade {
                 }
                 case NEED_PAYMENT -> {
                     var user = userService.findOrCreateByPhone(userPhone);
-                    messageService.send(user.getPhone(), String.format(SMS_NEED_PAYMENT, trackNumber, marketplace, ourUrl));
+                    smsMessageService.send(user.getPhone(), String.format(SMS_NEED_PAYMENT, orderNumber, marketplace, ourUrl));
                     if (user.getEmail() != null) {
-                        emailService.sendMessageUsingTemplate(
+                        emailMessageService.sendMessageUsingTemplate(
                                 user.getEmail(),
-                                String.format(EMAIL_TITLE_NEED_PAYMENT, trackNumber, marketplace),
+                                String.format(EMAIL_TITLE_NEED_PAYMENT, orderNumber, marketplace),
                                 emailInfo,
                                 "need_payment.html"
                         );
