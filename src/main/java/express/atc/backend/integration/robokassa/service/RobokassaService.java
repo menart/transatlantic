@@ -6,5 +6,5 @@ public interface RobokassaService {
 
     String makePaymentUrl(PaymentDto payment);
 
-    String paymentResult(String outSum, Long orderId, String trackingNumber, String checkSum);
+    String paymentResult(String outSum, Long orderId, String orderNumber, String checkSum);
 }

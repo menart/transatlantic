@@ -26,6 +26,6 @@ public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> 
     @Query(value="select max(te.orderId) from TrackingEntity te where te.userPhone = :userPhone")
     Long getMaxOrderIdByUserPhone(String userPhone);
 
-    @Query(value = "select trackNumber from TrackingEntity where userPhone = :userPhone and status = :trackingStatus")
-    List<String> findTrackNumberByNeed(String userPhone, TrackingStatus trackingStatus);
+    @Query(value = "select orderNumber from TrackingEntity where userPhone = :userPhone and status = :trackingStatus")
+    List<String> findOrderNumberByNeed(String userPhone, TrackingStatus trackingStatus);
 }

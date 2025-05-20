@@ -17,8 +17,8 @@ public class PaymentController {
     @GetMapping("ctrl")
     public String payment(@RequestParam("out_summ") String outSum,
                           @RequestParam("inv_id") long orderId,
-                          @RequestParam("Shp_TrackingNumber") String trackingNumber,
+                          @RequestParam("Shp_OrderNumber") String orderNumber,
                           @RequestParam("crc") String checkSum) {
-        return trackingService.paymentControl(outSum, orderId, trackingNumber, checkSum);
+        return trackingService.paymentControl(outSum, orderId, orderNumber, checkSum);
     }
 }
