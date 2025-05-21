@@ -27,6 +27,8 @@ public class CfApiServiceImpl implements CfApiService {
     private String platformId;
     @Value("${cfapi.url}")
     private String cfApiUrl;
+    @Value("${cfapi.location}")
+    private String cfLocation;
 
     private final WebClient cfApiWebClient;
     private final ObjectMapper objectMapper;
@@ -41,7 +43,7 @@ public class CfApiServiceImpl implements CfApiService {
                 "",
                 date.atZone(zone).toLocalDateTime(),
                 zonedDateTime.getOffset().toString(),
-                "MOW"
+                cfLocation
         );
         String msgString;
         try {
