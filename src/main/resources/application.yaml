@@ -175,7 +175,7 @@ cfapi:
   url: ${CFAPI_URL}
   token: ${CFAPI_TOKEN}
   platformId: ${CFAPI_PLATFORM_ID}
-
+  location: ${OUR_URL}
 #Feedback
 feedback:
   title: ${FEEDBACK_TITLE}
