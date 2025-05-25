@@ -1,9 +1,6 @@
 package express.atc.backend.integration.cargoflow.config;
 
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.ssl.SslContext;
-import io.netty.handler.ssl.SslContextBuilder;
-import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import express.atc.backend.integration.cargoflow.service.impl.CargoflowAuthFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,23 +10,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
-import reactor.netty.transport.logging.AdvancedByteBufFormat;
 
 import javax.net.ssl.SSLException;
 import java.util.Collections;
-import java.util.List;
 
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
 public class CargoflowConfig {
 
-    @Value("${cargoflow.cuba.rest.endpoint}")
-    private String cargoflowAuthUrl;
-    @Value("${cargoflow.cuba.rest.client.id}")
-    private String clientId;
-    @Value("${cargoflow.cuba.rest.client.secret}")
-    private String clientSecret;
     @Value("${cargoflow.entity.endpoint}")
     private String cargoflowEntityUrl;
     @Value("${cargoflow.upload.endpoint}")
@@ -40,38 +29,14 @@ public class CargoflowConfig {
     private String cargoflowListOrderUrl;
 
     private final HttpClient httpClient;
-
-//    @Bean
-//    public HttpClient httpClient() throws SSLException {
-//        SslContext sslContext = SslContextBuilder
-//                .forClient()
-//                .trustManager(InsecureTrustManagerFactory.INSTANCE)
-//                .build();
-//        return HttpClient.create()
-//                .secure(t -> t.sslContext(sslContext))
-//                .followRedirect(true)
-//                .wiretap(this.getClass().getCanonicalName(),
-//                        LogLevel.DEBUG, AdvancedByteBufFormat.TEXTUAL);
-//    }
-
-    @Bean("cargoflowAuthWebClient")
-    public WebClient cargoflowAuthWebClient() throws SSLException {
-        return WebClient.builder()
-                .clientConnector(new ReactorClientHttpConnector(httpClient))
-                .baseUrl(cargoflowAuthUrl)
-                .defaultHeaders(httpHeaders -> {
-                    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-                    httpHeaders.setAcceptCharset(List.of());
-                    httpHeaders.setBasicAuth(clientId, clientSecret);
-                })
-                .build();
-    }
+    private final CargoflowAuthFilter cargoflowAuthFilter;
 
     @Bean("cargoflowEntityWebClient")
     public WebClient cargoflowOrderWebClient() throws SSLException {
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(cargoflowEntityUrl)
+                .filter(cargoflowAuthFilter)
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                     httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -84,6 +49,7 @@ public class CargoflowConfig {
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(cargoflowListOrderUrl)
+                .filter(cargoflowAuthFilter)
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                     httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
@@ -96,9 +62,10 @@ public class CargoflowConfig {
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(cargoflowUploadUrl)
+                .filter(cargoflowAuthFilter)
                 .defaultHeaders(httpHeaders -> {
-                    httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
                     httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+                    httpHeaders.setContentType(MediaType.MULTIPART_FORM_DATA);
                 })
                 .build();
     }
@@ -108,6 +75,7 @@ public class CargoflowConfig {
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
                 .baseUrl(cargoflowAttachUrl)
+                .filter(cargoflowAuthFilter)
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
                     httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));

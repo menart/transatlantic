@@ -1,0 +1,9 @@
+**/node_modules
+**/dist
+**/.cache
+**/.env
+**/*.md
+**/Dockerfile
+.git
+.idea
+.env

@@ -175,7 +175,7 @@ cfapi:
   url: ${CFAPI_URL}
   token: ${CFAPI_TOKEN}
   platformId: ${CFAPI_PLATFORM_ID}
-  location: ${OUR_URL}
+  location: ${CFAPI_LOCATION}
 #Feedback
 feedback:
   title: ${FEEDBACK_TITLE}
@@ -199,4 +199,10 @@ management:
       application: ${spring.application.name}
 
 project:
-  url: ${OUR_URL}
+  url: ${SERVER_NAME}
+
+springdoc:
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLE}    # Отключает Swagger UI
+  api-docs:
+    enabled: ${SWAGGER_ENABLE}    # Отключает генерацию OpenAPI документации
