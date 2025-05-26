@@ -64,9 +64,8 @@ spring:
 server:
   port: 8080
   http:
-    enabled: true   # Включить HTTP
+    enabled: ${SERVER_HTTP:true}   # Включить HTTP
   https:
-    enabled: false  # Включить HTTPS
     ssl:
       key-store-type: ${SSL_KEY_STORE_TYPE}
       key-store: ${SSL_KEY_STORE}

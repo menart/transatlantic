@@ -137,11 +137,14 @@ public class TrackingServiceImpl implements TrackingService {
 
     @Override
     public String paymentControl(String outSum, Long orderId, String orderNumber, String checkSum) {
+        outSum = outSum.replace(",", ".");
         var entity = trackingRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
         var calc = calcTrack(entity.getGoods(), entity.getOrderId(), orderNumber, null);
+        log.info("payment dto,: {}", calc);
+        log.info("payment parameters,: {}, {}, {}, {}", Double.parseDouble(outSum) * 100, orderId, orderNumber, checkSum);
         try {
-            if (!calc.getPaid().equals((long) (Double.parseDouble(outSum) * 100))) {
+            if (!calc.getPaid().equals((long) Math.round(Double.parseDouble(outSum) * 100))) {
                 throw new ApiException(PAYMENT_NOT_EQUALS, HttpStatus.BAD_REQUEST);
             }
         } catch (NumberFormatException exception) {
