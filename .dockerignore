@@ -6,4 +6,4 @@
 **/Dockerfile
 .git
 .idea
-.env
+*.env
