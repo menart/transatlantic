@@ -18,11 +18,7 @@ public class WebServerConfig {
     @Bean
     public ServletWebServerFactory servletContainer() {
         boolean isHttpEnabled = env.getProperty("server.http.enabled", Boolean.class, false);
-        boolean isHttpsEnabled = env.getProperty("server.https.enabled", Boolean.class, false);
-
-        if (isHttpEnabled && isHttpsEnabled) {
-            throw new IllegalStateException("Нельзя одновременно включать HTTP и HTTPS");
-        }
+        boolean isHttpsEnabled = !isHttpEnabled;
 
         TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
         factory.setPort(env.getProperty("server.https.port", Integer.class, 8080));
