@@ -1,31 +1,43 @@
 package express.atc.backend.service.Impl;
 
+import express.atc.backend.db.entity.TokenEntity;
+import express.atc.backend.db.repository.TokenRepository;
+import express.atc.backend.exception.ApiException;
 import express.atc.backend.security.UserDetail;
 import express.atc.backend.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
+import static express.atc.backend.Constants.TOKEN_NOT_VALID;
+
 @Service
+@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
 
     @Value("${jwt.secret}")
     private String secret;
-    @Value("${jwt.issuer}")
-    private String issuer;
     @Value("${jwt.expiration}")
     private Integer expirationInSecond;
+    @Value("${jwt.refresh}")
+    private Integer expirationRefreshInMinute;
+    private final TokenRepository tokenRepository;
 
     /**
      * Извлечение имени пользователя из токена
@@ -53,6 +65,18 @@ public class JwtServiceImpl implements JwtService {
         return generateToken(claims, userDetails);
     }
 
+    @Override
+    @Transactional
+    public UUID generateRefresh(String phone) {
+        return tokenRepository.save(
+                        TokenEntity.builder()
+                                .expiredAt(LocalDateTime.now().plusMinutes(expirationRefreshInMinute))
+                                .createdAt(LocalDateTime.now())
+                                .userPhone(phone)
+                                .build())
+                .getId();
+    }
+
     /**
      * Проверка токена на валидность
      *
@@ -63,6 +87,23 @@ public class JwtServiceImpl implements JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String userName = extractPhone(token);
         return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    @Override
+    public String getPhoneByRefresh(UUID refresh) {
+        return tokenRepository.findById(refresh)
+                .orElseThrow(() -> new ApiException(TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED))
+                .getUserPhone();
+    }
+
+    @Override
+    public void removeToken(UUID refresh) {
+        tokenRepository.findById(refresh).ifPresent(tokenRepository::delete);
+    }
+
+    @Override
+    public int removeExpiredTokens() {
+        return tokenRepository.removeExpired(LocalDateTime.now());
     }
 
     /**

@@ -4,6 +4,8 @@ import express.atc.backend.dto.*;
 import express.atc.backend.exception.AuthSmsException;
 import jakarta.validation.Valid;
 
+import java.util.UUID;
+
 public interface AuthService {
 
     int makeCode(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException;
@@ -13,9 +15,14 @@ public interface AuthService {
 
     String getSms(String phone);
 
-    void clearAuthCode();
+    void clearExpired();
 
     JwtAuthenticationResponse login(LoginDto login) throws AuthSmsException;
 
     JwtAuthenticationResponse registration(@Valid RegistrationDto registration);
+
+    JwtAuthenticationResponse refresh(UUID refresh);
+
+    boolean logout(UUID refresh);
+
 }

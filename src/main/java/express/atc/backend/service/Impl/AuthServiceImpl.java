@@ -20,6 +20,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 import static express.atc.backend.Constants.*;
 
@@ -34,6 +36,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailMapper userDetailMapper;
     private final MessageService messageService;
     private final JwtService jwt;
+    private final JwtService jwtService;
 
     @Value(value = "${auth.time_hold_sms}")
     private int TIME_HOLD_SMS;
@@ -41,13 +44,13 @@ public class AuthServiceImpl implements AuthService {
     private int COUNT_NUMBER_CODE;
     @Value(value = "${auth.sms_code_live}")
     private int SMS_CODE_LIVE;
-    @Value(value="${project.url}")
+    @Value(value = "${project.url}")
     private String PROJECT_URL;
 
     @Override
     public int makeCode(String ipAddress, AuthSmsDto authSmsDto) throws AuthSmsException {
         var user = userService.findUserByPhone(authSmsDto.phone());
-        if(user != null && !Strings.isBlank(user.getEmail())) {
+        if (user != null && !Strings.isBlank(user.getEmail())) {
             return makeCodeSms(ipAddress, authSmsDto);
         } else {
             throw new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -91,10 +94,7 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthSmsException("Не верный код");
         }
         var user = userService.findOrCreateByPhone(validateSms.phone());
-        return JwtAuthenticationResponse.builder()
-                .token(jwt.generateToken(userDetailMapper.toUserDetail(user)))
-                .isFull(user.isFull())
-                .build();
+        return generateToken(user);
     }
 
     @Override
@@ -106,18 +106,16 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void clearAuthCode() {
+    public void clearExpired() {
         LocalDateTime expireDate = LocalDateTime.now().minusSeconds(SMS_CODE_LIVE);
         log.info("remove expired sms: {}", authSmsRepository.deleteByCreatedAtBefore(expireDate));
+        log.info("remove expired refresh token: {}", jwt.removeExpiredTokens());
     }
 
     @Override
     public JwtAuthenticationResponse login(LoginDto login) throws AuthSmsException {
         var user = userService.authenticate(login);
-        return JwtAuthenticationResponse.builder()
-                .token(jwt.generateToken(userDetailMapper.toUserDetail(user)))
-                .isFull(user.isFull())
-                .build();
+        return generateToken(user);
     }
 
     @Override
@@ -125,6 +123,23 @@ public class AuthServiceImpl implements AuthService {
         var token = validateCode(new ValidateSmsDto(registration.phone(), registration.code()));
         userService.registrationUser(registration);
         return token;
+    }
+
+    @Override
+    public JwtAuthenticationResponse refresh(UUID refresh) {
+        var user = Optional.of(
+                userService.findUserByPhone(jwtService.getPhoneByRefresh(refresh))
+        ).orElseThrow(
+                () -> new ApiException(TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED)
+        );
+        jwt.removeToken(refresh);
+        return generateToken(user);
+    }
+
+    @Override
+    public boolean logout(UUID refresh) {
+        jwt.removeToken(refresh);
+        return true;
     }
 
     private String makeCodeForPhone() {
@@ -135,5 +150,13 @@ public class AuthServiceImpl implements AuthService {
     private boolean checkCode(String code, String phone) {
         LocalDateTime timeExpired = LocalDateTime.now().minusSeconds(SMS_CODE_LIVE);
         return authSmsRepository.findFirstByPhoneAndCodeAndCreatedAtAfter(phone, code, timeExpired).isPresent();
+    }
+
+    private JwtAuthenticationResponse generateToken(UserDto user) {
+        return new JwtAuthenticationResponse(
+                jwt.generateToken(userDetailMapper.toUserDetail(user)),
+                jwt.generateRefresh(user.getPhone()),
+                user.isFull()
+        );
     }
 }

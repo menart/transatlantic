@@ -15,6 +15,7 @@ public class Constants {
     public static final String CALC_AMOUNT = "Расчет по сумме";
 
     //Exception message
+    public static final String TOKEN_NOT_VALID = "токен не валиден";
     public static final String USER_NOT_FOUND = "Пользователь не найден";
     public static final String USER_NOT_FOUND_OR_NOT_VALID_PASSWORD = "Пользователь не найден или не верный пароль";
     public static final String USER_ALREADY_REGISTERED = "Пользователь уже зарегистрирован";
