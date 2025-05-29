@@ -5,6 +5,7 @@ import express.atc.backend.integration.cargoflow.dto.*;
 import express.atc.backend.integration.cargoflow.service.CargoflowClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
@@ -41,7 +42,7 @@ public class CargoflowClientImpl implements CargoflowClient {
                 .bodyToFlux(response)
                 .collectList()
                 .block();
-        log.info("{}", responseList);
+        log.info("receive count: {}", CollectionUtils.isNotEmpty(responseList) ? responseList.size() : 0);
         return responseList;
     }
 
@@ -107,7 +108,7 @@ public class CargoflowClientImpl implements CargoflowClient {
                 .bodyToFlux(CargoflowOrder.class)
                 .collectList()
                 .block();
-        log.info("{}", responseList);
+        log.info("receive count: {}", CollectionUtils.isNotEmpty(responseList) ? responseList.size() : 0);
         return responseList;
     }
 }
