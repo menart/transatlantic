@@ -38,6 +38,7 @@ public class MessageFacadeImpl implements MessageFacade {
         try {
             switch (status) {
                 case NEED_DOCUMENT -> {
+                    log.info("Sending NEED_DOCUMENT to {}", userPhone);
                     var user = userService.findOrCreateByPhone(userPhone);
                     smsMessageService.send(user.getPhone(), String.format(SMS_NEED_DOCUMENT, orderNumber, marketplace, ourUrl));
                     if (user.getEmail() != null) {
@@ -50,6 +51,7 @@ public class MessageFacadeImpl implements MessageFacade {
                     }
                 }
                 case NEED_PAYMENT -> {
+                    log.info("Sending NEED_PAYMENT to {}", userPhone);
                     var user = userService.findOrCreateByPhone(userPhone);
                     smsMessageService.send(user.getPhone(), String.format(SMS_NEED_PAYMENT, orderNumber, marketplace, ourUrl));
                     if (user.getEmail() != null) {

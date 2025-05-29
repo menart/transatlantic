@@ -16,7 +16,7 @@ public class RabbitMqService {
             dto.setStatus("CUSTOMS_ID_CHECKING");
         }
         trackingService.updateByOrderCode(
-                dto.getLogisticsOrderCode() != null ? dto.getLogisticsOrderCode() : dto.getTrackingNumber(),
-                dto.getStatus());
+                dto.getLogisticsOrderCode() != null ? dto.getLogisticsOrderCode() : dto.getTrackingNumber()
+        );
     }
 }

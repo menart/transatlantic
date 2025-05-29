@@ -6,8 +6,7 @@ import express.atc.backend.rabbitmq.dto.PersonInfoNeedDto;
 import express.atc.backend.rabbitmq.service.RabbitMqService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.Argument;
-import org.springframework.amqp.rabbit.annotation.Queue;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -21,14 +20,18 @@ public class PersonInfoNeedListener {
 
     @RabbitListener(queues = "${spring.rabbitmq.person-info-need.queue-pd}")
     public void listenerPD(String message) {
-        log.info("RabbitMQ pd read message: {}", message);
-        processing(message);
+        if (StringUtils.isNotEmpty(message)) {
+            log.info("RabbitMQ pd read message: {}", message);
+            processing(message);
+        }
     }
 
     @RabbitListener(queues = "${spring.rabbitmq.person-info-need.queue-status}")
     public void listenerStatus(String message) {
-        log.info("RabbitMQ status read message: {}", message);
-        processing(message);
+        if (StringUtils.isNotEmpty(message)) {
+            log.info("RabbitMQ status read message: {}", message);
+            processing(message);
+        }
     }
 
     private void processing(String message) {

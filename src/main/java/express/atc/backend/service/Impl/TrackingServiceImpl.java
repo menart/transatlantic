@@ -72,7 +72,12 @@ public class TrackingServiceImpl implements TrackingService {
     @Override
     public TrackingPageDto list(Integer page, int count, TrackingStatus filter) {
         String userPhone = requestInfo.getUser().getPhone();
-        updateListTracking(userPhone);
+        log.info("get list for user {}: page: {}, count: {}, status: {}", userPhone, page, count, filter);
+        try {
+            updateListTracking(userPhone);
+        } catch (Error e) {
+            log.error("get list for user {}: error: {}", userPhone, e);
+        }
         Pageable pageable = PageRequest.of(page, count);
         return new TrackingPageDto(
                 findAndFilterList(userPhone, pageable, filter)
@@ -111,16 +116,16 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     public void updateListTracking(String userPhone) {
-        var list = cargoflowService.getSetInfoByPhone(userPhone).stream();
-        Long maxOrderId = trackingRepository.getMaxOrderIdByUserPhone(userPhone);
-        if (maxOrderId != null) {
-            list = list.filter(t -> t.getOrderId() > maxOrderId);
-        }
-        trackingRepository.saveAll(list
-                .map(trackingMapper::toEntity)
-                .toList()
-        );
-        findAndFilterList(userPhone, null, null).forEach(this::updateRoute);
+//        var list = cargoflowService.getSetInfoByPhone(userPhone).stream();
+//        Long maxOrderId = trackingRepository.getMaxOrderIdByUserPhone(userPhone);
+//        if (maxOrderId != null) {
+//            list = list.filter(t -> t.getOrderId() > maxOrderId);
+//        }
+//        trackingRepository.saveAll(list
+//                .map(trackingMapper::toEntity)
+//                .toList()
+//        );
+//        findAndFilterList(userPhone, null, ACTIVE).forEach(this::updateRoute);
     }
 
     @Override
@@ -160,8 +165,13 @@ public class TrackingServiceImpl implements TrackingService {
 
     @Override
     public Set<TrackingDto> getAllTrackByPhone(String userPhone) {
-        updateListTracking(userPhone);
-        return cargoflowService.getSetInfoByPhone(userPhone);
+//        try {
+//            updateListTracking(userPhone);
+//        } catch (Error e) {
+//            log.error("get list for user {}: error: {}", userPhone, e);
+//        }
+//        return cargoflowService.getSetInfoByPhone(userPhone);
+        return null;
     }
 
     @Override
@@ -174,17 +184,10 @@ public class TrackingServiceImpl implements TrackingService {
 
     @Override
     @Transactional
-    public void updateByOrderCode(String orderCode, String rawStatus) {
+    public void updateByOrderCode(String orderCode) {
         var entity = trackingRepository.findByTrack(orderCode)
                 .orElseGet(() -> trackingRepository.save(findByCargoFlow(orderCode)));
         updateRoute(entity);
-        var statusModel = statusService.getStatus(rawStatus);
-        messageFacade.sendTrackingInfo(
-                entity.getUserPhone(),
-                entity.setStatus(statusModel != null ? statusModel.mapStatus() : NEED_DOCUMENT).getStatus(),
-                entity.getOrderNumber(),
-                entity.getMarketplace()
-        );
     }
 
     private TrackingDto findTrack(String number) throws TrackNotFoundException {
