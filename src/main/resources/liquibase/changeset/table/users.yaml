@@ -145,3 +145,19 @@ databaseChangeLog:
                   name: confirmation_email
                   type: boolean
                   defaultValueBoolean:  false
+  - changeSet:
+      id: users:change-05
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: WARN
+        - not:
+            - tableExists:
+                tableName: users
+      changes:
+        - addColumn:
+            tableName: users
+            columns:
+              - column:
+                  name: agree
+                  type: boolean
+                  defaultValueBoolean: true
