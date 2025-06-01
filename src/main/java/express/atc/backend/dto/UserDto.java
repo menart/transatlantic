@@ -69,4 +69,9 @@ public class UserDto {
     private boolean full = true;
     @Schema(description = "Подтвержден email")
     private boolean confirmationEmail;
+    @Schema(description =
+            "Согласие \"Публичной офертой о заключении договора на предоставление " +
+                    "услуг таможенного представительства для физических лиц\"")
+    @AssertTrue(message = DISAGREE)
+    private boolean agree;
 }

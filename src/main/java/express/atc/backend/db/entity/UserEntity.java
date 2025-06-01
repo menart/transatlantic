@@ -53,6 +53,8 @@ public class UserEntity {
     private Language language;
     @Column
     private boolean confirmationEmail;
+    @Column
+    private boolean agree;
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
