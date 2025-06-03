@@ -1,9 +1,16 @@
 package express.atc.backend.enums;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Getter
 public enum TrackingStatus {
-    ACTIVE,
-    NEED_PAYMENT,
-    NEED_DOCUMENT,
-    PAYMENT_CONFIRMATION,
-    ARCHIVE
+    NEED_PAYMENT(true),
+    NEED_DOCUMENT(true),
+    PAYMENT_CONFIRMATION(true),
+    ACTIVE(false),
+    ARCHIVE(false);
+
+    private final boolean isNeedAction;
 }

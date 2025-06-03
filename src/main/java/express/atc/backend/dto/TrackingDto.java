@@ -45,6 +45,9 @@ public class TrackingDto implements Comparable<TrackingDto> {
     private TrackingStatus status;
     @Schema(description = "Список маршрутов")
     private TreeSet<TrackingRouteDto> routes;
+    @JsonIgnore
+    @Schema(description = "Customs operator Id")
+    private String providerId;
 
     @Override
     public int compareTo(TrackingDto o) {

@@ -67,3 +67,16 @@ databaseChangeLog:
             - minValue: 1
             - sequenceName: tracking_route_id_seq
             - startValue: 1
+  - changeSet:
+      id: tracking_route:clean-01
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: HALT
+        - tableExists:
+            tableName: tracking_route
+      changes:
+        - sql:
+            sql: |
+              TRUNCATE TABLE tracking_route 
+              RESTART IDENTITY 
+              CASCADE;

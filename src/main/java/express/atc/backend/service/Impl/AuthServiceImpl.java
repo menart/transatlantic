@@ -6,10 +6,7 @@ import express.atc.backend.dto.*;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.mapper.UserDetailMapper;
-import express.atc.backend.service.AuthService;
-import express.atc.backend.service.JwtService;
-import express.atc.backend.service.MessageService;
-import express.atc.backend.service.UserService;
+import express.atc.backend.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
@@ -33,6 +30,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final UserDetailMapper userDetailMapper;
     private final MessageService messageService;
+    private final TrackingService trackingService;
     private final JwtService jwt;
 
     @Value(value = "${auth.time_hold_sms}")
@@ -124,6 +122,7 @@ public class AuthServiceImpl implements AuthService {
     public JwtAuthenticationResponse registration(RegistrationDto registration) {
         var token = validateCode(new ValidateSmsDto(registration.phone(), registration.code()));
         userService.registrationUser(registration);
+        trackingService.updateListTracking(registration.phone());
         return token;
     }
 

@@ -31,6 +31,7 @@ public interface CargoflowMapper {
     @Mapping(target = "status", expression = "java(setActiveStatus())")
     @Mapping(target = "goods",
             expression = "java(toOrders(order.properties().parcel()))")
+    @Mapping(target = "providerId", source = "route.customsOperator.providerId")
     TrackingDto toTracking(CargoflowOrder order);
 
     @Mapping(target = "priceModel", expression = "java(toMoneyModel(parcel.priceCurrency(), parcel.price()))")

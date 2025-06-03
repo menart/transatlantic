@@ -18,8 +18,8 @@ public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> 
     Optional<TrackingEntity> findByOrderId(Long orderId);
 
 
-    List<TrackingEntity> findAllByUserPhoneAndStatus(String phone, TrackingStatus status, Pageable pageable);
-    List<TrackingEntity> findAllByUserPhoneAndStatusNot(String phone, TrackingStatus status, Pageable pageable);
+    List<TrackingEntity> findAllByUserPhoneAndStatusOrderByStatusIdAscCreatedAtDesc(String phone, TrackingStatus status, Pageable pageable);
+    List<TrackingEntity> findAllByUserPhoneAndStatusNotOrderByStatusIdAscCreatedAtDesc(String phone, TrackingStatus status, Pageable pageable);
 
     int countByUserPhone(String phone);
 

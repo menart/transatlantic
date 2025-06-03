@@ -20,9 +20,11 @@ import express.atc.backend.service.TrackingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -39,6 +41,9 @@ import static express.atc.backend.integration.cfapi.enums.OrderStatus.CUSTOMS_ID
 @Service
 @RequiredArgsConstructor
 public class TrackingServiceImpl implements TrackingService {
+
+    @Value("#{'${service.tracking.work-provider-ids:}'.split(',')}")
+    private List<String> workProviderIds = Collections.emptyList();
 
     private final CargoflowService cargoflowService;
     private final TrackingRepository trackingRepository;
@@ -73,11 +78,6 @@ public class TrackingServiceImpl implements TrackingService {
     public TrackingPageDto list(Integer page, int count, TrackingStatus filter) {
         String userPhone = requestInfo.getUser().getPhone();
         log.info("get list for user {}: page: {}, count: {}, status: {}", userPhone, page, count, filter);
-        try {
-            updateListTracking(userPhone);
-        } catch (Error e) {
-            log.error("get list for user {}: error: {}", userPhone, e);
-        }
         Pageable pageable = PageRequest.of(page, count);
         return new TrackingPageDto(
                 findAndFilterList(userPhone, pageable, filter)
@@ -115,17 +115,27 @@ public class TrackingServiceImpl implements TrackingService {
         return true;
     }
 
+    @Async
     public void updateListTracking(String userPhone) {
-//        var list = cargoflowService.getSetInfoByPhone(userPhone).stream();
-//        Long maxOrderId = trackingRepository.getMaxOrderIdByUserPhone(userPhone);
-//        if (maxOrderId != null) {
-//            list = list.filter(t -> t.getOrderId() > maxOrderId);
-//        }
-//        trackingRepository.saveAll(list
-//                .map(trackingMapper::toEntity)
-//                .toList()
-//        );
-//        findAndFilterList(userPhone, null, ACTIVE).forEach(this::updateRoute);
+        var list = cargoflowService.getSetInfoByPhone(userPhone).stream();
+        Long maxOrderId = trackingRepository.getMaxOrderIdByUserPhone(userPhone);
+        if (maxOrderId != null) {
+            list = list.filter(t -> t.getOrderId() > maxOrderId);
+        }
+        var listEntity = list
+                .map(this::mapToEntity)
+                .toList();
+        trackingRepository.saveAll(listEntity);
+        findAndFilterList(userPhone, null, ACTIVE).forEach(this::updateRoute);
+    }
+
+    private TrackingEntity mapToEntity(TrackingDto dto) {
+        return trackingRepository.findByOrderId(dto.getOrderId()).orElse(trackingMapper.toEntity(dto));
+    }
+
+    private TrackingRouteEntity mapRouteToEntity(TrackingRouteDto dto) {
+        return trackingRouteRepository.findByRouteId(dto.getRouteId())
+                .orElse(trackingRouterMapper.toEntity(dto));
     }
 
     @Override
@@ -165,13 +175,12 @@ public class TrackingServiceImpl implements TrackingService {
 
     @Override
     public Set<TrackingDto> getAllTrackByPhone(String userPhone) {
-//        try {
-//            updateListTracking(userPhone);
-//        } catch (Error e) {
-//            log.error("get list for user {}: error: {}", userPhone, e);
-//        }
-//        return cargoflowService.getSetInfoByPhone(userPhone);
-        return null;
+        try {
+            updateListTracking(userPhone);
+        } catch (Error e) {
+            log.error("get list for user {}: error: {}", userPhone, e);
+        }
+        return cargoflowService.getSetInfoByPhone(userPhone);
     }
 
     @Override
@@ -218,7 +227,7 @@ public class TrackingServiceImpl implements TrackingService {
                 cargoflowService.updateRoute(entity.getOrderId(), maxRouteId)
                         .stream()
                         .filter(Objects::nonNull)
-                        .map(trackingRouterMapper::toEntity)
+                        .map(this::mapRouteToEntity)
                         .map(trackingRoute -> trackingRoute.setTracking(entity))
                         .map(trackingRouteRepository::save)
                         .collect(Collectors.toSet());
@@ -229,7 +238,11 @@ public class TrackingServiceImpl implements TrackingService {
         }
         var lastRoute = new TreeSet<>(entity.getRoutes()).last();
         if (!Objects.equals(maxRouteId, lastRoute.getRouteId())) {
-            entity.setStatus(statusService.getStatus(lastRoute.getStatus()).mapStatus());
+            var status = statusService.getStatus(lastRoute.getStatus()).mapStatus();
+            if (!status.isNeedAction() || workProviderIds.contains(entity.getProviderId())) {
+                entity.setStatus(status);
+            }
+            entity.setStatus(status);
             messageFacade.sendTrackingInfo(
                     entity.getUserPhone(),
                     entity.getStatus(),
@@ -242,7 +255,7 @@ public class TrackingServiceImpl implements TrackingService {
 
     private TrackingEntity findByCargoFlow(String number) throws TrackNotFoundException {
         var dto = getInfoByTrackNumberOrOrderNumber(number).orElseThrow(TrackNotFoundException::new);
-        var trackingEntity = trackingRepository.save(trackingMapper.toEntity(dto).setRoutes(null));
+        var trackingEntity = trackingRepository.save(mapToEntity(dto));
         updateRoute(trackingEntity);
         return trackingEntity;
     }
@@ -288,8 +301,8 @@ public class TrackingServiceImpl implements TrackingService {
 
     private List<TrackingEntity> findAndFilterList(String userPhone, Pageable pageable, TrackingStatus filter) {
         if (filter == null || ACTIVE.equals(filter)) {
-            return trackingRepository.findAllByUserPhoneAndStatusNot(userPhone, TrackingStatus.ARCHIVE, pageable);
+            return trackingRepository.findAllByUserPhoneAndStatusNotOrderByStatusIdAscCreatedAtDesc(userPhone, TrackingStatus.ARCHIVE, pageable);
         }
-        return trackingRepository.findAllByUserPhoneAndStatus(userPhone, filter, pageable);
+        return trackingRepository.findAllByUserPhoneAndStatusOrderByStatusIdAscCreatedAtDesc(userPhone, filter, pageable);
     }
 }

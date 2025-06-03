@@ -136,7 +136,9 @@ cargoflow:
 
 service:
   tracking:
+    work-provider-ids: t-atlantic.ru
     update: ${SERVICE_TRACKING_CRON}
+
 #CBRF
 cbrf:
   url: ${CBRF_URL}
