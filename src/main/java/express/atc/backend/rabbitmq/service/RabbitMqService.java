@@ -12,11 +12,13 @@ public class RabbitMqService {
     private final TrackingService trackingService;
 
     public void processing(PersonInfoNeedDto dto) {
-        if (dto.getStatus() == null) {
-            dto.setStatus("CUSTOMS_ID_CHECKING");
-        }
         trackingService.updateByOrderCode(
                 dto.getLogisticsOrderCode() != null ? dto.getLogisticsOrderCode() : dto.getTrackingNumber()
         );
+    }
+
+
+    public void processingNeedDocument(PersonInfoNeedDto dto) {
+        trackingService.setStatusNeedDocument(dto.getLogisticsOrderCode());
     }
 }

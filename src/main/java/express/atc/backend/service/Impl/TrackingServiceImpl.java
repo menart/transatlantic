@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
 
 import static express.atc.backend.Constants.*;
 import static express.atc.backend.enums.TrackingStatus.*;
-import static express.atc.backend.integration.cfapi.enums.OrderStatus.CUSTOMS_FEE_PAID;
-import static express.atc.backend.integration.cfapi.enums.OrderStatus.CUSTOMS_ID_COLLECTED;
+import static express.atc.backend.integration.cfapi.enums.OrderStatus.*;
 
 @Slf4j
 @Service
@@ -86,7 +85,7 @@ public class TrackingServiceImpl implements TrackingService {
                         .map(trackingMapper::toDto)
                         .toList(),
                 page,
-                (int) Math.ceil(trackingRepository.countByUserPhone(userPhone) / (double) count),
+                (int) Math.ceil(countFilterList(userPhone, filter) / (double) count),
                 count,
                 need()
         );
@@ -174,13 +173,22 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
-    public Set<TrackingDto> getAllTrackByPhone(String userPhone) {
+    public Boolean setToArchive() {
+        trackingRepository.findAll().stream().parallel()
+                .forEach(entity ->
+                        cfApiService.changeStatusToCargoflow(entity.getTrackNumber(), LASTMILE_DELIVERED)
+                );
+        return true;
+    }
+
+    @Override
+    public Boolean getAllTrackByPhone() {
         try {
-            updateListTracking(userPhone);
+            updateListTracking(requestInfo.getUser().getPhone());
         } catch (Error e) {
-            log.error("get list for user {}: error: {}", userPhone, e);
+            log.error("get list for user {}: error: {}", requestInfo.getUser().getPhone(), e);
         }
-        return cargoflowService.getSetInfoByPhone(userPhone);
+        return true;
     }
 
     @Override
@@ -197,6 +205,14 @@ public class TrackingServiceImpl implements TrackingService {
         var entity = trackingRepository.findByTrack(orderCode)
                 .orElseGet(() -> trackingRepository.save(findByCargoFlow(orderCode)));
         updateRoute(entity);
+    }
+
+    public void setStatusNeedDocument(String logisticsOrderCode) {
+        var entity = trackingRepository.findByTrack(logisticsOrderCode)
+                .orElse(trackingRepository.save(findByCargoFlow(logisticsOrderCode)));
+        updateRoute(entity);
+        entity.setStatus(NEED_DOCUMENT);
+        trackingRepository.save(entity);
     }
 
     private TrackingDto findTrack(String number) throws TrackNotFoundException {
@@ -301,8 +317,15 @@ public class TrackingServiceImpl implements TrackingService {
 
     private List<TrackingEntity> findAndFilterList(String userPhone, Pageable pageable, TrackingStatus filter) {
         if (filter == null || ACTIVE.equals(filter)) {
-            return trackingRepository.findAllByUserPhoneAndStatusNotOrderByStatusIdAscCreatedAtDesc(userPhone, TrackingStatus.ARCHIVE, pageable);
+            return trackingRepository.findAllByUserPhoneAndStatusNot(userPhone, TrackingStatus.ARCHIVE, pageable);
         }
-        return trackingRepository.findAllByUserPhoneAndStatusOrderByStatusIdAscCreatedAtDesc(userPhone, filter, pageable);
+        return trackingRepository.findAllByUserPhoneAndStatus(userPhone, filter, pageable);
+    }
+
+    private int countFilterList(String userPhone, TrackingStatus filter) {
+        if (filter == null || ACTIVE.equals(filter)) {
+            return trackingRepository.getCountByUserPhoneAndStatusNot(userPhone, TrackingStatus.ARCHIVE);
+        }
+        return trackingRepository.getCountByUserPhoneAndStatus(userPhone, filter);
     }
 }

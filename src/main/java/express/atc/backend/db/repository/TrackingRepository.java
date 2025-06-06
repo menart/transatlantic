@@ -18,8 +18,15 @@ public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> 
     Optional<TrackingEntity> findByOrderId(Long orderId);
 
 
-    List<TrackingEntity> findAllByUserPhoneAndStatusOrderByStatusIdAscCreatedAtDesc(String phone, TrackingStatus status, Pageable pageable);
-    List<TrackingEntity> findAllByUserPhoneAndStatusNotOrderByStatusIdAscCreatedAtDesc(String phone, TrackingStatus status, Pageable pageable);
+    @Query("from TrackingEntity where userPhone =:phone and status = :status order by statusId, createdAt desc")
+    List<TrackingEntity> findAllByUserPhoneAndStatus(String phone, TrackingStatus status, Pageable pageable);
+    @Query("from TrackingEntity where userPhone =:phone and status <> :status order by statusId, createdAt desc")
+    List<TrackingEntity> findAllByUserPhoneAndStatusNot(String phone, TrackingStatus status, Pageable pageable);
+
+    @Query("select count(id) from TrackingEntity where userPhone =:phone and status <> :status")
+    int getCountByUserPhoneAndStatusNot(String phone, TrackingStatus status);
+    @Query("select count(id) from TrackingEntity where userPhone =:phone and status = :status")
+    int getCountByUserPhoneAndStatus(String phone, TrackingStatus status);
 
     int countByUserPhone(String phone);
 
