@@ -99,8 +99,8 @@ auth:
 #Jwt
 jwt:
   secret: ${JWT_SECRET}
-  expiration: ${JWT_EXPIRATION}
-  issuer: ${spring.application.name}
+  expiration: ${JWT_EXPIRATION:600}
+  refresh: ${JWT_EXPIRATION_REFRESH:1440}
 
 #SMS Aero
 sms-aero:

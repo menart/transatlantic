@@ -9,12 +9,12 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
-public class ClearAuthCodeScheduler {
+public class ClearExpiredCodeScheduler {
 
     private final AuthService authService;
 
     @Scheduled(fixedDelayString = "${auth.scheduler.interval}", timeUnit = TimeUnit.SECONDS)
-    public void clearAuthCode() {
-        authService.clearAuthCode();
+    public void clearExpiredCode() {
+        authService.clearExpired();
     }
 }
