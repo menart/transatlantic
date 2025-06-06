@@ -2,7 +2,9 @@ package express.atc.backend.service.Impl;
 
 import express.atc.backend.db.entity.TokenEntity;
 import express.atc.backend.db.repository.TokenRepository;
+import express.atc.backend.dto.UserDto;
 import express.atc.backend.exception.ApiException;
+import express.atc.backend.mapper.UserDetailMapper;
 import express.atc.backend.model.TokenModel;
 import express.atc.backend.security.UserDetail;
 import express.atc.backend.service.JwtService;
@@ -39,6 +41,7 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.refresh}")
     private Long expirationRefreshInMinute;
     private final TokenRepository tokenRepository;
+    private final UserDetailMapper userDetailMapper;
 
     /**
      * Извлечение имени пользователя из токена
@@ -179,14 +182,12 @@ public class JwtServiceImpl implements JwtService {
 
     @Transactional
     @Override
-    public TokenModel generateTokens(UserDetails user) {
-        if (user instanceof UserDetail customUserDetails) {
-            return new TokenModel(
-                    generateToken(user),
-                    expirationInSecond,
-                    generateRefresh(customUserDetails.getPhone()),
-                    expirationRefreshInMinute
-            );
-        } else return null;
+    public TokenModel generateTokens(UserDto user) {
+        return new TokenModel(
+                generateToken(userDetailMapper.toUserDetail(user)),
+                expirationInSecond,
+                generateRefresh(user.getPhone()),
+                expirationRefreshInMinute
+        );
     }
 }

@@ -20,7 +20,7 @@ public class AuthHelper {
         response.addHeader("Set-Cookie",
                 setCookie(ACCESS_TOKEN,
                         tokens.accessToken(),
-                        Duration.ofSeconds(tokens.refreshTokenExpiresIn()).getSeconds(),
+                        Duration.ofMinutes(tokens.refreshTokenExpiresIn()).getSeconds(),
                         secure).toString());
 
         response.addHeader("Set-Cookie",

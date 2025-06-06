@@ -1,5 +1,6 @@
 package express.atc.backend.service;
 
+import express.atc.backend.dto.UserDto;
 import express.atc.backend.model.TokenModel;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,5 +13,5 @@ public interface JwtService {
     boolean checkPhoneByRefresh(UUID refresh, String phone);
     void removeToken(UUID refresh);
     int removeExpiredTokens();
-    TokenModel generateTokens(UserDetails user);
+    TokenModel generateTokens(UserDto user);
 }

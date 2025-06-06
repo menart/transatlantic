@@ -8,8 +8,7 @@ import express.atc.backend.dto.RegistrationDto;
 import express.atc.backend.dto.ValidateSmsDto;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
-import express.atc.backend.mapper.UserDetailMapper;
-import express.atc.backend.model.TokenModel;
+import express.atc.backend.model.AuthResponseModel;
 import express.atc.backend.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +32,10 @@ public class AuthServiceImpl implements AuthService {
 
     private final AuthSmsRepository authSmsRepository;
     private final UserService userService;
-    private final UserDetailMapper userDetailMapper;
     private final MessageService messageService;
     private final TrackingService trackingService;
     private final JwtService jwtService;
+
 
     @Value(value = "${auth.time_hold_sms}")
     private int TIME_HOLD_SMS;
@@ -86,15 +85,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public TokenModel validateCode(ValidateSmsDto validateSms) throws AuthSmsException {
-        if (validateSms.code().length() != COUNT_NUMBER_CODE) {
+    public AuthResponseModel validateCode(ValidateSmsDto validateSms) throws AuthSmsException {
+        validateCode(validateSms.code(), validateSms.phone());
+        var user = userService.findOrCreateByPhone(validateSms.phone());
+        return new AuthResponseModel(jwtService.generateTokens(user), user);
+    }
+
+    private void validateCode(String code, String phone) throws AuthSmsException {
+        if (code.length() != COUNT_NUMBER_CODE) {
             throw new AuthSmsException("Не верная длина кода");
         }
-        if (!checkCode(validateSms.code(), validateSms.phone())) {
+        if (!checkCode(code, phone)) {
             throw new AuthSmsException("Не верный код");
         }
-        var user = userService.findOrCreateByPhone(validateSms.phone());
-        return jwtService.generateTokens(userDetailMapper.toUserDetail(user));
     }
 
     @Override
@@ -113,17 +116,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public TokenModel login(LoginDto login) throws AuthSmsException {
+    public AuthResponseModel login(LoginDto login) throws AuthSmsException {
         var user = userService.authenticate(login);
-        return jwtService.generateTokens(userDetailMapper.toUserDetail(user));
+        return new AuthResponseModel(jwtService.generateTokens(user), user);
     }
 
     @Override
-    public TokenModel registration(RegistrationDto registration) {
-        var token = validateCode(new ValidateSmsDto(registration.phone(), registration.code()));
-        userService.registrationUser(registration);
+    public AuthResponseModel registration(RegistrationDto registration) {
+        validateCode(registration.phone(), registration.code());
+        var user = userService.registrationUser(registration);
         trackingService.updateListTracking(registration.phone());
-        return token;
+        return new AuthResponseModel(jwtService.generateTokens(user), user);
     }
 
     @Override

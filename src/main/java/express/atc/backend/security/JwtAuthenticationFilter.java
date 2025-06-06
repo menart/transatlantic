@@ -1,4 +1,4 @@
-package express.atc.backend.config;
+package express.atc.backend.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import express.atc.backend.dto.ErrorResponseDto;
@@ -66,7 +66,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             refreshToken = StringUtils.isNotBlank(rawRefreshToken) ? UUID.fromString(rawRefreshToken) : null;
         } catch (IllegalArgumentException e) {
-            throw new ApiException(TOKEN_NOT_VALID, HttpStatus.BAD_REQUEST);
+            sendErrorResponse(response, TOKEN_NOT_VALID, HttpStatus.BAD_REQUEST);
         }
 
         if (StringUtils.isEmpty(accessToken) && StringUtils.isEmpty(rawRefreshToken)) {
@@ -102,16 +102,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Обновляем refresh токен для следующей итерации
                 refreshToken = newTokens.refreshToken();
             } catch (ApiException ex) {
+                AuthHelper.removeTokenCookie(response, request.isSecure());
                 if (TOKEN_NOT_VALID.equals(ex.getMessage())) {
                     sendErrorResponse(response, TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED);
                 } else {
                     sendErrorResponse(response, ex.getMessage(), HttpStatus.UNAUTHORIZED);
                 }
-                AuthHelper.removeTokenCookie(response, request.isSecure());
-                sendErrorResponse(response, ex.getMessage(), HttpStatus.UNAUTHORIZED);
-                return;
-            } catch (IllegalArgumentException e) {
-                sendErrorResponse(response, TOKEN_NOT_VALID, HttpStatus.BAD_REQUEST);
                 return;
             }
         }
@@ -139,17 +135,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private TokenModel refreshTokens(UUID refresh, String phone) throws ApiException {
+    TokenModel refreshTokens(UUID refresh, String phone) throws ApiException {
         if (StringUtils.isBlank(phone) || !(jwtService.checkPhoneByRefresh(refresh, phone))) {
             throw new ApiException(TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED);
         }
         var user = Optional.of(userService.findUserByPhone(phone))
                 .orElseThrow(() -> new ApiException(TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED));
         jwtService.removeToken(refresh);
-        return jwtService.generateTokens(userDetailMapper.toUserDetail(user));
+        return jwtService.generateTokens(user);
     }
 
-    private void sendErrorResponse(HttpServletResponse response, String message, HttpStatus status) throws IOException {
+    public void sendErrorResponse(HttpServletResponse response, String message, HttpStatus status) throws IOException {
         ErrorResponseDto errorResponse = new ErrorResponseDto(
                 status.name(),
                 List.of(message)
@@ -162,7 +158,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     // Проверка, является ли эндпоинт публичным
-    private boolean isPublicEndpoint(HttpServletRequest request) {
+    public boolean isPublicEndpoint(HttpServletRequest request) {
         AntPathMatcher pathMatcher = new AntPathMatcher();
         String requestURI = request.getRequestURI();
 

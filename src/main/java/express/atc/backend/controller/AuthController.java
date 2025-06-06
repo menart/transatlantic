@@ -4,6 +4,8 @@ import express.atc.backend.dto.*;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.helper.AuthHelper;
+import express.atc.backend.mapper.UserMapper;
+import express.atc.backend.model.AuthResponseModel;
 import express.atc.backend.service.AuthService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +36,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final HttpServletRequest request;
+    private final UserMapper userMapper;
 
     @Value("${sms-aero.enable}")
     private boolean disabledGetSms;
@@ -58,9 +61,9 @@ public class AuthController {
     @Operation(summary = "Проверка СМС")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Успешная авторизация",
+                    description = "Краткая информация о пользователе",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Boolean.class))}),
+                            schema = @Schema(implementation = UserShortDto.class))}),
             @ApiResponse(responseCode = "400",
                     description = "Невалидные параметры в запросе",
                     content = {@Content(mediaType = "application/json",
@@ -71,12 +74,13 @@ public class AuthController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @PostMapping("/validate")
-    public Boolean validateCode(
+    public UserShortDto validateCode(
             @RequestBody @Valid ValidateSmsDto validateSms,
             HttpServletRequest request,
             HttpServletResponse response) throws AuthSmsException {
-        AuthHelper.setTokenCookie(response, authService.validateCode(validateSms), request.isSecure());
-        return true;
+        AuthResponseModel authResponse = authService.validateCode(validateSms);
+        AuthHelper.setTokenCookie(response, authResponse.tokens() , request.isSecure());
+        return userMapper.toShortDto(authResponse.user());
     }
 
     @GetMapping("/sms")
@@ -90,9 +94,9 @@ public class AuthController {
     @Operation(summary = "Аутентификация по email/номеру телефона и паролю")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Успешная авторизация",
+                    description = "Краткая информация о пользователе",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Boolean.class))}),
+                            schema = @Schema(implementation = UserShortDto.class))}),
             @ApiResponse(responseCode = "400",
                     description = "Невалидные параметры в запросе",
                     content = {@Content(mediaType = "application/json",
@@ -103,21 +107,22 @@ public class AuthController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @PostMapping("/auth")
-    public Boolean auth(
+    public UserShortDto auth(
             @RequestBody @Valid LoginDto login,
             HttpServletRequest request,
             HttpServletResponse response
     ) throws AuthSmsException {
-        AuthHelper.setTokenCookie(response, authService.login(login), request.isSecure());
-        return true;
+        AuthResponseModel authResponse = authService.login(login);
+        AuthHelper.setTokenCookie(response, authResponse.tokens(), request.isSecure());
+        return userMapper.toShortDto(authResponse.user());
     }
 
     @Operation(summary = "Регистрация пользователя")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201",
-                    description = "Успешная регистрация",
+                    description = "Краткая информация о пользователе",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = Boolean.class))}),
+                            schema = @Schema(implementation = UserShortDto.class))}),
             @ApiResponse(responseCode = "400",
                     description = "Невалидные параметры в запросе",
                     content = {@Content(mediaType = "application/json",
@@ -128,13 +133,14 @@ public class AuthController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @PostMapping("/registration")
-    public ResponseEntity<Boolean> registration(
+    public ResponseEntity<UserShortDto> registration(
             @RequestBody @Valid RegistrationDto registration,
             HttpServletRequest request,
             HttpServletResponse response
     ) throws ApiException {
-        AuthHelper.setTokenCookie(response, authService.registration(registration), request.isSecure());
-        return new ResponseEntity<>(true, HttpStatus.CREATED);
+        AuthResponseModel authResponse = authService.registration(registration);
+        AuthHelper.setTokenCookie(response, authResponse.tokens() , request.isSecure());
+        return new ResponseEntity<>(userMapper.toShortDto(authResponse.user()), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Проверить номер телефона пользователя")
