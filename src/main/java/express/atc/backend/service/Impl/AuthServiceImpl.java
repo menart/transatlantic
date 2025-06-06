@@ -2,10 +2,14 @@ package express.atc.backend.service.Impl;
 
 import express.atc.backend.db.entity.AuthSmsEntity;
 import express.atc.backend.db.repository.AuthSmsRepository;
-import express.atc.backend.dto.*;
+import express.atc.backend.dto.AuthSmsDto;
+import express.atc.backend.dto.LoginDto;
+import express.atc.backend.dto.RegistrationDto;
+import express.atc.backend.dto.ValidateSmsDto;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.mapper.UserDetailMapper;
+import express.atc.backend.model.TokenModel;
 import express.atc.backend.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import static express.atc.backend.Constants.*;
@@ -33,7 +36,6 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailMapper userDetailMapper;
     private final MessageService messageService;
     private final TrackingService trackingService;
-    private final JwtService jwt;
     private final JwtService jwtService;
 
     @Value(value = "${auth.time_hold_sms}")
@@ -84,7 +86,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public JwtAuthenticationResponse validateCode(ValidateSmsDto validateSms) throws AuthSmsException {
+    public TokenModel validateCode(ValidateSmsDto validateSms) throws AuthSmsException {
         if (validateSms.code().length() != COUNT_NUMBER_CODE) {
             throw new AuthSmsException("Не верная длина кода");
         }
@@ -92,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthSmsException("Не верный код");
         }
         var user = userService.findOrCreateByPhone(validateSms.phone());
-        return generateToken(user);
+        return jwtService.generateTokens(userDetailMapper.toUserDetail(user));
     }
 
     @Override
@@ -107,17 +109,17 @@ public class AuthServiceImpl implements AuthService {
     public void clearExpired() {
         LocalDateTime expireDate = LocalDateTime.now().minusSeconds(SMS_CODE_LIVE);
         log.info("remove expired sms: {}", authSmsRepository.deleteByCreatedAtBefore(expireDate));
-        log.info("remove expired refresh token: {}", jwt.removeExpiredTokens());
+        log.info("remove expired refresh token: {}", jwtService.removeExpiredTokens());
     }
 
     @Override
-    public JwtAuthenticationResponse login(LoginDto login) throws AuthSmsException {
+    public TokenModel login(LoginDto login) throws AuthSmsException {
         var user = userService.authenticate(login);
-        return generateToken(user);
+        return jwtService.generateTokens(userDetailMapper.toUserDetail(user));
     }
 
     @Override
-    public JwtAuthenticationResponse registration(RegistrationDto registration) {
+    public TokenModel registration(RegistrationDto registration) {
         var token = validateCode(new ValidateSmsDto(registration.phone(), registration.code()));
         userService.registrationUser(registration);
         trackingService.updateListTracking(registration.phone());
@@ -125,19 +127,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public JwtAuthenticationResponse refresh(UUID refresh) {
-        var user = Optional.of(
-                userService.findUserByPhone(jwtService.getPhoneByRefresh(refresh))
-        ).orElseThrow(
-                () -> new ApiException(TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED)
-        );
-        jwt.removeToken(refresh);
-        return generateToken(user);
-    }
-
-    @Override
     public boolean logout(UUID refresh) {
-        jwt.removeToken(refresh);
+        jwtService.removeToken(refresh);
         return true;
     }
 
@@ -149,13 +140,5 @@ public class AuthServiceImpl implements AuthService {
     private boolean checkCode(String code, String phone) {
         LocalDateTime timeExpired = LocalDateTime.now().minusSeconds(SMS_CODE_LIVE);
         return authSmsRepository.findFirstByPhoneAndCodeAndCreatedAtAfter(phone, code, timeExpired).isPresent();
-    }
-
-    private JwtAuthenticationResponse generateToken(UserDto user) {
-        return new JwtAuthenticationResponse(
-                jwt.generateToken(userDetailMapper.toUserDetail(user)),
-                jwt.generateRefresh(user.getPhone()),
-                user.isFull()
-        );
     }
 }

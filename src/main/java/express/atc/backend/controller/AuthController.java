@@ -3,23 +3,27 @@ package express.atc.backend.controller;
 import express.atc.backend.dto.*;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
+import express.atc.backend.helper.AuthHelper;
 import express.atc.backend.service.AuthService;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
+
+import static express.atc.backend.Constants.REFRESH_TOKEN;
 
 @RestController
 @RequiredArgsConstructor
@@ -54,9 +58,9 @@ public class AuthController {
     @Operation(summary = "Проверка СМС")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Сгенерированный JWT токен",
+                    description = "Успешная авторизация",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = JwtAuthenticationResponse.class))}),
+                            schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "400",
                     description = "Невалидные параметры в запросе",
                     content = {@Content(mediaType = "application/json",
@@ -67,8 +71,12 @@ public class AuthController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @PostMapping("/validate")
-    public JwtAuthenticationResponse validateCode(@RequestBody @Valid ValidateSmsDto validateSms) throws AuthSmsException {
-        return authService.validateCode(validateSms);
+    public Boolean validateCode(
+            @RequestBody @Valid ValidateSmsDto validateSms,
+            HttpServletRequest request,
+            HttpServletResponse response) throws AuthSmsException {
+        AuthHelper.setTokenCookie(response, authService.validateCode(validateSms), request.isSecure());
+        return true;
     }
 
     @GetMapping("/sms")
@@ -82,9 +90,9 @@ public class AuthController {
     @Operation(summary = "Аутентификация по email/номеру телефона и паролю")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
-                    description = "Сгенерированный JWT токен",
+                    description = "Успешная авторизация",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = JwtAuthenticationResponse.class))}),
+                            schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "400",
                     description = "Невалидные параметры в запросе",
                     content = {@Content(mediaType = "application/json",
@@ -95,16 +103,21 @@ public class AuthController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @PostMapping("/auth")
-    public JwtAuthenticationResponse auth(@RequestBody @Valid LoginDto login) throws AuthSmsException {
-        return authService.login(login);
+    public Boolean auth(
+            @RequestBody @Valid LoginDto login,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws AuthSmsException {
+        AuthHelper.setTokenCookie(response, authService.login(login), request.isSecure());
+        return true;
     }
 
     @Operation(summary = "Регистрация пользователя")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Сгенерированный JWT токен",
+            @ApiResponse(responseCode = "201",
+                    description = "Успешная регистрация",
                     content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = JwtAuthenticationResponse.class))}),
+                            schema = @Schema(implementation = Boolean.class))}),
             @ApiResponse(responseCode = "400",
                     description = "Невалидные параметры в запросе",
                     content = {@Content(mediaType = "application/json",
@@ -115,8 +128,13 @@ public class AuthController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @PostMapping("/registration")
-    public JwtAuthenticationResponse registration(@RequestBody @Valid RegistrationDto registration) throws ApiException {
-        return authService.registration(registration);
+    public ResponseEntity<Boolean> registration(
+            @RequestBody @Valid RegistrationDto registration,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws ApiException {
+        AuthHelper.setTokenCookie(response, authService.registration(registration), request.isSecure());
+        return new ResponseEntity<>(true, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Проверить номер телефона пользователя")
@@ -136,28 +154,6 @@ public class AuthController {
         return authService.checkUserPhone(ipAddress, authSmsDto);
     }
 
-    @Operation(summary = "Обновить access token по refresh token")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Сгенерированный JWT токен",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = JwtAuthenticationResponse.class))}),
-            @ApiResponse(responseCode = "400",
-                    description = "Невалидные параметры в запросе",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponseDto.class))}),
-            @ApiResponse(responseCode = "403",
-                    description = " Ошибка авторизации, неверный refresh токен",
-                    content = {@Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ErrorResponseDto.class))}),
-    })
-    @GetMapping("/refresh")
-    public JwtAuthenticationResponse refresh(
-            @RequestParam @Parameter(description = "refresh token") UUID refresh
-    ) {
-        return authService.refresh(refresh);
-    }
-
     @Operation(summary = "Выход пользователя из системы")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -170,8 +166,21 @@ public class AuthController {
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
     @GetMapping("/logout")
-    public boolean logout(@RequestParam UUID refresh) {
-        return authService.logout(refresh);
+    public boolean logout(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        try {
+            String rawRefreshToken = AuthHelper.extractTokenFromCookie(REFRESH_TOKEN, request);
+            if (rawRefreshToken != null) {
+                UUID refreshToken = UUID.fromString(rawRefreshToken);
+                authService.logout(refreshToken);
+            }
+        } catch (ApiException e) {
+            // Логируем отсутствие токена, но продолжаем удаление куки
+        } finally {
+            AuthHelper.removeTokenCookie(response, request.isSecure());
+        }
+        return true;
     }
-
 }

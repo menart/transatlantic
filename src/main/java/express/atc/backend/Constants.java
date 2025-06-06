@@ -4,6 +4,8 @@ public class Constants {
     public static final String BEARER_PREFIX = "Bearer ";
     public static final String AUTH_HEADER_NAME = "Authorization";
     public static final String LANG_HEADER_NAME = "Current-Language";
+    public static final String ACCESS_TOKEN = "access_token";
+    public static final String REFRESH_TOKEN = "refresh_token";
     public static final String LOCATE_CURRENCY = "RUB";
     public static final long GRAMS_PER_KG = 1000;
 
@@ -15,6 +17,7 @@ public class Constants {
     public static final String CALC_AMOUNT = "Расчет по сумме";
 
     //Exception message
+    public static final String NEED_AUTHORIZED = "Требуется аутентификация";
     public static final String TOKEN_NOT_VALID = "Токен невалиден";
     public static final String USER_NOT_FOUND = "Пользователь не найден";
     public static final String USER_NOT_FOUND_OR_NOT_VALID_PASSWORD = "Пользователь не найден или неверный пароль";

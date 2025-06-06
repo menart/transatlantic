@@ -3,6 +3,7 @@ package express.atc.backend.service.Impl;
 import express.atc.backend.db.entity.TokenEntity;
 import express.atc.backend.db.repository.TokenRepository;
 import express.atc.backend.exception.ApiException;
+import express.atc.backend.model.TokenModel;
 import express.atc.backend.security.UserDetail;
 import express.atc.backend.service.JwtService;
 import io.jsonwebtoken.Claims;
@@ -34,9 +35,9 @@ public class JwtServiceImpl implements JwtService {
     @Value("${jwt.secret}")
     private String secret;
     @Value("${jwt.expiration}")
-    private Integer expirationInSecond;
+    private Long expirationInSecond;
     @Value("${jwt.refresh}")
-    private Integer expirationRefreshInMinute;
+    private Long expirationRefreshInMinute;
     private final TokenRepository tokenRepository;
 
     /**
@@ -55,7 +56,7 @@ public class JwtServiceImpl implements JwtService {
      * @param userDetails данные пользователя
      * @return токен
      */
-    public String generateToken(UserDetails userDetails) {
+    private String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         if (userDetails instanceof UserDetail customUserDetails) {
             claims.put("id", customUserDetails.getId());
@@ -65,9 +66,7 @@ public class JwtServiceImpl implements JwtService {
         return generateToken(claims, userDetails);
     }
 
-    @Override
-    @Transactional
-    public UUID generateRefresh(String phone) {
+    private UUID generateRefresh(String phone) {
         return tokenRepository.save(
                         TokenEntity.builder()
                                 .expiredAt(LocalDateTime.now().plusMinutes(expirationRefreshInMinute))
@@ -90,10 +89,10 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String getPhoneByRefresh(UUID refresh) {
+    public boolean checkPhoneByRefresh(UUID refresh, String phone) {
         return tokenRepository.findById(refresh)
-                .orElseThrow(() -> new ApiException(TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED))
-                .getUserPhone();
+                .map(tokenEntity -> phone.equals(tokenEntity.getUserPhone()))
+                .orElseThrow(() -> new ApiException(TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED));
     }
 
     @Override
@@ -139,7 +138,8 @@ public class JwtServiceImpl implements JwtService {
      * @param token токен
      * @return true, если токен просрочен
      */
-    private boolean isTokenExpired(String token) {
+    @Override
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
@@ -175,5 +175,18 @@ public class JwtServiceImpl implements JwtService {
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    @Transactional
+    @Override
+    public TokenModel generateTokens(UserDetails user) {
+        if (user instanceof UserDetail customUserDetails) {
+            return new TokenModel(
+                    generateToken(user),
+                    expirationInSecond,
+                    generateRefresh(customUserDetails.getPhone()),
+                    expirationRefreshInMinute
+            );
+        } else return null;
     }
 }

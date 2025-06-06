@@ -1,11 +1,7 @@
 package express.atc.backend.controller;
 
-import express.atc.backend.dto.ChangePasswordDto;
-import express.atc.backend.dto.ErrorResponseDto;
-import express.atc.backend.dto.LanguageDto;
-import express.atc.backend.dto.UserDto;
+import express.atc.backend.dto.*;
 import express.atc.backend.enums.Language;
-import express.atc.backend.service.JwtService;
 import express.atc.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController extends PrivateController {
 
     private final UserService userService;
-    private final JwtService jwtService;
+    private final RequestInfo requestInfo;
 
     @Operation(summary = "Получить информацию о пользователе")
     @ApiResponses(value = {
@@ -44,7 +40,7 @@ public class UserController extends PrivateController {
     })
     @GetMapping("/me")
     public UserDto getFullUserInfo() {
-        String userPhone = jwtService.extractPhone(getToken());
+        String userPhone = requestInfo.getUser().getPhone();
         return userService.findUserByPhone(userPhone);
     }
 
@@ -65,7 +61,7 @@ public class UserController extends PrivateController {
     })
     @PostMapping("/me")
     public UserDto updateFullUserInfo(@Valid @RequestBody UserDto userInfo) {
-        String userPhone = jwtService.extractPhone(getToken());
+        String userPhone = requestInfo.getUser().getPhone();
         userInfo.setPhone(userPhone);
         return userService.updateFullUserInfo(userInfo);
     }
@@ -87,7 +83,7 @@ public class UserController extends PrivateController {
     })
     @DeleteMapping("/me")
     public Boolean dropUser() {
-        String userPhone = jwtService.extractPhone(getToken());
+        String userPhone = requestInfo.getUser().getPhone();
         return userService.dropUser(userPhone);
     }
 
@@ -108,7 +104,7 @@ public class UserController extends PrivateController {
     })
     @GetMapping("/language")
     public LanguageDto getUserLanguage() {
-        String userPhone = jwtService.extractPhone(getToken());
+        String userPhone = requestInfo.getUser().getPhone();
         return userService.getLanguage(userPhone);
     }
 
@@ -129,7 +125,7 @@ public class UserController extends PrivateController {
     })
     @PostMapping("/language/{language}")
     public LanguageDto setUserLanguage(@PathVariable Language language) {
-        String userPhone = jwtService.extractPhone(getToken());
+        String userPhone = requestInfo.getUser().getPhone();
         return userService.setLanguage(userPhone, language);
     }
 
@@ -150,7 +146,7 @@ public class UserController extends PrivateController {
     })
     @PostMapping("/change-password")
     public UserDto changePassword(@Valid @RequestBody ChangePasswordDto changePassword) {
-        String userPhone = jwtService.extractPhone(getToken());
+        String userPhone = requestInfo.getUser().getPhone();
         return userService.changePassword(userPhone, changePassword);
     }
 }

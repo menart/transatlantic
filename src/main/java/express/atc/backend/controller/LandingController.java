@@ -24,8 +24,6 @@ public class LandingController {
 
     private final LandingService landingService;
 
-    private final HttpServletRequest request;
-
     @Operation(summary = "Отправка заказа на доставку")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",
@@ -43,7 +41,6 @@ public class LandingController {
     })
     @PostMapping("/delivery")
     public boolean delivery(@Valid @RequestBody DeliveryDto delivery) throws MessagingException {
-
         return landingService.deliveryRequest(delivery);
     }
 }
