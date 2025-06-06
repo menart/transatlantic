@@ -75,6 +75,6 @@ public interface CargoflowMapper {
     }
 
     default MoneyModel toMoneyModel(String currency, Long price){
-        return new MoneyModel(currency, price);
+        return new MoneyModel(price, currency);
     }
 }

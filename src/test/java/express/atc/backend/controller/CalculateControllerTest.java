@@ -1,101 +1,134 @@
 //package express.atc.backend.controller;
 //
-//import express.atc.backend.AbstractControllerTest;
+//import com.fasterxml.jackson.databind.ObjectMapper;
+//import express.atc.backend.calculate.CalcCustomsFee;
 //import express.atc.backend.dto.CalculateDto;
-//import express.atc.backend.dto.ErrorResponseDto;
+//import express.atc.backend.dto.OrderDto;
 //import express.atc.backend.dto.OrdersDto;
-//import express.atc.backend.integration.cbrf.dto.CurrencyDto;
-//import lombok.SneakyThrows;
+//import express.atc.backend.model.MoneyModel;
+//import express.atc.backend.security.JwtAuthenticationFilter;
 //import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.params.ParameterizedTest;
-//import org.junit.jupiter.params.provider.Arguments;
-//import org.junit.jupiter.params.provider.MethodSource;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+//import org.springframework.boot.test.mock.mockito.MockBean;
+//import org.springframework.context.annotation.ComponentScan;
+//import org.springframework.context.annotation.FilterType;
 //import org.springframework.http.MediaType;
+//import org.springframework.security.config.annotation.web.WebSecurityConfigurer;
+//import org.springframework.test.web.servlet.MockMvc;
 //
-//import java.util.ArrayList;
-//import java.util.HashMap;
 //import java.util.List;
-//import java.util.Map;
-//import java.util.stream.Stream;
 //
+//import static org.mockito.ArgumentMatchers.any;
 //import static org.mockito.Mockito.when;
 //import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 //import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 //
+//// Фокусируемся только на CalculateController, отключаем безопасность
+//@WebMvcTest(
+//        controllers = CalculateController.class,
+//        includeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = CalcCustomsFee.class),
+//        excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = WebSecurityConfigurer.class)
+//)
+//class CalculateControllerTest {
 //
-//class CalculateControllerTest extends AbstractControllerTest {
+//    @Autowired
+//    private MockMvc mockMvc;
 //
-//    private final String webPath = "/api/calculate/customs-fee";
-//    private final String path = "controller/CalculateController/";
+//    @Autowired
+//    private ObjectMapper objectMapper;
 //
-//    private void mockCbrfCurrency() {
-//        Map<String, CurrencyDto> currencyDtoMap = new HashMap<>();
-//        currencyDtoMap.put("EUR", new CurrencyDto(
-//                "R01239",
-//                "978",
-//                "EUR",
-//                1,
-//                "Евро",
-//                106.8883,
-//                106.8883)
-//        );
-//        currencyDtoMap.put("USD", new CurrencyDto(
-//                "R01235",
-//                "840",
-//                "USD",
-//                1,
-//                "Доллар США",
-//                98.0562,
-//                98.0562)
-//        );
-//        when(cbrfService.getCurrencyMap())
-//                .thenReturn(currencyDtoMap);
-//    }
+//    @MockBean
+//    private CalcCustomsFee calcCustomsFee;
 //
-//    @SneakyThrows
+//    @MockBean
+//    private JwtAuthenticationFilter jwtAuthenticationFilter;
+//
 //    @Test
-//    void calcCustomersFeeNotFoundCurrency() {
-//        mockCbrfCurrency();
-//        var request = new OrdersDto();
-//        request.setCurrency("NOT");
-//        request.setItems(new ArrayList<>());
-//        var response = new ErrorResponseDto("BAD_REQUEST", List.of("Данный тип валюты не найден в ЦБ РФ"));
-//        mvc.perform(post(webPath)
-//                        .content(objectMapper.writeValueAsString(request))
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().json(objectMapper.writeValueAsString(response)));
-//    }
-//
-//    @SneakyThrows
-//    @ParameterizedTest
-//    @MethodSource("calcParameters")
-//    void calcCustomersFeeCalcTest(String test) {
-//        mockCbrfCurrency();
-//        var request = loadContent(String.format("%s%sRequest.json", path, test), OrdersDto.class);
-//        var response = loadContent(String.format("%s%sResponse.json", path, test), CalculateDto.class);
-//        mvc.perform(post(webPath)
-//                        .content(objectMapper.writeValueAsString(request))
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(response == null
-//                        ? jsonPath("$").doesNotExist()
-//                        : content().json(objectMapper.writeValueAsString(response)));
-//    }
-//
-//    public static Stream<Arguments> calcParameters() {
-//        List<String> list = List.of(
-//                "NullPay",
-//                "PricePay",
-//                "WeightPay",
-//                "WeightLtPricePay",
-//                "PricePayUSD",
-//                "WeightPayUSD",
-//                "WeightLtPricePayUSD",
-//                "WeightGtPricePay",
-//                "PricePayRUB"
+//    void validRequest_returnsCalculateDto() throws Exception {
+//        OrdersDto request = new OrdersDto(
+//                new MoneyModel(10000L, "RUB"),
+//                "RUB",
+//                1000,
+//                List.of(new OrderDto())
 //        );
-//        return list.stream()
-//                .map(Arguments::of);
+//
+//        CalculateDto response = new CalculateDto();
+//        response.setFee(1000L);
+//
+//        when(calcCustomsFee.calculate(any(OrdersDto.class))).thenReturn(response);
+//
+//        mockMvc.perform(post("/api/calculate/customs-fee")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.fee").value(1000));
+//    }
+//
+//    @Test
+//    void emptyItems_returnsBadRequest() throws Exception {
+//        OrdersDto request = new OrdersDto(
+//                new MoneyModel(10000L, "RUB"),
+//                "RUB",
+//                1000,
+//                List.of() // Пустой список товаров
+//        );
+//
+//        mockMvc.perform(post("/api/calculate/customs-fee")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.messages[0]").value("Список товаров не может быть пустым"));
+//    }
+//
+//    @Test
+//    void negativeWeight_returnsBadRequest() throws Exception {
+//        OrdersDto request = new OrdersDto(
+//                new MoneyModel(10000L, "RUB"),
+//                "RUB",
+//                -100, // Отрицательный вес
+//                List.of(new OrderDto())
+//        );
+//
+//        mockMvc.perform(post("/api/calculate/customs-fee")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.messages[0]").value("Вес должен быть положительным"));
+//    }
+//
+//    @Test
+//    void invalidCurrency_returnsBadRequest() throws Exception {
+//        OrdersDto request = new OrdersDto(
+//                new MoneyModel(10000L, "RUB"),
+//                "XYZ", // Невалидная валюта
+//                1000,
+//                List.of(new OrderDto())
+//        );
+//
+//        mockMvc.perform(post("/api/calculate/customs-fee")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andExpect(status().isBadRequest())
+//                .andExpect(jsonPath("$.messages[0]").value("Недопустимая валюта"));
+//    }
+//
+//    @Test
+//    void serviceThrowsException_returnsInternalError() throws Exception {
+//        OrdersDto request = new OrdersDto(
+//                new MoneyModel(10000L, "RUB"),
+//                "RUB",
+//                1000,
+//                List.of(new OrderDto())
+//        );
+//
+//        when(calcCustomsFee.calculate(any(OrdersDto.class)))
+//                .thenThrow(new RuntimeException("Ошибка расчета"));
+//
+//        mockMvc.perform(post("/api/calculate/customs-fee")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(request)))
+//                .andExpect(status().isInternalServerError())
+//                .andExpect(jsonPath("$.messages[0]").value("Ошибка расчета"));
 //    }
 //}
