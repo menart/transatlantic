@@ -2,6 +2,8 @@ stages:
   - deploy
 
 deploy_backend:
+  tags:
+    - deploy
   stage: deploy
   only:
     - develop
