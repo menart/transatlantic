@@ -54,7 +54,7 @@ public class AuthHelper {
                 .httpOnly(true)
                 .secure(secure)
                 .path(path)
-                .sameSite("Strict")
+//                .sameSite("Strict")
                 .maxAge(age)
                 .build();
     }

@@ -1,4 +1,4 @@
-package express.atc.backend.service.Impl;
+package express.atc.backend.security.impl;
 
 import express.atc.backend.db.entity.TokenEntity;
 import express.atc.backend.db.repository.TokenRepository;
@@ -7,7 +7,7 @@ import express.atc.backend.exception.ApiException;
 import express.atc.backend.mapper.UserDetailMapper;
 import express.atc.backend.model.TokenModel;
 import express.atc.backend.security.UserDetail;
-import express.atc.backend.service.JwtService;
+import express.atc.backend.security.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;

@@ -9,6 +9,7 @@ import express.atc.backend.dto.ValidateSmsDto;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.model.AuthResponseModel;
+import express.atc.backend.security.JwtService;
 import express.atc.backend.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

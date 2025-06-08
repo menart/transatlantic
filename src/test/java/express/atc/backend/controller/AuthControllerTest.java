@@ -10,7 +10,7 @@ import express.atc.backend.mapper.UserMapper;
 import express.atc.backend.model.AuthResponseModel;
 import express.atc.backend.model.TokenModel;
 import express.atc.backend.service.AuthService;
-import express.atc.backend.service.JwtService;
+import express.atc.backend.security.JwtService;
 import express.atc.backend.service.UserService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
@@ -194,7 +194,7 @@ public class AuthControllerTest {
     void logout_RemovesCookies() throws Exception {
         UUID refreshToken = UUID.randomUUID();
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/logout")
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/auth/logout")
                         .cookie(new Cookie(REFRESH_TOKEN, refreshToken.toString())))
                 .andExpect(status().isOk())
                 .andExpect(cookie().maxAge("access_token", 0))

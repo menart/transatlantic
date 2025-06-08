@@ -79,7 +79,7 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response) throws AuthSmsException {
         AuthResponseModel authResponse = authService.validateCode(validateSms);
-        AuthHelper.setTokenCookie(response, authResponse.tokens() , request.isSecure());
+        AuthHelper.setTokenCookie(response, authResponse.tokens(), request.isSecure());
         return userMapper.toShortDto(authResponse.user());
     }
 
@@ -139,7 +139,7 @@ public class AuthController {
             HttpServletResponse response
     ) throws ApiException {
         AuthResponseModel authResponse = authService.registration(registration);
-        AuthHelper.setTokenCookie(response, authResponse.tokens() , request.isSecure());
+        AuthHelper.setTokenCookie(response, authResponse.tokens(), request.isSecure());
         return new ResponseEntity<>(userMapper.toShortDto(authResponse.user()), HttpStatus.CREATED);
     }
 
@@ -171,7 +171,7 @@ public class AuthController {
                     content = {@Content(mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponseDto.class))}),
     })
-    @GetMapping("/logout")
+    @DeleteMapping("/logout")
     public boolean logout(
             HttpServletRequest request,
             HttpServletResponse response

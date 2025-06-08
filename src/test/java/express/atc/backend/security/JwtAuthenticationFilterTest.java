@@ -9,7 +9,6 @@ import express.atc.backend.enums.UserRole;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.mapper.UserDetailMapper;
 import express.atc.backend.model.TokenModel;
-import express.atc.backend.service.JwtService;
 import express.atc.backend.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;

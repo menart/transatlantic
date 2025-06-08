@@ -1,4 +1,4 @@
-package express.atc.backend.service;
+package express.atc.backend.security;
 
 import express.atc.backend.dto.UserDto;
 import express.atc.backend.model.TokenModel;
