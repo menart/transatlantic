@@ -1,0 +1,17 @@
+stages:
+  - deploy
+
+deploy_backend:
+  stage: deploy
+  only:
+    - develop
+  before_script:
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
+  script:
+    - ssh ${SSH_USER}@${SSH_HOST} "cd ${APP_DIR}/ta-backend && git pull origin develop"
+    - ssh ${SSH_USER}@${SSH_HOST} "cd ${APP_DIR} && docker-compose build backend"
+    - ssh ${SSH_USER}@${SSH_HOST} "cd ${APP_DIR} && docker-compose up -d backend"
