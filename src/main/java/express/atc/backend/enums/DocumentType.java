@@ -19,7 +19,7 @@ public enum DocumentType {
     BIRTH_CERTIFICATE_FOREIGN(23, "Свидетельство о рождении, выданное уполномоченным органом иностранного государства");
 
     private final Integer id;
-    private final String name;
+    private final String rus;
 
     public static DocumentType getDocumentTypeById(Integer id) {
         if (id == null) {
@@ -36,8 +36,12 @@ public enum DocumentType {
             return null;
         }
         return Stream.of(values())
-                .filter(documentType -> Objects.equals(documentType.getName(), name))
+                .filter(documentType -> Objects.equals(documentType.getRus(), name))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public String toString(){
+        return rus;
     }
 }

@@ -1,5 +1,6 @@
 package express.atc.backend.config;
 
+import express.atc.backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +14,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
@@ -24,20 +24,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
-    // Можно указать конкретный путь, * - 1 уровень вложенности, ** - любое количество уровней вложенности
-    private final List<String> PATH_WITHOUT_AUTH = Arrays.asList(
-            "/actuator/**",
-            "/api/auth/**",
-            "/swagger-ui/**",
-            "/swagger-resources/*",
-            "/v3/**",
-            "/api/tracking/find/**",
-            "/api/calculate/**",
-            "/api/payment/**",
-            "/api/landing/**",
-            "/api/payment/ctrl"
-    );
+    private final List<String> publicEndpoints;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -53,7 +40,7 @@ public class SecurityConfiguration {
                 }))
                 // Настройка доступа к конечным точкам
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers(PATH_WITHOUT_AUTH.toArray(new String[0])).permitAll()
+                        .requestMatchers(publicEndpoints.toArray(new String[0])).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

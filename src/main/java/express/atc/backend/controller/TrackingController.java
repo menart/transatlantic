@@ -16,8 +16,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Set;
-
 import static express.atc.backend.integration.robokassa.config.RobokassaConfig.ROBOKASSA_ERROR_RESPONSE;
 
 @RestController
@@ -165,9 +163,15 @@ public class TrackingController extends PrivateController {
         return trackingService.uploadFiles(files, trackNumber);
     }
 
-    @GetMapping(path = "/all/{phoneNumber}")
-    public Set<TrackingDto> loadList(@PathVariable String phoneNumber) {
-        return trackingService.getAllTrackByPhone(phoneNumber);
+    @GetMapping(path = "/load-all")
+    public Boolean loadList() {
+        return trackingService.getAllTrackByPhone();
+    }
+
+    @GetMapping("/all-archive")
+    public Boolean allArchive() {
+//        return trackingService.setToArchive();
+        return false;
     }
 
     @ApiResponses(value = {

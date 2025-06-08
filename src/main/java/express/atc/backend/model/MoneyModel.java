@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MoneyModel {
-
-    private String currency;
     private Long amount;
+    private String currency;
 }

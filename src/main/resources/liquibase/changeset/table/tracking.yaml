@@ -106,3 +106,33 @@ databaseChangeLog:
             - minValue: 1
             - sequenceName: tracking_id_seq
             - startValue: 1
+  - changeSet:
+      id: tracking:clean-01
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: HALT
+        - tableExists:
+            tableName: tracking
+      changes:
+        - sql:
+            sql: |
+              TRUNCATE TABLE tracking 
+              RESTART IDENTITY 
+              CASCADE;
+  - changeSet:
+      id: tracking:change-01
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: HALT
+        - tableExists:
+            tableName: tracking
+      changes:
+        - addColumn:
+            tableName: tracking
+            columns:
+              - column:
+                  name: provider_id
+                  type: varchar(50)
+              - column:
+                  name: status_id
+                  type: int

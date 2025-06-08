@@ -66,7 +66,6 @@ public class UserEntity {
     public boolean isFullInfo(){
         return Objects.nonNull(surname)
                 && Objects.nonNull(firstName)
-                && Objects.nonNull(lastName)
                 && Objects.nonNull(birthday);
     }
 }

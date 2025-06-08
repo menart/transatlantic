@@ -1,31 +1,47 @@
-package express.atc.backend.service.Impl;
+package express.atc.backend.security.impl;
 
+import express.atc.backend.db.entity.TokenEntity;
+import express.atc.backend.db.repository.TokenRepository;
+import express.atc.backend.dto.UserDto;
+import express.atc.backend.exception.ApiException;
+import express.atc.backend.mapper.UserDetailMapper;
+import express.atc.backend.model.TokenModel;
 import express.atc.backend.security.UserDetail;
-import express.atc.backend.service.JwtService;
+import express.atc.backend.security.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.SecretKey;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
+import static express.atc.backend.Constants.TOKEN_NOT_VALID;
+
 @Service
+@RequiredArgsConstructor
 public class JwtServiceImpl implements JwtService {
 
 
     @Value("${jwt.secret}")
     private String secret;
-    @Value("${jwt.issuer}")
-    private String issuer;
     @Value("${jwt.expiration}")
-    private Integer expirationInSecond;
+    private Long expirationInSecond;
+    @Value("${jwt.refresh}")
+    private Long expirationRefreshInMinute;
+    private final TokenRepository tokenRepository;
+    private final UserDetailMapper userDetailMapper;
 
     /**
      * Извлечение имени пользователя из токена
@@ -43,7 +59,7 @@ public class JwtServiceImpl implements JwtService {
      * @param userDetails данные пользователя
      * @return токен
      */
-    public String generateToken(UserDetails userDetails) {
+    private String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         if (userDetails instanceof UserDetail customUserDetails) {
             claims.put("id", customUserDetails.getId());
@@ -51,6 +67,16 @@ public class JwtServiceImpl implements JwtService {
             claims.put("role", customUserDetails.getRole());
         }
         return generateToken(claims, userDetails);
+    }
+
+    private UUID generateRefresh(String phone) {
+        return tokenRepository.save(
+                        TokenEntity.builder()
+                                .expiredAt(LocalDateTime.now().plusMinutes(expirationRefreshInMinute))
+                                .createdAt(LocalDateTime.now())
+                                .userPhone(phone)
+                                .build())
+                .getId();
     }
 
     /**
@@ -63,6 +89,23 @@ public class JwtServiceImpl implements JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String userName = extractPhone(token);
         return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
+    }
+
+    @Override
+    public boolean checkPhoneByRefresh(UUID refresh, String phone) {
+        return tokenRepository.findById(refresh)
+                .map(tokenEntity -> phone.equals(tokenEntity.getUserPhone()))
+                .orElseThrow(() -> new ApiException(TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED));
+    }
+
+    @Override
+    public void removeToken(UUID refresh) {
+        tokenRepository.findById(refresh).ifPresent(tokenRepository::delete);
+    }
+
+    @Override
+    public int removeExpiredTokens() {
+        return tokenRepository.removeExpired(LocalDateTime.now());
     }
 
     /**
@@ -98,7 +141,8 @@ public class JwtServiceImpl implements JwtService {
      * @param token токен
      * @return true, если токен просрочен
      */
-    private boolean isTokenExpired(String token) {
+    @Override
+    public boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
 
@@ -134,5 +178,16 @@ public class JwtServiceImpl implements JwtService {
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    @Transactional
+    @Override
+    public TokenModel generateTokens(UserDto user) {
+        return new TokenModel(
+                generateToken(userDetailMapper.toUserDetail(user)),
+                expirationInSecond,
+                generateRefresh(user.getPhone()),
+                expirationRefreshInMinute
+        );
     }
 }

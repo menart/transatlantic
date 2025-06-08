@@ -8,8 +8,6 @@ import express.atc.backend.enums.TrackingStatus;
 import express.atc.backend.exception.TrackNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Set;
-
 public interface TrackingService {
 
     TrackingDto find(String number) throws TrackNotFoundException;
@@ -21,15 +19,19 @@ public interface TrackingService {
     boolean uploadOneFile(MultipartFile file, String trackNumber);
     boolean uploadFiles(MultipartFile[] file, String trackNumber);
 
-    Set<TrackingDto> getAllTrackByPhone(String phoneNumber);
+    Boolean getAllTrackByPhone();
 
     TrackingNeedingDto need();
 
     void updateByOrderCode(String orderCode);
+
+    void setStatusNeedDocument(String getLogisticsOrderCode);
 
     void updateListTracking(String userPhone);
 
     boolean paymentConfirmation(Long orderId);
 
     String paymentControl(String outSum, Long orderId, String orderNumber, String checkSum);
+
+    Boolean setToArchive();
 }

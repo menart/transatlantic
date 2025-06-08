@@ -8,9 +8,6 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import express.atc.backend.db.entity.UserEntity;
-import express.atc.backend.enums.DocumentType;
-import express.atc.backend.serializer.DocumentTypeDeserializer;
-import express.atc.backend.serializer.DocumentTypeSerializer;
 import express.atc.backend.serializer.LocalDateValidDeserializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
@@ -34,9 +31,17 @@ public class DocumentDto {
     private Long id;
     @JsonIgnore
     private UserEntity user;
-    @JsonDeserialize(using = DocumentTypeDeserializer.class)
-    @JsonSerialize(using = DocumentTypeSerializer.class)
     @NotNull(message = DOC_TYPE_NOT_VALID)
+    @Schema(description = "Тип документа:     <br/>" +
+            "\"21 - Паспорт РФ\",<br/>" +
+            "\"10 - Паспорт иностранного гражданина\",<br/>" +
+            "\"12 - Вид на жительство в РФ\",<br/>" +
+            "\"15 - Разрешение на временное проживание в РФ\",<br/>" +
+            "\"19 - Свидетельство о предоставлении временного убежища на территории РФ\",<br/>" +
+            "\"3  - Свидетельство о рождении\",<br/>" +
+            "\"23 - Свидетельство о рождении, выданное уполномоченным органом иностранного государства\"",
+            type = "int")
+    private Integer typeId;
     @Schema(description = "Тип документа:     <br/>" +
             "\"Паспорт РФ\",<br/>" +
             "\"Паспорт иностранного гражданина\",<br/>" +
@@ -46,7 +51,7 @@ public class DocumentDto {
             "\"Свидетельство о рождении\",<br/>" +
             "\"Свидетельство о рождении, выданное уполномоченным органом иностранного государства\"",
             type = "string")
-    private DocumentType type;
+    private String type;
     @Schema(description = "Серия документа")
     private String series;
     @Schema(description = "Номер документа")
