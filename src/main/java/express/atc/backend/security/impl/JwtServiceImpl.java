@@ -69,6 +69,12 @@ public class JwtServiceImpl implements JwtService {
         return generateToken(claims, userDetails);
     }
 
+    /**
+     * Генерация и сохранение refresh токена
+     *
+     * @param phone номер телефона пользователя
+     * @return идентификатор сгенерированного refresh токена
+     */
     private UUID generateRefresh(String phone) {
         return tokenRepository.save(
                         TokenEntity.builder()
@@ -91,6 +97,14 @@ public class JwtServiceImpl implements JwtService {
         return (userName.equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
+    /**
+     * Проверка принадлежности refresh токена указанному пользователю
+     *
+     * @param refresh идентификатор refresh токена
+     * @param phone   номер телефона пользователя для проверки
+     * @return true, если refresh токен существует и принадлежит пользователю
+     * @throws ApiException если токен не найден или невалиден (HTTP 401)
+     */
     @Override
     public boolean checkPhoneByRefresh(UUID refresh, String phone) {
         return tokenRepository.findById(refresh)
@@ -98,11 +112,21 @@ public class JwtServiceImpl implements JwtService {
                 .orElseThrow(() -> new ApiException(TOKEN_NOT_VALID, HttpStatus.UNAUTHORIZED));
     }
 
+    /**
+     * Удаление refresh токена по идентификатору
+     *
+     * @param refresh идентификатор refresh токена для удаления
+     */
     @Override
     public void removeToken(UUID refresh) {
         tokenRepository.findById(refresh).ifPresent(tokenRepository::delete);
     }
 
+    /**
+     * Удаление всех просроченных refresh токенов
+     *
+     * @return количество удаленных токенов
+     */
     @Override
     public int removeExpiredTokens() {
         return tokenRepository.removeExpired(LocalDateTime.now());
@@ -113,8 +137,8 @@ public class JwtServiceImpl implements JwtService {
      *
      * @param token           токен
      * @param claimsResolvers функция извлечения данных
-     * @param <T>             тип данных
-     * @return данные
+     * @param <T>             тип извлекаемых данных
+     * @return извлеченные данные
      */
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolvers) {
         final Claims claims = extractAllClaims(token);
@@ -122,11 +146,11 @@ public class JwtServiceImpl implements JwtService {
     }
 
     /**
-     * Генерация токена
+     * Генерация JWT токена с дополнительными данными
      *
-     * @param extraClaims дополнительные данные
+     * @param extraClaims дополнительные данные для включения в токен
      * @param userDetails данные пользователя
-     * @return токен
+     * @return сгенерированный JWT токен
      */
     private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
@@ -147,20 +171,20 @@ public class JwtServiceImpl implements JwtService {
     }
 
     /**
-     * Извлечение даты истечения токена
+     * Извлечение даты истечения срока действия токена
      *
-     * @param token токен
-     * @return дата истечения
+     * @param token JWT токен
+     * @return дата истечения срока действия
      */
     private Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
     /**
-     * Извлечение всех данных из токена
+     * Извлечение всех данных (claims) из токена
      *
-     * @param token токен
-     * @return данные
+     * @param token JWT токен
+     * @return все данные из токена
      */
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
@@ -173,13 +197,19 @@ public class JwtServiceImpl implements JwtService {
     /**
      * Получение ключа для подписи токена
      *
-     * @return ключ
+     * @return секретный ключ
      */
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
+    /**
+     * Генерация пары токенов (access + refresh) для пользователя
+     *
+     * @param user DTO пользователя
+     * @return модель сгенерированных токенов
+     */
     @Transactional
     @Override
     public TokenModel generateTokens(UserDto user) {

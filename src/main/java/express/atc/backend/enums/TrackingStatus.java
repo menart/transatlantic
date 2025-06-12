@@ -10,7 +10,8 @@ public enum TrackingStatus {
     NEED_DOCUMENT(false),
     PAYMENT_CONFIRMATION(false),
     ACTIVE(false),
-    ARCHIVE(false);
+    ARCHIVE(false),
+    IGNORE(false);
 
     private final boolean isNeedAction;
 }

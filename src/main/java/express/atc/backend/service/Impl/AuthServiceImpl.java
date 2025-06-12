@@ -124,7 +124,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponseModel registration(RegistrationDto registration) {
-        validateCode(registration.phone(), registration.code());
+        validateCode(registration.code(), registration.phone());
         var user = userService.registrationUser(registration);
         trackingService.updateListTracking(registration.phone());
         return new AuthResponseModel(jwtService.generateTokens(user), user);

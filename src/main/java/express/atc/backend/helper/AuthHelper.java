@@ -26,7 +26,7 @@ public class AuthHelper {
         response.addHeader("Set-Cookie",
                 setCookie(REFRESH_TOKEN,
                         tokens.refreshToken().toString(),
-                        Duration.ofMinutes(tokens.accessTokenExpiresIn()).getSeconds(),
+                        Duration.ofMinutes(tokens.refreshTokenExpiresIn()).getSeconds(),
                         secure).toString());
     }
 
@@ -54,7 +54,7 @@ public class AuthHelper {
                 .httpOnly(true)
                 .secure(secure)
                 .path(path)
-//                .sameSite("Strict")
+                .sameSite("Strict")
                 .maxAge(age)
                 .build();
     }

@@ -78,3 +78,14 @@ databaseChangeLog:
             separator: ';' # символ, разделяющий столбцы в файле. Если это запятая, то параметр можно пропустить
             quotchar: '"' # в какие кавычки будет экранироваться элемент, строки если в нем есть знак, разделяющий столбцы. По умолчанию "
             file: "liquibase/changeset/csv/statuses.01.csv"
+  - changeSet:
+      id: statuses:update01
+      author: Artamonov Aleksander
+      changes:
+        - update:
+            columns:
+              - column:
+                  name: map_status
+                  value: IGNORE
+            tableName: statuses
+            where: map_status='NEED_DOCUMENT'

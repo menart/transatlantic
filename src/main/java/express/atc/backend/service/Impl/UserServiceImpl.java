@@ -66,6 +66,7 @@ public class UserServiceImpl implements UserService {
         UserEntity entity = getUserByPhone(userInfo.getPhone())
                 .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND));
         entity = userMapper.toEntity(userInfo)
+                .setPassword(entity.getPassword())
                 .setId(entity.getId())
                 .setRole(entity.getRole());
         entity.setEnable(entity.isFullInfo());

@@ -1,6 +1,7 @@
 package express.atc.backend.config;
 
 import express.atc.backend.enums.convert.StringToEnumConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
@@ -11,6 +12,9 @@ import java.util.List;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    @Value("${project.url}")
+    private String ourServer;
 
     @Bean
     public List<String> publicEndpoints() {

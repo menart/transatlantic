@@ -2,7 +2,6 @@ package express.atc.backend.controller;
 
 import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.exception.ApiException;
-import express.atc.backend.exception.AuthSmsException;
 import express.atc.backend.exception.TrackNotFoundException;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.mail.MessagingException;
@@ -44,15 +43,6 @@ public class ErrorHandlingControllerAdvice {
         List<String> error = Stream.concat(fieldErrors, globalErrors).toList();
 
         return new ErrorResponseDto(HttpStatus.BAD_REQUEST.getReasonPhrase(), error);
-    }
-
-
-    @ResponseBody
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(AuthSmsException.class)
-    public ErrorResponseDto handleAuthSmsException(AuthSmsException ex) {
-        return new ErrorResponseDto(HttpStatus.UNAUTHORIZED.getReasonPhrase(),
-                Collections.singletonList(ex.getMessage()));
     }
 
     @ResponseBody

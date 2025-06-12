@@ -212,6 +212,11 @@ public class TrackingServiceImpl implements TrackingService {
                 .orElse(trackingRepository.save(findByCargoFlow(logisticsOrderCode)));
         updateRoute(entity);
         entity.setStatus(NEED_DOCUMENT);
+        messageFacade.sendTrackingInfo(
+                entity.getUserPhone(),
+                entity.getStatus(),
+                entity.getOrderNumber(),
+                entity.getMarketplace());
         trackingRepository.save(entity);
     }
 
@@ -232,7 +237,7 @@ public class TrackingServiceImpl implements TrackingService {
         return calculate;
     }
 
-    private TrackingEntity updateRoute(TrackingEntity entity) {
+    private TrackingEntity  updateRoute(TrackingEntity entity) {
         var maxRouteId = entity.getRoutes() != null ?
                 entity.getRoutes().stream()
                         .map(TrackingRouteEntity::getRouteId)
@@ -255,15 +260,16 @@ public class TrackingServiceImpl implements TrackingService {
         var lastRoute = new TreeSet<>(entity.getRoutes()).last();
         if (!Objects.equals(maxRouteId, lastRoute.getRouteId())) {
             var status = statusService.getStatus(lastRoute.getStatus()).mapStatus();
-            if (!status.isNeedAction() || workProviderIds.contains(entity.getProviderId())) {
+            if (!status.equals(IGNORE)
+                    && (!status.isNeedAction() || workProviderIds.contains(entity.getProviderId()))
+            ) {
                 entity.setStatus(status);
+                messageFacade.sendTrackingInfo(
+                        entity.getUserPhone(),
+                        entity.getStatus(),
+                        entity.getOrderNumber(),
+                        entity.getMarketplace());
             }
-            entity.setStatus(status);
-            messageFacade.sendTrackingInfo(
-                    entity.getUserPhone(),
-                    entity.getStatus(),
-                    entity.getOrderNumber(),
-                    entity.getMarketplace());
             trackingRepository.save(entity);
         }
         return entity;
