@@ -212,7 +212,8 @@ public class TrackingServiceImpl implements TrackingService {
         var entity = trackingRepository.findByTrack(logisticsOrderCode)
                 .orElse(trackingRepository.save(findByCargoFlow(logisticsOrderCode)));
         updateRoute(entity);
-        entity.setStatus(FIRST_NEED_DOCUMENT);
+//        entity.setStatus(FIRST_NEED_DOCUMENT);
+        entity.setStatus(NEED_DOCUMENT);
         entity.setFlagNeedDocument(true);
         messageFacade.sendTrackingInfo(
                 entity.getUserPhone(),
