@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <style>
+        p {
+            text-indent: 5em each-line;
+        }
+    </style>
+</head>
+<body>
+<H1>Уважаемый клиент!</H1>
+<div style="background-color: #eee; border: 1px dotted black; padding: 5px; margin: 5px; border-radius: 5px">
+    <p>В ваш адрес направлен экспресс-груз <span style="font-weight: bold" th:text="${trackNumber}"/>,
+        приобретённый вами в <span style="font-weight: bold" th:text="${marketplace}"/>.</p>
+    <p>Настоящим информируем, что прибывшие товары подлежат процедуре обязательного таможенного декларирования
+        (Соглашение стран членов ТС от 18.06.2010 «О Порядке перемещения физическими лицами товаров для личного
+        пользования через таможенную границу Таможенного Союза и совершения таможенных операций, связанных с их
+        выпуском»).</p>
+    <p>Для проведения таможенного декларирования Вам необходимо предоставить в таможенные органы РФ документы и персональные сведения.</p>
+    <p>Информация и форма для представления сведений на сайте <a th:href="${ourUrl + '/auth'}" th:text="${ourUrl + '/auth'}"></a></p>
+</div>
+</body>
+</html>

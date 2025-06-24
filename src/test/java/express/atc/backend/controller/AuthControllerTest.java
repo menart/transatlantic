@@ -1,149 +1,239 @@
-//package express.atc.backend.controller;
-//
-//import express.atc.backend.AbstractControllerTest;
-//import express.atc.backend.db.entity.AuthSmsEntity;
-//import express.atc.backend.db.repository.AuthSmsRepository;
-//import express.atc.backend.dto.AuthSmsDto;
-//import express.atc.backend.dto.ErrorResponseDto;
-//import express.atc.backend.dto.ValidateSmsDto;
-//import express.atc.backend.service.MessageService;
-//import lombok.SneakyThrows;
-//import lombok.extern.slf4j.Slf4j;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.params.ParameterizedTest;
-//import org.junit.jupiter.params.provider.Arguments;
-//import org.junit.jupiter.params.provider.MethodSource;
-//import org.mockito.ArgumentCaptor;
-//import org.springframework.beans.factory.annotation.Value;
-//import org.springframework.boot.test.mock.mockito.MockBean;
-//import org.springframework.http.MediaType;
-//
-//import java.util.List;
-//import java.util.Optional;
-//import java.util.stream.Stream;
-//
-//import static express.atc.backend.Constants.*;
-//import static org.mockito.ArgumentMatchers.any;
-//import static org.mockito.Mockito.*;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-//
-//@Slf4j
-//class AuthControllerTest extends AbstractControllerTest {
-//
-//    @Value(value = "${auth.time_hold_sms}")
-//    private int TIME_HOLD_SMS;
-//    private final String webPath = "/api/auth";
-//    private final String makePath = webPath + "/make";
-//    private final String validatePath = webPath + "/validate";
-//    private final String getPath = webPath + "/sms";
-//
-//    @MockBean
-//    private AuthSmsRepository authSmsRepository;
-//    @MockBean
-//    private MessageService messageService;
-//
-//    @Test
-//    @SneakyThrows
-//    void makeCodeOkTest() {
-//        var request = new AuthSmsDto(
-//                "79174165380"
-//        );
-//        when(authSmsRepository.save(any()))
-//                .then(invocation -> invocation.getArgument(0));
-//        ArgumentCaptor<AuthSmsEntity> actualArgumentCaptor =
-//                ArgumentCaptor.forClass(AuthSmsEntity.class);
-//        mvc.perform(post(makePath)
-//                        .content(objectMapper.writeValueAsString(request))
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$").isNumber())
-//                .andExpect(jsonPath("$").value(TIME_HOLD_SMS));
-//        verify(authSmsRepository, times(1))
-//                .save(actualArgumentCaptor.capture());
-//        var authSmsEntity = actualArgumentCaptor.getValue();
-//        verify(messageService, times(1))
-//                .send(request.phone(), String.format(SMS_CODE_MESSAGE, authSmsEntity.getCode()));
-//    }
-//
-//    @SneakyThrows
-//    @ParameterizedTest
-//    @MethodSource("failMakeCode")
-//    void makeCodeFalseTest(String phone, boolean agree, List<String> errorResponse) {
-//        var request = new AuthSmsDto(phone);
-//        var response = new ErrorResponseDto("Bad Request", errorResponse);
-//        when(authSmsRepository.save(any()))
-//                .then(invocation -> invocation.getArgument(0));
-//        mvc.perform(post(makePath)
-//                        .content(objectMapper.writeValueAsString(request))
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isBadRequest())
-//                .andExpect(content().json(objectMapper.writeValueAsString(response)));
-//        verify(authSmsRepository, times(0)).save(any());
-//        verify(messageService, times(0)).send(any(), any());
-//    }
-//
-//    @Test
-//    @SneakyThrows
-//    void makeCodeShortTimeTest() {
-//        var request = new AuthSmsDto("79174165380", true);
-//        var response = new ErrorResponseDto("Unauthorized", List.of(MESSAGE_SMALL_INTERVAL));
-//        when(authSmsRepository.save(any()))
-//                .then(invocation -> invocation.getArgument(0));
-//        mvc.perform(post(makePath)
-//                        .content(objectMapper.writeValueAsString(request))
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$").isNumber())
-//                .andExpect(jsonPath("$").value(TIME_HOLD_SMS));
-//
-//        Thread.sleep(TIME_HOLD_SMS - 1);
-//        when(authSmsRepository.countByIpaddressAndCreatedAtAfter(any(), any()))
-//                .thenReturn(1);
-//        mvc.perform(post(webPath + "/make")
-//                        .content(objectMapper.writeValueAsString(request))
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isUnauthorized())
-//                .andExpect(content().json(objectMapper.writeValueAsString(response)));
-//        verify(authSmsRepository, times(1)).save(any());
-//        verify(messageService, times(1)).send(any(), any());
-//    }
-//
-//    @Test
-//    @SneakyThrows
-//    void validateCode() {
-//        var request = new ValidateSmsDto("79174165380", "1234");
-//        when(authSmsRepository
-//                .findFirstByPhoneAndCodeAndCreatedAtAfter(
-//                        eq(request.phone()), eq(request.code()), notNull()))
-//                .thenReturn(Optional.of(new AuthSmsEntity()));
-//        mvc.perform(post(validatePath)
-//                        .content(objectMapper.writeValueAsString(request))
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk());
-//    }
-//
-//    @Test
-//    @SneakyThrows
-//    void getSms() {
-//        String phone = "79174165380";
-//        String code = "0123";
-//        when(authSmsRepository.findFirstByPhoneOrderByCreatedAtDesc(phone))
-//                .thenReturn(Optional.of(AuthSmsEntity.builder()
-//                        .code(code)
-//                        .build()));
-//        mvc.perform(get(getPath)
-//                        .queryParam("phone", phone))
-//                .andExpect(status().isOk())
-//                .andExpect(content().string(code));
-//    }
-//
-//    public static Stream<Arguments> failMakeCode() {
-//        return Stream.of(
-//                Arguments.of("79174165380", false, List.of(DISAGREE)),
-//                Arguments.of("1", true, List.of(PHONE_NOT_VALID)),
-//                Arguments.of("1", false, List.of(PHONE_NOT_VALID, DISAGREE))
-//        );
-//    }
-//}
+package express.atc.backend.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import express.atc.backend.dto.*;
+import express.atc.backend.enums.Language;
+import express.atc.backend.enums.UserRole;
+import express.atc.backend.exception.AuthSmsException;
+import express.atc.backend.mapper.UserDetailMapper;
+import express.atc.backend.mapper.UserMapper;
+import express.atc.backend.model.AuthResponseModel;
+import express.atc.backend.model.TokenModel;
+import express.atc.backend.service.AuthService;
+import express.atc.backend.security.JwtService;
+import express.atc.backend.service.UserService;
+import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import static express.atc.backend.Constants.REFRESH_TOKEN;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(controllers = AuthController.class)
+@AutoConfigureMockMvc(addFilters = false) // Отключаем все фильтры
+@ContextConfiguration(classes = AuthControllerTest.TestConfig.class)
+@Import(ErrorHandlingControllerAdvice.class)
+public class AuthControllerTest {
+
+    @Configuration
+    @Import(AuthController.class)
+    static class TestConfig {
+        @Bean
+        public RequestInfo requestInfo() {
+            return new RequestInfo();
+        }
+    }
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private AuthService authService;
+
+    @MockitoBean
+    private UserService userService;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private UserMapper userMapper;
+
+    @MockitoBean
+    private UserDetailMapper userDetailMapper;
+
+    @Autowired
+    private RequestInfo requestInfo; // Внедряем бин RequestInfo
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    // Создание валидного UserDto для тестов
+    private UserDto createValidUserDto() {
+        DocumentDto document = new DocumentDto();
+        document.setTypeId(21); // Паспорт РФ
+        document.setSeries("1234");
+        document.setNumber("567890");
+        document.setIssueDate(LocalDate.now().minusYears(5));
+        document.setExpiredDate(LocalDate.now().plusYears(5));
+
+        return UserDto.builder()
+                .id(1L)
+                .email("test@mail.ru")
+                .phone("79991234567")
+                .firstName("Test")
+                .lastName("User")
+                .surname("Surname")
+                .birthday(LocalDate.now().minusYears(30))
+                .document(document)
+                .inn("123456789012")
+                .language(Language.RU)
+                .confirmationEmail(true)
+                .agree(true)
+                .role(UserRole.ROLE_USER)
+                .build();
+    }
+
+    // Создание валидного TokenModel
+    private TokenModel createValidTokenModel() {
+        return new TokenModel(
+                "access_token",
+                30L, // accessTokenExpiresIn в минутах
+                UUID.randomUUID(),
+                1440L // refreshTokenExpiresIn в минутах
+        );
+    }
+
+    // Создание UserShortDto
+    private UserShortDto createUserShortDto() {
+        return new UserShortDto(
+                "Test",
+                "User",
+                "Surname",
+                LocalDate.now().minusYears(30),
+                "test@mail.ru",
+                true
+        );
+    }
+
+    @Test
+    void makeCode_Success() throws Exception {
+        AuthSmsDto request = new AuthSmsDto("79991234567");
+        Mockito.when(authService.makeCode(anyString(), any())).thenReturn(60);
+
+        MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.post("/api/auth/make")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+                .with(req -> {
+                    req.setRemoteAddr("192.168.1.1"); // Устанавливаем IP напрямую
+                    return req;
+                });
+
+        mockMvc.perform(builder)
+                .andExpect(status().isOk())
+                .andExpect(content().string("60"));
+    }
+
+    @Test
+    void validateCode_Success() throws Exception {
+        ValidateSmsDto request = new ValidateSmsDto("79991234567", "1234");
+        AuthResponseModel responseModel = new AuthResponseModel(
+                createValidTokenModel(),
+                createValidUserDto()
+        );
+
+        Mockito.when(userMapper.toShortDto(any())).thenReturn(createUserShortDto());
+        Mockito.when(authService.validateCode(any())).thenReturn(responseModel);
+
+        MockHttpServletResponse response = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse();
+
+        assertNotNull(response.getCookie(REFRESH_TOKEN));
+        assertNotNull(response.getCookie("access_token"));
+    }
+
+    @Test
+    void getSms_WhenEnabled_ReturnsCode() throws Exception {
+        Mockito.when(authService.getSms(anyString())).thenReturn("654321");
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/auth/sms")
+                        .param("phone", "79991234567"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("654321"));
+    }
+
+    @Test
+    void auth_Success() throws Exception {
+        LoginDto request = new LoginDto("test@mail.ru", "password");
+        AuthResponseModel responseModel = new AuthResponseModel(
+                createValidTokenModel(),
+                createValidUserDto()
+        );
+
+        Mockito.when(userMapper.toShortDto(any())).thenReturn(createUserShortDto());
+        Mockito.when(authService.login(any())).thenReturn(responseModel);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/auth")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void logout_RemovesCookies() throws Exception {
+        UUID refreshToken = UUID.randomUUID();
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/auth/logout")
+                        .cookie(new Cookie(REFRESH_TOKEN, refreshToken.toString())))
+                .andExpect(status().isOk())
+                .andExpect(cookie().maxAge("access_token", 0))
+                .andExpect(cookie().maxAge(REFRESH_TOKEN, 0));
+    }
+
+    @Test
+    void validateCode_InvalidCode_ThrowsException() throws Exception {
+        ValidateSmsDto request = new ValidateSmsDto("79991234567", "7777");
+        Mockito.when(authService.validateCode(any())).thenThrow(new AuthSmsException("Invalid code"));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/validate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void registration_Success() throws Exception {
+        RegistrationDto request = new RegistrationDto(
+                "79991234567",
+                "test@mail.ru",
+                "password",
+                "password", // confirmation
+                true,       // agree
+                "123456"    // code
+        );
+
+        AuthResponseModel responseModel = new AuthResponseModel(
+                createValidTokenModel(),
+                createValidUserDto()
+        );
+
+        Mockito.when(userMapper.toShortDto(any())).thenReturn(createUserShortDto());
+        Mockito.when(authService.registration(any())).thenReturn(responseModel);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/registration")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+    }
+}

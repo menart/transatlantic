@@ -1,0 +1,24 @@
+stages:
+  - deploy
+
+deploy_backend:
+  tags:
+    - deploy
+  stage: deploy
+  only:
+    - develop
+  before_script:
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | base64 -d > ~/.ssh/id_ed25519
+    - chmod 600 ~/.ssh/id_ed25519
+    - ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+  script:
+    - echo "Проверка  SSH-ключа:"
+    - ssh-keygen -l -f ~/.ssh/id_ed25519
+    - echo "Тестирование подключения:"
+    - ssh -v -i ~/.ssh/id_ed25519 ${SSH_USER}@${SSH_HOST} "echo 'SSH connection successful!'"
+    - ssh ${SSH_USER}@${SSH_HOST} "cd ${APP_DIR}/backend && git config --global --add safe.directory '*'"
+    - ssh ${SSH_USER}@${SSH_HOST} "cd ${APP_DIR}/backend && git pull origin develop"
+    - ssh ${SSH_USER}@${SSH_HOST} "cd ${APP_DIR} && docker-compose build backend"
+    - ssh ${SSH_USER}@${SSH_HOST} "cd ${APP_DIR} && docker-compose up -d backend"

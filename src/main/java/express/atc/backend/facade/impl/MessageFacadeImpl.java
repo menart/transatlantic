@@ -37,6 +37,19 @@ public class MessageFacadeImpl implements MessageFacade {
         emailInfo.put("ourUrl", ourUrl);
         try {
             switch (status) {
+                case FIRST_NEED_DOCUMENT -> {
+                    log.info("Sending FIRST_NEED_DOCUMENT to {}", userPhone);
+                    var user = userService.findOrCreateByPhone(userPhone);
+                    smsMessageService.send(user.getPhone(), String.format(SMS_FIRST_NEED_DOCUMENT, orderNumber, marketplace, ourUrl));
+                    if (user.getEmail() != null) {
+                        emailMessageService.sendMessageUsingTemplate(
+                                user.getEmail(),
+                                String.format(EMAIL_TITLE_FIRST_NEED_DOCUMENT, orderNumber, marketplace),
+                                emailInfo,
+                                "first_need_document.html"
+                        );
+                    }
+                }
                 case NEED_DOCUMENT -> {
                     log.info("Sending NEED_DOCUMENT to {}", userPhone);
                     var user = userService.findOrCreateByPhone(userPhone);

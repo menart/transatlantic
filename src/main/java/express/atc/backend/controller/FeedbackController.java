@@ -2,9 +2,9 @@ package express.atc.backend.controller;
 
 import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.dto.FeedbackFieldDto;
+import express.atc.backend.dto.RequestInfo;
 import express.atc.backend.enums.FeedbackType;
 import express.atc.backend.service.FeedbackService;
-import express.atc.backend.service.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,7 +25,7 @@ import java.util.List;
 public class FeedbackController extends PrivateController {
 
     private final FeedbackService feedbackService;
-    private final JwtService jwtService;
+    private final RequestInfo requestInfo;
 
     @Operation(summary = "Запись сообщения для обратной связи")
     @ApiResponses(value = {
@@ -40,8 +40,7 @@ public class FeedbackController extends PrivateController {
     })
     @PostMapping
     public FeedbackFieldDto saveFeedback(@RequestBody FeedbackFieldDto feedbackField) {
-        var token = getToken();
-        String userPhone = token != null ? jwtService.extractPhone(token) : null;
+        String userPhone = requestInfo.getUser() != null ? requestInfo.getUser().getPhone() : null;
         return feedbackService.saveFeedback(feedbackField, FeedbackType.QUESTION, userPhone);
     }
 
@@ -59,8 +58,7 @@ public class FeedbackController extends PrivateController {
     })
     @GetMapping
     public List<FeedbackFieldDto> getListFeedback() {
-        var token = getToken();
-        String userPhone = token != null ? jwtService.extractPhone(token) : null;
+        String userPhone = requestInfo.getUser() != null ? requestInfo.getUser().getPhone() : null;
         return feedbackService.getListFeedback(userPhone);
     }
 }

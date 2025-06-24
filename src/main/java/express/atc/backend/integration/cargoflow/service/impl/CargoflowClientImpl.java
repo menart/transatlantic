@@ -2,6 +2,7 @@ package express.atc.backend.integration.cargoflow.service.impl;
 
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.integration.cargoflow.dto.*;
+import express.atc.backend.integration.cargoflow.enums.CargoflowView;
 import express.atc.backend.integration.cargoflow.service.CargoflowClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +33,9 @@ public class CargoflowClientImpl implements CargoflowClient {
     private final WebClient cargoflowListOrderWebClient;
 
     @Override
-    public <T> List<T> getFromCargoflowEntity(List<ConditionDto> condition, String entity, Class<T> response) {
-        var request = new RequestDto(new FilterDto(condition), "_local");
+    public <T> List<T> getFromCargoflowEntity(List<ConditionDto> condition, String entity,
+                                              CargoflowView view, Class<T> response) {
+        var request = new RequestDto(new FilterDto(condition), view.getView());
         var responseList = cargoflowEntityWebClient
                 .post()
                 .uri(uriBuilder -> uriBuilder.build(entity))
@@ -44,6 +46,11 @@ public class CargoflowClientImpl implements CargoflowClient {
                 .block();
         log.info("receive count: {}", CollectionUtils.isNotEmpty(responseList) ? responseList.size() : 0);
         return responseList;
+    }
+
+    @Override
+    public <T> List<T> getFromCargoflowEntity(List<ConditionDto> condition, String entity, Class<T> response) {
+        return getFromCargoflowEntity(condition, entity, CargoflowView.LOCAL, response);
     }
 
     @Override

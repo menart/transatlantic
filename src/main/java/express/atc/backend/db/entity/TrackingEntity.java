@@ -2,8 +2,8 @@ package express.atc.backend.db.entity;
 
 import express.atc.backend.dto.OrdersDto;
 import express.atc.backend.enums.TrackingStatus;
-import jakarta.persistence.*;
 import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.Accessors;
 import org.hibernate.annotations.*;
@@ -15,7 +15,6 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Builder(toBuilder = true)
 @Accessors(chain = true)
 @Table(name = "tracking")
 @AllArgsConstructor
@@ -57,8 +56,17 @@ public class TrackingEntity {
     private LocalDateTime orderDatetime;
 
     @Column
+    private TrackingStatus statusId = TrackingStatus.ACTIVE;
+
+    @Column
     @Enumerated(EnumType.STRING)
     private TrackingStatus status = TrackingStatus.ACTIVE;
+
+    @Column
+    private String providerId;
+
+    @Column
+    private Boolean flagNeedDocument = false;
 
     @OneToMany(mappedBy = "tracking")
     @Fetch(FetchMode.JOIN)
@@ -69,5 +77,11 @@ public class TrackingEntity {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    public TrackingEntity setStatus(TrackingStatus status) {
+        this.status = status;
+        this.statusId = this.status;
+        return this;
+    }
 
 }

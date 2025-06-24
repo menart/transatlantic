@@ -22,7 +22,7 @@ public class PersonInfoNeedListener {
     public void listenerPD(String message) {
         if (StringUtils.isNotEmpty(message)) {
             log.info("RabbitMQ pd read message: {}", message);
-            processing(message);
+            processingNeedDocument(message);
         }
     }
 
@@ -40,6 +40,18 @@ public class PersonInfoNeedListener {
             log.info("Rabbit MQ {}", dto);
             if (dto.getLogisticsOrderCode() != null || dto.getTrackingNumber() != null) {
                 rabbitMqService.processing(dto);
+            }
+        } catch (JsonProcessingException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void processingNeedDocument(String message) {
+        try {
+            PersonInfoNeedDto dto = objectMapper.readValue(message, PersonInfoNeedDto.class);
+            log.info("Rabbit MQ Need Documents:  {}", dto);
+            if (dto.getLogisticsOrderCode() != null || dto.getTrackingNumber() != null) {
+                rabbitMqService.processingNeedDocument(dto);
             }
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
