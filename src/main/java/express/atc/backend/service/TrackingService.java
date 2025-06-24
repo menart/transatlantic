@@ -25,7 +25,7 @@ public interface TrackingService {
 
     void updateByOrderCode(String orderCode);
 
-    void setStatusNeedDocument(String getLogisticsOrderCode);
+    void setStatusFirstNeedDocument(String getLogisticsOrderCode);
 
     void updateListTracking(String userPhone);
 

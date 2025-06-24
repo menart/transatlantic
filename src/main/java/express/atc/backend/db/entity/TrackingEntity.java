@@ -65,6 +65,9 @@ public class TrackingEntity {
     @Column
     private String providerId;
 
+    @Column
+    private Boolean flagNeedDocument = false;
+
     @OneToMany(mappedBy = "tracking")
     @Fetch(FetchMode.JOIN)
     private Set<TrackingRouteEntity> routes;

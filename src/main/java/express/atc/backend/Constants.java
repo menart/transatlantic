@@ -45,10 +45,12 @@ public class Constants {
     public static final String SMS_NEED_PAYMENT = "Уважаемый клиент!\n" +
             "Для получения экспресс-груза %s, приобретённого в %s, " +
             "необходимо оплатить таможенные пошлины. Оплата доступна на сайте %s/auth в разделе заказы";
+    public static final String SMS_FIRST_NEED_DOCUMENT = "Уважаемый клиент!\n" +
+            "Для получения экспресс-груза %s, приобретённого в %s, Вам необходимо предоставить документы и персональные сведения на сайте %s/auth";
     public static final String SMS_NEED_DOCUMENT = "Уважаемый клиент!\n" +
-            "Для получения экспресс-груза %s, приобретённого в %s, Вам необходимо предоставить документы и сведения на сайте %s/auth";
-
+            "Для получения экспресс-груза %s, приобретённого в %s, Вам необходимо предоставить дополнительные документы и сведения на сайте %s/auth";
     //Email title
-    public static final String EMAIL_TITLE_NEED_DOCUMENT = "Предоставление документов для получения экспресс-груза  %s,  приобретённого в %s";
+    public static final String EMAIL_TITLE_FIRST_NEED_DOCUMENT = "Предоставление документов для получения экспресс-груза  %s,  приобретённого в %s";
+    public static final String EMAIL_TITLE_NEED_DOCUMENT = "Предоставление дополнительных документов для получения экспресс-груза  %s,  приобретённого в %s";
     public static final String EMAIL_TITLE_NEED_PAYMENT = "Оплата таможенных пошлин по экспресс-грузу %s, приобретённого в %s";
 }

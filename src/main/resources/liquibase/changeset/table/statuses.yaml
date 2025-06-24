@@ -89,3 +89,14 @@ databaseChangeLog:
                   value: IGNORE
             tableName: statuses
             where: map_status='NEED_DOCUMENT'
+  - changeSet:
+      id: statuses:update02
+      author: Artamonov Aleksander
+      changes:
+        - update:
+            columns:
+              - column:
+                  name: map_status
+                  value: NEED_DOCUMENT
+            tableName: statuses
+            where: map_status='IGNORE'

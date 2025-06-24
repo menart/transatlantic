@@ -136,3 +136,18 @@ databaseChangeLog:
               - column:
                   name: status_id
                   type: int
+  - changeSet:
+      id: tracking:change-02
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: HALT
+        - tableExists:
+            tableName: tracking
+      changes:
+        - addColumn:
+            tableName: tracking
+            columns:
+              - column:
+                  name: flag_need_document
+                  type: boolean
+                  defaultValueBoolean: false
