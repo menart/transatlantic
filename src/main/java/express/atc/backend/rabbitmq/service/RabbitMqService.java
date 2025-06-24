@@ -19,6 +19,6 @@ public class RabbitMqService {
 
 
     public void processingNeedDocument(PersonInfoNeedDto dto) {
-        trackingService.setStatusNeedDocument(dto.getLogisticsOrderCode());
+        trackingService.setStatusFirstNeedDocument(dto.getLogisticsOrderCode());
     }
 }

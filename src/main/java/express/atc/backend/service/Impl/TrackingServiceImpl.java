@@ -156,13 +156,13 @@ public class TrackingServiceImpl implements TrackingService {
                 .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
         var calc = calcTrack(entity.getGoods(), entity.getOrderId(), orderNumber, null);
         log.info("payment dto,: {}", calc);
-        log.info("payment parameters,: {}, {}, {}, {}", Double.parseDouble(outSum) * 100, orderId, orderNumber, checkSum);
+        log.info("payment parameters,: {}, {}, {}, {}", Double.parseDouble(outSum) * 100L, orderId, orderNumber, checkSum);
         try {
-            if (!calc.getPaid().equals((long) Math.round(Double.parseDouble(outSum) * 100))) {
+            if (!calc.getPaid().equals(Math.round(Double.parseDouble(outSum) * 100L))) {
                 throw new ApiException(PAYMENT_NOT_EQUALS, HttpStatus.BAD_REQUEST);
             }
         } catch (NumberFormatException exception) {
-            log.error("{}", exception.fillInStackTrace());
+            log.error("{}", exception.getMessage(), exception);
             throw new ApiException(exception.getMessage(), HttpStatus.BAD_REQUEST);
         }
         String request = robokassaService.paymentResult(outSum, orderId, orderNumber, checkSum);
@@ -186,7 +186,7 @@ public class TrackingServiceImpl implements TrackingService {
         try {
             updateListTracking(requestInfo.getUser().getPhone());
         } catch (Error e) {
-            log.error("get list for user {}: error: {}", requestInfo.getUser().getPhone(), e);
+            log.error("get list for user {}: error: ", requestInfo.getUser().getPhone(), e);
         }
         return true;
     }
@@ -195,7 +195,8 @@ public class TrackingServiceImpl implements TrackingService {
     public TrackingNeedingDto need() {
         String userPhone = requestInfo.getUser().getPhone();
         List<String> needPay = trackingRepository.findOrderNumberByNeed(userPhone, NEED_PAYMENT);
-        List<String> needDocument = trackingRepository.findOrderNumberByNeed(userPhone, NEED_DOCUMENT);
+        List<String> needDocument = trackingRepository.findOrderNumberByNeed(userPhone, FIRST_NEED_DOCUMENT);
+        needDocument.addAll(trackingRepository.findOrderNumberByNeed(userPhone, NEED_DOCUMENT));
         return new TrackingNeedingDto(needPay, needDocument);
     }
 
@@ -207,11 +208,13 @@ public class TrackingServiceImpl implements TrackingService {
         updateRoute(entity);
     }
 
-    public void setStatusNeedDocument(String logisticsOrderCode) {
+    public void setStatusFirstNeedDocument(String logisticsOrderCode) {
         var entity = trackingRepository.findByTrack(logisticsOrderCode)
                 .orElse(trackingRepository.save(findByCargoFlow(logisticsOrderCode)));
         updateRoute(entity);
+//        entity.setStatus(FIRST_NEED_DOCUMENT);
         entity.setStatus(NEED_DOCUMENT);
+        entity.setFlagNeedDocument(true);
         messageFacade.sendTrackingInfo(
                 entity.getUserPhone(),
                 entity.getStatus(),
@@ -237,7 +240,7 @@ public class TrackingServiceImpl implements TrackingService {
         return calculate;
     }
 
-    private TrackingEntity  updateRoute(TrackingEntity entity) {
+    private TrackingEntity updateRoute(TrackingEntity entity) {
         var maxRouteId = entity.getRoutes() != null ?
                 entity.getRoutes().stream()
                         .map(TrackingRouteEntity::getRouteId)
@@ -260,17 +263,25 @@ public class TrackingServiceImpl implements TrackingService {
         var lastRoute = new TreeSet<>(entity.getRoutes()).last();
         if (!Objects.equals(maxRouteId, lastRoute.getRouteId())) {
             var status = statusService.getStatus(lastRoute.getStatus()).mapStatus();
-            if (!status.equals(IGNORE)
-                    && (!status.isNeedAction() || workProviderIds.contains(entity.getProviderId()))
-            ) {
-                entity.setStatus(status);
-                messageFacade.sendTrackingInfo(
-                        entity.getUserPhone(),
-                        entity.getStatus(),
-                        entity.getOrderNumber(),
-                        entity.getMarketplace());
+            switch (status) {
+                case NEED_PAYMENT -> {
+                    if (workProviderIds.contains(entity.getProviderId())) {
+                        entity.setStatus(NEED_PAYMENT);
+                    }
+                }
+                case NEED_DOCUMENT -> {
+                    if (entity.getFlagNeedDocument()) {
+                        entity.setStatus(NEED_DOCUMENT);
+                    }
+                }
+                default -> entity.setStatus(status);
             }
             trackingRepository.save(entity);
+            messageFacade.sendTrackingInfo(
+                    entity.getUserPhone(),
+                    entity.getStatus(),
+                    entity.getOrderNumber(),
+                    entity.getMarketplace());
         }
         return entity;
     }
@@ -324,6 +335,11 @@ public class TrackingServiceImpl implements TrackingService {
     private List<TrackingEntity> findAndFilterList(String userPhone, Pageable pageable, TrackingStatus filter) {
         if (filter == null || ACTIVE.equals(filter)) {
             return trackingRepository.findAllByUserPhoneAndStatusNot(userPhone, TrackingStatus.ARCHIVE, pageable);
+        }
+        if (NEED_DOCUMENT.equals(filter) || FIRST_NEED_DOCUMENT.equals(filter)) {
+            var list = trackingRepository.findAllByUserPhoneAndStatus(userPhone, FIRST_NEED_DOCUMENT, pageable);
+            list.addAll(trackingRepository.findAllByUserPhoneAndStatus(userPhone, NEED_DOCUMENT, pageable));
+            return list;
         }
         return trackingRepository.findAllByUserPhoneAndStatus(userPhone, filter, pageable);
     }
