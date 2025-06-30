@@ -265,6 +265,9 @@ public class TrackingServiceImpl implements TrackingService {
             var status = statusService.getStatus(lastRoute.getStatus()).mapStatus();
             switch (status) {
                 case NEED_PAYMENT -> {
+                    var dto = getInfoByTrackNumberOrOrderNumber(entity.getTrackNumber())
+                            .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
+                    entity.setProviderId(dto.getProviderId());
                     if (workProviderIds.contains(entity.getProviderId())) {
                         entity.setStatus(NEED_PAYMENT);
                     }
