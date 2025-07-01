@@ -151,3 +151,15 @@ databaseChangeLog:
                   name: flag_need_document
                   type: boolean
                   defaultValueBoolean: false
+  - changeSet:
+      id: tracking:change-03
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: HALT
+        - tableExists:
+            tableName: tracking
+      changes:
+        - modifyDataType:
+            tableName: tracking
+            columnName: status
+            newDataType: varchar(25)
