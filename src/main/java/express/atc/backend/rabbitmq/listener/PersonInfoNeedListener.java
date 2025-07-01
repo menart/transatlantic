@@ -2,13 +2,18 @@ package express.atc.backend.rabbitmq.listener;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import express.atc.backend.db.entity.MqLoggerEntity;
+import express.atc.backend.db.repository.MqLoggerRepository;
 import express.atc.backend.rabbitmq.dto.PersonInfoNeedDto;
 import express.atc.backend.rabbitmq.service.RabbitMqService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 @Slf4j
@@ -17,6 +22,13 @@ public class PersonInfoNeedListener {
 
     private final ObjectMapper objectMapper;
     private final RabbitMqService rabbitMqService;
+    private final MqLoggerRepository loggerRepository;
+
+    @Value("${spring.rabbitmq.person-info-need.queue-pd}")
+    private String queuePd;
+
+    @Value("${spring.rabbitmq.person-info-need.queue-status}")
+    private String queueStatus;
 
     @RabbitListener(queues = "${spring.rabbitmq.person-info-need.queue-pd}")
     public void listenerPD(String message) {
@@ -38,8 +50,14 @@ public class PersonInfoNeedListener {
         try {
             PersonInfoNeedDto dto = objectMapper.readValue(message, PersonInfoNeedDto.class);
             log.info("Rabbit MQ {}", dto);
+            loggerRepository.save(
+                    new MqLoggerEntity()
+                            .setTopic(queueStatus)
+                            .setMessage(dto)
+                            .setReadAt(LocalDateTime.now())
+            );
             if (dto.getLogisticsOrderCode() != null || dto.getTrackingNumber() != null) {
-                rabbitMqService.processing(dto);
+                rabbitMqService.processingStatus(dto);
             }
         } catch (JsonProcessingException e) {
             log.error(e.getMessage());
@@ -50,6 +68,12 @@ public class PersonInfoNeedListener {
         try {
             PersonInfoNeedDto dto = objectMapper.readValue(message, PersonInfoNeedDto.class);
             log.info("Rabbit MQ Need Documents:  {}", dto);
+            loggerRepository.save(
+                    new MqLoggerEntity()
+                            .setTopic(queuePd)
+                            .setMessage(dto)
+                            .setReadAt(LocalDateTime.now())
+            );
             if (dto.getLogisticsOrderCode() != null || dto.getTrackingNumber() != null) {
                 rabbitMqService.processingNeedDocument(dto);
             }
