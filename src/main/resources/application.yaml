@@ -78,17 +78,17 @@ logging:
     net:
       ttddyy:
         dsproxy:
-          listener: debug
+          listener: ${LOG_LEVEL:ERROR}
     org:
       springframework:
         jdbc:
           core:
-            JdbcTemplate: DEBUG
-            StatementCreatorUtils: TRACE
+            JdbcTemplate: ${LOG_LEVEL_SQL:ERROR}
+            StatementCreatorUtils: ${LOG_LEVEL_SQL:ERROR}
     reactor:
-      netty.http.client: DEBUG
+      netty.http.client: ${LOG_LEVEL:ERROR}
     express:
-      atc.backend.integration.cfapi.service.impl.CfApiServiceImpl: DEBUG
+      atc.backend: ${LOG_LEVEL:WARN}
 auth:
   time_hold_sms: ${AUTH_TIME_HOLD_SMS}
   count_number_code: ${AUTH_COUNT_NUMBER_CODE}
