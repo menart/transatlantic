@@ -1,5 +1,6 @@
 package express.atc.backend.helper;
 
+import express.atc.backend.config.ProfileConfig;
 import express.atc.backend.model.TokenModel;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,7 +55,7 @@ public class AuthHelper {
                 .httpOnly(true)
                 .secure(secure)
                 .path(path)
-                .sameSite("Strict")
+                .sameSite(ProfileConfig.getSameSite())
                 .maxAge(age)
                 .build();
     }

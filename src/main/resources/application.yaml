@@ -211,3 +211,7 @@ springdoc:
     enabled: ${SWAGGER_ENABLE}    # Отключает Swagger UI
   api-docs:
     enabled: ${SWAGGER_ENABLE}    # Отключает генерацию OpenAPI документации
+
+profile:
+  cookie:
+    same-site: ${PROFILE_COOKIE:Strict}
