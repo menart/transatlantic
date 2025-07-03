@@ -11,6 +11,7 @@ import express.atc.backend.integration.cargoflow.dto.Order.OrderParcel;
 import express.atc.backend.integration.cargoflow.dto.Order.OrderPropertyDto;
 import express.atc.backend.integration.cargoflow.dto.OrderHistory;
 import express.atc.backend.model.MoneyModel;
+import org.apache.logging.log4j.util.Strings;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -56,25 +57,28 @@ public interface CargoflowMapper {
         return LocalDateTime.ofInstant(history.opTime(), history.opTimezone().toZoneId());
     }
 
-    default TrackingStatus setActiveStatus(){
+    default TrackingStatus setActiveStatus() {
         return TrackingStatus.ACTIVE;
     }
 
-    default String getPhone(OrderPropertyDto property){
+    default String getPhone(OrderPropertyDto property) {
         String phone = property.buyer() != null ? property.buyer().phone() : property.receiver().phone();
-        if (phone != null && !phone.isEmpty()) {
+        if (!Strings.isBlank(phone)) {
             phone = phone.replaceAll("[^0-9]", "");
+            if (phone.charAt(0) == '8') {
+                phone = "7" + phone.substring(1);
+            }
         }
         return phone;
     }
 
-    default String getAddress(OrderPropertyDto property){
+    default String getAddress(OrderPropertyDto property) {
         return property.buyer() != null
                 ? property.buyer().address().detailAddress()
                 : property.receiver().address().detailAddress();
     }
 
-    default MoneyModel toMoneyModel(String currency, Long price){
+    default MoneyModel toMoneyModel(String currency, Long price) {
         return new MoneyModel(price, currency);
     }
 }
