@@ -1,9 +1,6 @@
 package express.atc.backend.service;
 
-import express.atc.backend.dto.CalculateDto;
-import express.atc.backend.dto.TrackingDto;
-import express.atc.backend.dto.TrackingNeedingDto;
-import express.atc.backend.dto.TrackingPageDto;
+import express.atc.backend.dto.*;
 import express.atc.backend.enums.TrackingStatus;
 import express.atc.backend.exception.TrackNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,4 +31,6 @@ public interface TrackingService {
     String paymentControl(String outSum, Long orderId, String orderNumber, String checkSum);
 
     Boolean setToArchive();
+
+    TrackingAdminDto findByAdmin(String number);
 }

@@ -163,3 +163,23 @@ databaseChangeLog:
             tableName: tracking
             columnName: status
             newDataType: varchar(25)
+  - changeSet:
+      id: tracking:change-04
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: tracking
+        - columnExists:
+            tableName: tracking
+            columnName: user_phone
+      changes:
+        - sql:
+            sql: |
+              UPDATE tracking
+              SET user_phone = 
+                CASE 
+                  WHEN user_phone ~ '^8[0-9]+$' THEN '7' || regexp_replace(substring(user_phone from 2), '[^0-9]', '', 'g')
+                  ELSE regexp_replace(user_phone, '[^0-9]', '', 'g')
+                END
+              WHERE user_phone ~ '[^0-9]' OR user_phone ~ '^8';

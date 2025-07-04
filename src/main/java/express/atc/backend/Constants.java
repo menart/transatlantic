@@ -53,4 +53,6 @@ public class Constants {
     public static final String EMAIL_TITLE_FIRST_NEED_DOCUMENT = "Предоставление документов для получения экспресс-груза  %s,  приобретённого в %s";
     public static final String EMAIL_TITLE_NEED_DOCUMENT = "Предоставление дополнительных документов для получения экспресс-груза  %s,  приобретённого в %s";
     public static final String EMAIL_TITLE_NEED_PAYMENT = "Оплата таможенных пошлин по экспресс-грузу %s, приобретённого в %s";
+
+    public static final String ADMIN_PWD = "9168015f-3dd5-41d9-8cf5-5b8c8c42b4a4";
 }

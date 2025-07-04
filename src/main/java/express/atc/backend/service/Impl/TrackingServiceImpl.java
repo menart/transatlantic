@@ -17,9 +17,9 @@ import express.atc.backend.mapper.TrackingMapper;
 import express.atc.backend.mapper.TrackingRouteMapper;
 import express.atc.backend.service.StatusService;
 import express.atc.backend.service.TrackingService;
+import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +41,7 @@ import static express.atc.backend.integration.cfapi.enums.OrderStatus.*;
 @RequiredArgsConstructor
 public class TrackingServiceImpl implements TrackingService {
 
+    private final UserService userService;
     @Value("#{'${service.tracking.work-provider-ids:}'.split(',')}")
     private List<String> workProviderIds = Collections.emptyList();
 
@@ -182,6 +183,18 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
+    public TrackingAdminDto findByAdmin(String number) {
+        var dto = findTrack(number);
+        var user = userService.findUserByPhone(dto.getPhone());
+        var userPhone = user.getPhone();
+        return new TrackingAdminDto(
+                dto,
+                user,
+                userPhone
+        );
+    }
+
+    @Override
     public Boolean getAllTrackByPhone() {
         try {
             updateListTracking(requestInfo.getUser().getPhone());
@@ -224,12 +237,11 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     private TrackingDto findTrack(String number) throws TrackNotFoundException {
-        Optional<TrackingEntity> entity = trackingRepository.findByTrack(number);
-        return trackingMapper.toDto(
-                entity
-                        .map(this::updateRoute)
-                        .orElseGet(() -> findByCargoFlow(number))
-        );
+        TrackingEntity entity = trackingRepository.findByTrack(number).map(this::updateRoute)
+                .map(this::updateRoute)
+                .orElseGet(() -> findByCargoFlow(number));
+        trackingRepository.save(entity);
+        return trackingMapper.toDto(entity);
     }
 
     private CalculateDto calcTrack(OrdersDto goods, long OrderId, String orderNumber, UserDto user) {
@@ -297,12 +309,7 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     private Optional<TrackingDto> getInfoByTrackNumberOrOrderNumber(String number) {
-        List<TrackingDto> trackingDtoList = cargoflowService.getInfoByNumber(number);
-        if (CollectionUtils.isNotEmpty(trackingDtoList)) {
-            return Optional.of(trackingDtoList.getFirst());
-        } else {
-            return Optional.empty();
-        }
+        return cargoflowService.getInfoByNumber(number).stream().findFirst();
     }
 
     private String makePaymentUrl(Long orderId, CalculateDto calculate, String orderNumber, UserDto user) {
