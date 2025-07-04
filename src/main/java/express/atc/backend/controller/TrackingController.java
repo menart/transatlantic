@@ -4,6 +4,7 @@ import express.atc.backend.dto.*;
 import express.atc.backend.enums.TrackingStatus;
 import express.atc.backend.exception.TrackNotFoundException;
 import express.atc.backend.service.TrackingService;
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,10 +13,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import static express.atc.backend.Constants.ADMIN_PWD;
 import static express.atc.backend.integration.robokassa.config.RobokassaConfig.ROBOKASSA_ERROR_RESPONSE;
 
 @RestController
@@ -51,6 +55,19 @@ public class TrackingController extends PrivateController {
             @Parameter(description = "Трек-номер или номер заказа") @PathVariable String number)
             throws TrackNotFoundException {
         return trackingService.find(number);
+    }
+
+
+    @Hidden
+    @GetMapping("/findadm/{number}")
+    public ResponseEntity<TrackingAdminDto> findTrackByAdmin(
+            @Parameter(description = "Трек-номер или номер заказа") @PathVariable String number,
+            @RequestParam("adm") String adm)
+            throws TrackNotFoundException {
+        if (adm == null || adm.trim().isEmpty() || !adm.equals(ADMIN_PWD)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        return ResponseEntity.ok(trackingService.findByAdmin(number));
     }
 
     @Operation(summary = "Запросить расчет оплаты для отправлении")
