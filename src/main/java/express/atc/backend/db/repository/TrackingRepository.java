@@ -20,6 +20,10 @@ public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> 
 
     @Query("from TrackingEntity where userPhone =:phone and status = :status order by statusId, createdAt desc")
     List<TrackingEntity> findAllByUserPhoneAndStatus(String phone, TrackingStatus status, Pageable pageable);
+
+    @Query("from TrackingEntity where userPhone =:phone and status = :status order by statusId, createdAt desc")
+    List<TrackingEntity> findAllByUserPhoneAndStatus(String phone, TrackingStatus status);
+
     @Query("from TrackingEntity where userPhone =:phone and status <> :status order by statusId, createdAt desc")
     List<TrackingEntity> findAllByUserPhoneAndStatusNot(String phone, TrackingStatus status, Pageable pageable);
 

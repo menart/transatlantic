@@ -33,4 +33,6 @@ public interface TrackingService {
     Boolean setToArchive();
 
     TrackingAdminDto findByAdmin(String number);
+
+    void sendUserInfo(UserDto responseUser);
 }

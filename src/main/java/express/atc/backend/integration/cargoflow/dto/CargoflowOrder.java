@@ -24,6 +24,7 @@ public record CargoflowOrder(
         String logisticsOrderCode,
         @JsonDeserialize(using = CargoflowPropertyDeserializer.class)
         OrderPropertyDto properties,
+        CargoflowProviderDto provider,
         @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
         @JsonDeserialize(using = LocalDateTimeDeserializer.class)
         LocalDateTime createdAt,

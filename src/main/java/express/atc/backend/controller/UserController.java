@@ -2,6 +2,7 @@ package express.atc.backend.controller;
 
 import express.atc.backend.dto.*;
 import express.atc.backend.enums.Language;
+import express.atc.backend.service.TrackingService;
 import express.atc.backend.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,6 +23,7 @@ public class UserController extends PrivateController {
 
     private final UserService userService;
     private final RequestInfo requestInfo;
+    private final TrackingService trackingService;
 
     @Operation(summary = "Получить информацию о пользователе")
     @ApiResponses(value = {
@@ -63,7 +65,11 @@ public class UserController extends PrivateController {
     public UserDto updateFullUserInfo(@Valid @RequestBody UserDto userInfo) {
         String userPhone = requestInfo.getUser().getPhone();
         userInfo.setPhone(userPhone);
-        return userService.updateFullUserInfo(userInfo);
+        var responseUser = userService.updateFullUserInfo(userInfo);
+        if(responseUser.isFull()){
+            trackingService.sendUserInfo(responseUser);
+        }
+        return responseUser;
     }
 
     @Operation(summary = "Удалить авторизованного пользователя")

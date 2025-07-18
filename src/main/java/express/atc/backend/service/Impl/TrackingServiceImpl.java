@@ -195,6 +195,17 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     @Override
+    @Async
+    public void sendUserInfo(UserDto responseUser) {
+        trackingRepository.findAllByUserPhoneAndStatus(responseUser.getPhone(), NEED_DOCUMENT)
+                .forEach(trackingEntity ->
+                    cfApiService.sendPersonalInfo(trackingEntity.getLogisticsOrderCode(),
+                            responseUser,
+                            trackingEntity.getProvider())
+                );
+    }
+
+    @Override
     public Boolean getAllTrackByPhone() {
         try {
             updateListTracking(requestInfo.getUser().getPhone());
@@ -234,6 +245,10 @@ public class TrackingServiceImpl implements TrackingService {
                 entity.getOrderNumber(),
                 entity.getMarketplace());
         trackingRepository.save(entity);
+        var userDto = userService.findUserByPhone(entity.getUserPhone());
+        if (userDto.isFull()) {
+            cfApiService.sendPersonalInfo(logisticsOrderCode, userDto, entity.getProvider());
+        }
     }
 
     private TrackingDto findTrack(String number) throws TrackNotFoundException {
