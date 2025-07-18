@@ -60,7 +60,7 @@ public class CargoflowServiceImpl implements CargoflowService {
                 new ConditionDto(CONDITION_ORDER_LOGISTIC_CODE, CONDITION_OPERATOR_EQ, number)
         );
         var cargoflowOrders = cargoflowClient.getFromCargoflowEntity(List.of(new ConditionDto(condition, "OR")),
-                orderEntity, CargoflowView.ORDER_LIST, CargoflowOrder.class);
+                orderEntity, CargoflowView.ORDER_VIEW, CargoflowOrder.class);
         log.info("{}", cargoflowOrders);
         return cargoflowOrders.stream()
                 .map(cargoflowMapper::toTracking)

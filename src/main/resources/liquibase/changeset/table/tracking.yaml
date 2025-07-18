@@ -183,3 +183,17 @@ databaseChangeLog:
                   ELSE regexp_replace(user_phone, '[^0-9]', '', 'g')
                 END
               WHERE user_phone ~ '[^0-9]' OR user_phone ~ '^8';
+  - changeSet:
+      id: tracking:change-05
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: HALT
+        - tableExists:
+            tableName: tracking
+      changes:
+        - addColumn:
+            tableName: tracking
+            columns:
+              - column:
+                  name: provider
+                  type: jsonb

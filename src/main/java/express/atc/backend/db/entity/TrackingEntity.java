@@ -1,6 +1,7 @@
 package express.atc.backend.db.entity;
 
 import express.atc.backend.dto.OrdersDto;
+import express.atc.backend.dto.ProviderInfoDto;
 import express.atc.backend.enums.TrackingStatus;
 import jakarta.persistence.Table;
 import jakarta.persistence.*;
@@ -61,6 +62,10 @@ public class TrackingEntity {
     @Column
     @Enumerated(EnumType.STRING)
     private TrackingStatus status = TrackingStatus.ACTIVE;
+
+    @Column
+    @JdbcTypeCode(SqlTypes.JSON)
+    private ProviderInfoDto provider;
 
     @Column
     private String providerId;

@@ -10,7 +10,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
 
 import javax.net.ssl.SSLException;
-import java.util.UUID;
 
 @Configuration
 @RequiredArgsConstructor
@@ -18,9 +17,6 @@ public class CfapiConfig {
 
     @Value("${cfapi.url}")
     private String cfApiUrl;
-
-    @Value("${cfapi.platformId}")
-    private String platformId;
 
     private final HttpClient httpClient;
 
@@ -31,8 +27,6 @@ public class CfapiConfig {
                 .baseUrl(cfApiUrl)
                 .defaultHeaders(httpHeaders -> {
                     httpHeaders.setContentType(MediaType.APPLICATION_JSON);
-                    httpHeaders.set("msgId", UUID.randomUUID().toString());
-                    httpHeaders.set("platformId", platformId);
                 })
                 .build();
     }

@@ -147,7 +147,11 @@
 			<artifactId>reactor-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- Удалена зависимость junit (старый JUnit 4) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <!-- Удалена зависимость junit (старый JUnit 4) -->
 		<!-- Не нужно явно добавлять junit-jupiter, т.к. включено через spring-boot-starter-test -->
 	</dependencies>
 

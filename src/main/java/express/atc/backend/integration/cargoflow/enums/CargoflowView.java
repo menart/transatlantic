@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum CargoflowView {
     LOCAL("_local"),
-    ORDER_LIST("order-list-view");
+    ORDER_VIEW("order-view");
 
     private final String view;
 }
