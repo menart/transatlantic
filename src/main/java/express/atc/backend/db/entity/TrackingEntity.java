@@ -20,6 +20,7 @@ import java.util.Set;
 @Table(name = "tracking")
 @AllArgsConstructor
 @NoArgsConstructor
+@DynamicUpdate
 public class TrackingEntity {
 
     @Id
