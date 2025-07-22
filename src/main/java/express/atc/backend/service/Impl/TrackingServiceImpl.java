@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -199,10 +200,35 @@ public class TrackingServiceImpl implements TrackingService {
     public void sendUserInfo(UserDto responseUser) {
         trackingRepository.findAllByUserPhoneAndStatus(responseUser.getPhone(), NEED_DOCUMENT)
                 .forEach(trackingEntity ->
-                    cfApiService.sendPersonalInfo(trackingEntity.getLogisticsOrderCode(),
-                            responseUser,
-                            trackingEntity.getProvider())
+                        cfApiService.sendPersonalInfo(trackingEntity.getLogisticsOrderCode(),
+                                responseUser,
+                                trackingEntity.getProvider())
                 );
+    }
+
+    @Override
+    public void sendUserInfoBatch(Integer infoSendBatchSize) {
+        List<TrackingEntity> list = trackingRepository.findFirstNeedFirstSend(infoSendBatchSize);
+        list.forEach(trackingEntity -> {
+            var user = userService.findUserByPhone(trackingEntity.getUserPhone());
+            if (user != null && user.isFull()) {
+                try {
+                    trackingEntity = updateTrackingEntity(trackingEntity);
+                    var isSendPersonalInfo = cfApiService.sendPersonalInfo(
+                            trackingEntity.getLogisticsOrderCode(),
+                            user,
+                            trackingEntity.getProvider());
+                    if (isSendPersonalInfo) {
+                        trackingEntity.setFlagNeedDocument(false);
+                        trackingEntity.setStatus(ACTIVE);
+                    }
+                } catch (Exception exception) {
+                    log.error("{}", exception.getMessage(), exception);
+                }
+            }
+            trackingEntity.setUpdatedAt(LocalDateTime.now());
+        });
+        trackingRepository.saveAll(list);
     }
 
     @Override
@@ -233,22 +259,26 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     public void setStatusFirstNeedDocument(String logisticsOrderCode) {
-        var entity = trackingRepository.findByTrack(logisticsOrderCode)
-                .orElse(trackingRepository.save(findByCargoFlow(logisticsOrderCode)));
-        updateRoute(entity);
-//        entity.setStatus(FIRST_NEED_DOCUMENT);
-        entity.setStatus(NEED_DOCUMENT);
+        var entityFind = trackingRepository.findByTrack(logisticsOrderCode);
+        var entity = entityFind.map(this::updateTrackingEntity)
+                .orElseGet(() -> trackingRepository.save(findByCargoFlow(logisticsOrderCode)));
         entity.setFlagNeedDocument(true);
         messageFacade.sendTrackingInfo(
                 entity.getUserPhone(),
                 entity.getStatus(),
                 entity.getOrderNumber(),
                 entity.getMarketplace());
-        trackingRepository.save(entity);
         var userDto = userService.findUserByPhone(entity.getUserPhone());
-        if (userDto.isFull()) {
-            cfApiService.sendPersonalInfo(logisticsOrderCode, userDto, entity.getProvider());
+        if (userDto != null && userDto.isFull()) {
+            if (cfApiService.sendPersonalInfo(logisticsOrderCode, userDto, entity.getProvider())) {
+                entity.setFlagNeedDocument(false);
+            }
+        } else {
+            entity.setStatus(FIRST_NEED_DOCUMENT);
+            messageFacade.sendTrackingInfo(entity.getUserPhone(),
+                    entity.getStatus(), entity.getOrderNumber(), entity.getMarketplace());
         }
+        trackingRepository.save(entity);
     }
 
     private TrackingDto findTrack(String number) throws TrackNotFoundException {
@@ -374,5 +404,12 @@ public class TrackingServiceImpl implements TrackingService {
             return trackingRepository.getCountByUserPhoneAndStatusNot(userPhone, TrackingStatus.ARCHIVE);
         }
         return trackingRepository.getCountByUserPhoneAndStatus(userPhone, filter);
+    }
+
+    private TrackingEntity updateTrackingEntity(TrackingEntity entity) {
+        var dto = getInfoByTrackNumberOrOrderNumber(entity.getTrackNumber())
+                .orElseThrow(TrackNotFoundException::new);
+        trackingMapper.updateEntityFromDto(dto, entity);
+        return updateRoute(entity);
     }
 }

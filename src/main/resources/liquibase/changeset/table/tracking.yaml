@@ -197,3 +197,22 @@ databaseChangeLog:
               - column:
                   name: provider
                   type: jsonb
+  - changeSet:
+      id: tracking:change-06
+      author: Artamonov Aleksander
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: tracking
+        - columnExists:
+            tableName: tracking
+            columnName: flag_need_document
+        - columnExists:
+            tableName: tracking
+            columnName: status
+      changes:
+        - sql:
+            sql: |
+              UPDATE tracking
+              SET flag_need_document = true
+              WHERE status IN ('FIRST_NEED_DOCUMENT', 'NEED_DOCUMENT');
