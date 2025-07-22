@@ -134,8 +134,6 @@ public class CfApiServiceImpl implements CfApiService {
                 )
                 .bodyToMono(CfApiRequestDto.class)
                 .block();
-        log.info("response: {}", cfApiWebClient.head());
-        log.info("response: {}", response);
         return true;
     }
 

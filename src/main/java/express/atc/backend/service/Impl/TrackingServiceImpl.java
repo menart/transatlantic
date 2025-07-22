@@ -93,6 +93,7 @@ public class TrackingServiceImpl implements TrackingService {
         );
     }
 
+    @Override
     public boolean uploadOneFile(MultipartFile file, String trackNumber) {
         var entity = trackingRepository.findByTrack(trackNumber)
                 .orElseThrow(() -> new ApiException(ORDER_NOT_FOUND, HttpStatus.BAD_REQUEST));
@@ -198,17 +199,29 @@ public class TrackingServiceImpl implements TrackingService {
     @Override
     @Async
     public void sendUserInfo(UserDto responseUser) {
-        trackingRepository.findAllByUserPhoneAndStatus(responseUser.getPhone(), NEED_DOCUMENT)
+        trackingRepository.findAllByUserPhoneAndStatus(responseUser.getPhone(), FIRST_NEED_DOCUMENT)
                 .forEach(trackingEntity ->
-                        cfApiService.sendPersonalInfo(trackingEntity.getLogisticsOrderCode(),
-                                responseUser,
-                                trackingEntity.getProvider())
+                        {
+                            try {
+                                var isSending = cfApiService.sendPersonalInfo(
+                                        trackingEntity.getLogisticsOrderCode(),
+                                        responseUser,
+                                        trackingEntity.getProvider());
+                                if (isSending) {
+                                    trackingEntity.setStatus(ACTIVE);
+                                    trackingRepository.save(trackingEntity);
+                                }
+                            } catch (Exception exception) {
+                                log.error("{}", exception.getMessage(), exception);
+                            }
+                        }
                 );
     }
 
     @Override
     public void sendUserInfoBatch(Integer infoSendBatchSize) {
-        List<TrackingEntity> list = trackingRepository.findFirstNeedFirstSend(infoSendBatchSize);
+        List<TrackingEntity> list = trackingRepository
+                .findByStatusAndOrderUpdateAtLimit(FIRST_NEED_DOCUMENT, infoSendBatchSize);
         list.forEach(trackingEntity -> {
             var user = userService.findUserByPhone(trackingEntity.getUserPhone());
             if (user != null && user.isFull()) {
@@ -219,7 +232,6 @@ public class TrackingServiceImpl implements TrackingService {
                             user,
                             trackingEntity.getProvider());
                     if (isSendPersonalInfo) {
-                        trackingEntity.setFlagNeedDocument(false);
                         trackingEntity.setStatus(ACTIVE);
                     }
                 } catch (Exception exception) {
@@ -245,8 +257,7 @@ public class TrackingServiceImpl implements TrackingService {
     public TrackingNeedingDto need() {
         String userPhone = requestInfo.getUser().getPhone();
         List<String> needPay = trackingRepository.findOrderNumberByNeed(userPhone, NEED_PAYMENT);
-        List<String> needDocument = trackingRepository.findOrderNumberByNeed(userPhone, FIRST_NEED_DOCUMENT);
-        needDocument.addAll(trackingRepository.findOrderNumberByNeed(userPhone, NEED_DOCUMENT));
+        List<String> needDocument = trackingRepository.findOrderNumberByNeed(userPhone, NEED_DOCUMENT);
         return new TrackingNeedingDto(needPay, needDocument);
     }
 
@@ -269,9 +280,12 @@ public class TrackingServiceImpl implements TrackingService {
                 entity.getOrderNumber(),
                 entity.getMarketplace());
         var userDto = userService.findUserByPhone(entity.getUserPhone());
+        entity.setFlagNeedDocument(true);
         if (userDto != null && userDto.isFull()) {
-            if (cfApiService.sendPersonalInfo(logisticsOrderCode, userDto, entity.getProvider())) {
-                entity.setFlagNeedDocument(false);
+            try {
+                cfApiService.sendPersonalInfo(logisticsOrderCode, userDto, entity.getProvider());
+            } catch (Error e) {
+                log.error("{}", e.getMessage(), e);
             }
         } else {
             entity.setStatus(FIRST_NEED_DOCUMENT);
