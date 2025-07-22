@@ -215,3 +215,8 @@ springdoc:
 profile:
   cookie:
     same-site: ${PROFILE_COOKIE:Strict}
+
+personal:
+  send-info:
+    interval: ${PERSONAL_SEND_INFO_INTERVAL:600}
+    batch-size: ${PERSONAL_SEND_INFO_BATCH:1000}

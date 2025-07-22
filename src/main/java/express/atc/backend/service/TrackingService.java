@@ -35,4 +35,6 @@ public interface TrackingService {
     TrackingAdminDto findByAdmin(String number);
 
     void sendUserInfo(UserDto responseUser);
+
+    void sendUserInfoBatch(Integer infoSendBatchSize);
 }

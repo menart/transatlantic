@@ -39,4 +39,7 @@ public interface TrackingRepository extends JpaRepository<TrackingEntity, Long> 
 
     @Query(value = "select orderNumber from TrackingEntity where userPhone = :userPhone and status = :trackingStatus")
     List<String> findOrderNumberByNeed(String userPhone, TrackingStatus trackingStatus);
+
+    @Query(value = "from TrackingEntity where flagNeedDocument = true order by updatedAt limit :infoSendBatchSize")
+    List<TrackingEntity> findFirstNeedFirstSend(Integer infoSendBatchSize);
 }
