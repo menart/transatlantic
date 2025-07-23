@@ -2,16 +2,19 @@ package express.atc.backend.facade.impl;
 
 import express.atc.backend.enums.TrackingStatus;
 import express.atc.backend.facade.MessageFacade;
+import express.atc.backend.helper.StringHelper;
 import express.atc.backend.service.EmailService;
 import express.atc.backend.service.MessageService;
 import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static express.atc.backend.Constants.*;
@@ -31,16 +34,17 @@ public class MessageFacadeImpl implements MessageFacade {
     @Override
     @Async
     public void sendTrackingInfo(String userPhone, TrackingStatus status, String orderNumber, String marketplace) {
+        String sendUrl = Strings.join(List.of(StringHelper.removeTrailingSlash(ourUrl), MIDDLE_URL, orderNumber), '/');
         Map<String, Object> emailInfo = new HashMap<>();
         emailInfo.put("trackNumber", orderNumber);
         emailInfo.put("marketplace", marketplace);
-        emailInfo.put("ourUrl", ourUrl);
+        emailInfo.put("ourUrl", sendUrl);
         try {
             switch (status) {
                 case FIRST_NEED_DOCUMENT -> {
                     log.info("Sending FIRST_NEED_DOCUMENT to {}", userPhone);
                     var user = userService.findOrCreateByPhone(userPhone);
-                    smsMessageService.send(user.getPhone(), String.format(SMS_FIRST_NEED_DOCUMENT, orderNumber, marketplace, ourUrl));
+                    smsMessageService.send(user.getPhone(), String.format(SMS_FIRST_NEED_DOCUMENT, orderNumber, marketplace, sendUrl));
                     if (user.getEmail() != null) {
                         emailMessageService.sendMessageUsingTemplate(
                                 user.getEmail(),
@@ -53,7 +57,7 @@ public class MessageFacadeImpl implements MessageFacade {
                 case NEED_DOCUMENT -> {
                     log.info("Sending NEED_DOCUMENT to {}", userPhone);
                     var user = userService.findOrCreateByPhone(userPhone);
-                    smsMessageService.send(user.getPhone(), String.format(SMS_NEED_DOCUMENT, orderNumber, marketplace, ourUrl));
+                    smsMessageService.send(user.getPhone(), String.format(SMS_NEED_DOCUMENT, orderNumber, marketplace, sendUrl));
                     if (user.getEmail() != null) {
                         emailMessageService.sendMessageUsingTemplate(
                                 user.getEmail(),
@@ -66,7 +70,7 @@ public class MessageFacadeImpl implements MessageFacade {
                 case NEED_PAYMENT -> {
                     log.info("Sending NEED_PAYMENT to {}", userPhone);
                     var user = userService.findOrCreateByPhone(userPhone);
-                    smsMessageService.send(user.getPhone(), String.format(SMS_NEED_PAYMENT, orderNumber, marketplace, ourUrl));
+                    smsMessageService.send(user.getPhone(), String.format(SMS_NEED_PAYMENT, orderNumber, marketplace, sendUrl));
                     if (user.getEmail() != null) {
                         emailMessageService.sendMessageUsingTemplate(
                                 user.getEmail(),

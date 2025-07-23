@@ -8,6 +8,7 @@ public class Constants {
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String LOCATE_CURRENCY = "RUB";
     public static final long GRAMS_PER_KG = 1000;
+    public static final String MIDDLE_URL = "orders";
 
     public static final String STRING_FEE = "Таможенная пошлина";
     public static final String STRING_TAX = "Сбор за таможенное оформление";
@@ -44,13 +45,13 @@ public class Constants {
     public static final String SMS_CODE_MESSAGE = "Код: %s для входа в личный кабинет %s";
     public static final String SMS_NEED_PAYMENT = "Уважаемый клиент!\n" +
             "Для получения экспресс-груза %s, приобретённого в %s, " +
-            "необходимо оплатить таможенные пошлины. Оплата доступна на сайте %s/auth в разделе заказы";
+            "необходимо оплатить таможенные пошлины. Оплата доступна на сайте %s в разделе заказы";
     public static final String SMS_FIRST_NEED_DOCUMENT = "Уважаемый клиент!\n" +
-            "Для получения экспресс-груза %s, приобретённого в %s, Вам необходимо предоставить документы и персональные сведения на сайте %s/auth";
+            "Для получения экспресс-груза %s, приобретённого в %s, Вам необходимо предоставить персональные сведения на сайте %s";
     public static final String SMS_NEED_DOCUMENT = "Уважаемый клиент!\n" +
-            "Для получения экспресс-груза %s, приобретённого в %s, Вам необходимо предоставить дополнительные документы и сведения на сайте %s/auth";
+            "Для получения экспресс-груза %s, приобретённого в %s, Вам необходимо предоставить дополнительные документы и сведения на сайте %s";
     //Email title
-    public static final String EMAIL_TITLE_FIRST_NEED_DOCUMENT = "Предоставление документов для получения экспресс-груза  %s,  приобретённого в %s";
+    public static final String EMAIL_TITLE_FIRST_NEED_DOCUMENT = "Предоставление персональных сведений для получения экспресс-груза  %s,  приобретённого в %s";
     public static final String EMAIL_TITLE_NEED_DOCUMENT = "Предоставление дополнительных документов для получения экспресс-груза  %s,  приобретённого в %s";
     public static final String EMAIL_TITLE_NEED_PAYMENT = "Оплата таможенных пошлин по экспресс-грузу %s, приобретённого в %s";
 
