@@ -9,6 +9,7 @@ public class Constants {
     public static final String LOCATE_CURRENCY = "RUB";
     public static final long GRAMS_PER_KG = 1000;
     public static final String MIDDLE_URL = "orders";
+    public static final String BLANK_STRING = "-";
 
     public static final String STRING_FEE = "Таможенная пошлина";
     public static final String STRING_TAX = "Сбор за таможенное оформление";
