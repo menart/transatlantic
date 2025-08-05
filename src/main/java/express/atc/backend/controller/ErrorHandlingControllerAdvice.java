@@ -3,6 +3,7 @@ package express.atc.backend.controller;
 import express.atc.backend.dto.ErrorResponseDto;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.TrackNotFoundException;
+import express.atc.backend.exception.UnauthorizedException;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.mail.MessagingException;
 import lombok.extern.slf4j.Slf4j;
@@ -79,6 +80,19 @@ public class ErrorHandlingControllerAdvice {
                         Collections.singletonList(e.getMessage())
                 ),
                 e.getStatus()
+        );
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseBody
+    public ResponseEntity<?> onUnauthorizedException(UnauthorizedException e) {
+        log.warn("Exception {}", e.getMessage());
+        return new ResponseEntity<>(
+                new ErrorResponseDto(
+                        HttpStatus.NOT_FOUND.name(),
+                        Collections.singletonList(e.getMessage())
+                ),
+                HttpStatus.NOT_FOUND
         );
     }
 
