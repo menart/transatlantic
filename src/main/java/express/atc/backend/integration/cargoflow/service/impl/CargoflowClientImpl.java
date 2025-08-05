@@ -1,5 +1,6 @@
 package express.atc.backend.integration.cargoflow.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.integration.cargoflow.dto.*;
 import express.atc.backend.integration.cargoflow.enums.CargoflowView;
@@ -61,7 +62,7 @@ public class CargoflowClientImpl implements CargoflowClient {
                                 .defaultIfEmpty("")
                                 .flatMap(body -> {
                                     log.error("Error response from Cargoflow - send body: {}\n Status: {}, Body: {}",
-                                            request,
+                                            toJson(request),
                                             clientResponse.statusCode(), body);
                                     return Mono.error(new ApiException(
                                             "Cargoflow API error: " + body,
@@ -145,5 +146,15 @@ public class CargoflowClientImpl implements CargoflowClient {
                 .block();
         log.info("receive count: {}", CollectionUtils.isNotEmpty(responseList) ? responseList.size() : 0);
         return responseList;
+    }
+
+    private String toJson(Object object) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.writeValueAsString(object);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
+            return " ";
+        }
     }
 }
