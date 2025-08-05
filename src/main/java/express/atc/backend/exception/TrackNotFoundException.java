@@ -6,7 +6,7 @@ import static express.atc.backend.Constants.TRACK_NOT_FOUND;
 
 public class TrackNotFoundException extends ApiException {
 
-    public TrackNotFoundException() {
-        super(TRACK_NOT_FOUND, HttpStatus.NOT_FOUND);
+    public TrackNotFoundException(String trackNumber) {
+        super(String.format(TRACK_NOT_FOUND, trackNumber), HttpStatus.NOT_FOUND);
     }
 }
