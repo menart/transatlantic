@@ -329,6 +329,7 @@ public class TrackingServiceImpl implements TrackingService {
                         .stream()
                         .filter(Objects::nonNull)
                         .map(this::mapRouteToEntity)
+                        .sorted()
                         .map(trackingRoute -> trackingRoute.setTracking(entity))
                         .map(trackingRouteRepository::save)
                         .collect(Collectors.toSet());

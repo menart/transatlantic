@@ -100,3 +100,26 @@ databaseChangeLog:
                   value: NEED_DOCUMENT
             tableName: statuses
             where: map_status='IGNORE'
+  - changeSet:
+      id: statuses:insert02
+      author: Artamonov Aleksander
+      changes:
+        - loadData:
+            columns:
+              - column:
+                  index: 0
+                  name: status
+              - column:
+                  index: 1
+                  name: description_eng
+              - column:
+                  index: 2
+                  name: description_rus
+              - column:
+                  index: 3
+                  name: map_status
+            tableName: statuses
+            encoding: UTF-8 # кодировка csv файла если она UTF-8 можно этот параметр не ставить
+            separator: ';' # символ, разделяющий столбцы в файле. Если это запятая, то параметр можно пропустить
+            quotchar: '"' # в какие кавычки будет экранироваться элемент, строки если в нем есть знак, разделяющий столбцы. По умолчанию "
+            file: "liquibase/changeset/csv/statuses.02.csv"

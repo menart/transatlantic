@@ -37,6 +37,8 @@ public class TrackingRouteDto implements Comparable<TrackingRouteDto> {
 
     @Override
     public int compareTo(TrackingRouteDto o) {
-        return this.routeTime.compareTo(o.routeTime);
+        return this.routeId.compareTo(o.getRouteId()) != 0 ?
+                this.routeId.compareTo(o.getRouteId()) :
+                this.routeTime.compareTo(o.routeTime);
     }
 }

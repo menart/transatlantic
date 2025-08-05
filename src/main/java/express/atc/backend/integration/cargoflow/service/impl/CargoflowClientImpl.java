@@ -36,15 +36,46 @@ public class CargoflowClientImpl implements CargoflowClient {
     public <T> List<T> getFromCargoflowEntity(List<ConditionDto> condition, String entity,
                                               CargoflowView view, Class<T> response) {
         var request = new RequestDto(new FilterDto(condition), view.getView());
+
+        // Логируем информацию о запросе перед отправкой
+        log.info("Sending request to Cargoflow entity: {}", entity);
+        log.info("Request body: {}", request);
+
         var responseList = cargoflowEntityWebClient
                 .post()
-                .uri(uriBuilder -> uriBuilder.build(entity))
+                .uri(uriBuilder -> {
+                    var uri = uriBuilder.build(entity);
+                    log.info("Request URL: {}", uri);
+                    return uri;
+                })
                 .bodyValue(request)
-                .retrieve()
-                .bodyToFlux(response)
-                .collectList()
+                .exchangeToMono(clientResponse -> {
+                    // Логируем информацию о ответе
+                    log.info("Response status: {}", clientResponse.statusCode());
+                    log.debug("Response headers: {}", clientResponse.headers().asHttpHeaders());
+
+                    if (clientResponse.statusCode().is2xxSuccessful()) {
+                        return clientResponse.bodyToFlux(response)
+                                .collectList()
+                                .doOnNext(list ->
+                                        log.info("Successful response with {} items", list.size()));
+                    } else {
+                        // Для ошибок 4xx/5xx логируем детали
+                        return clientResponse.bodyToMono(String.class)
+                                .defaultIfEmpty("")
+                                .flatMap(body -> {
+                                    log.error("Error response from Cargoflow - Status: {}, Body: {}",
+                                            clientResponse.statusCode(), body);
+                                    return Mono.error(new ApiException(
+                                            "Cargoflow API error: " + body,
+                                            HttpStatus.valueOf(clientResponse.statusCode().value())
+                                    ));
+                                });
+                    }
+                })
                 .block();
-        log.info("receive count: {}", CollectionUtils.isNotEmpty(responseList) ? responseList.size() : 0);
+
+        log.info("Received count: {}", CollectionUtils.isNotEmpty(responseList) ? responseList.size() : 0);
         return responseList;
     }
 
