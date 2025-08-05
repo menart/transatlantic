@@ -20,6 +20,7 @@ import express.atc.backend.service.TrackingService;
 import express.atc.backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static express.atc.backend.Constants.*;
 import static express.atc.backend.enums.TrackingStatus.*;
@@ -428,8 +430,13 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     private TrackingEntity updateTrackingEntity(TrackingEntity entity) {
-        var dto = getInfoByTrackNumberOrOrderNumber(entity.getTrackNumber())
-                .orElseThrow(() -> new TrackNotFoundException(entity.getTrackNumber()));
+        var number = Stream.of(entity.getTrackNumber(), entity.getOrderNumber(), entity.getLogisticsOrderCode())
+                .filter(StringUtils::isNotBlank)
+                .findFirst()
+                .orElseThrow(() -> new TrackNotFoundException(String.format("Order id: %d is empty", entity.getId())));
+
+        var dto = getInfoByTrackNumberOrOrderNumber(number)
+                .orElseThrow(() -> new TrackNotFoundException(number));
         trackingMapper.updateEntityFromDto(dto, entity);
         return updateRoute(entity);
     }
