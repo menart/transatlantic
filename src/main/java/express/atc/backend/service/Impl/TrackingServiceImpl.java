@@ -234,6 +234,8 @@ public class TrackingServiceImpl implements TrackingService {
                     if (isSendPersonalInfo) {
                         trackingEntity.setStatus(ACTIVE);
                     }
+                } catch (TrackNotFoundException exception) {
+                    log.error("sendUserInfoBatch error {}", exception.getMessage());
                 } catch (Exception exception) {
                     log.error("{}", exception.getMessage(), exception);
                 }
@@ -271,28 +273,32 @@ public class TrackingServiceImpl implements TrackingService {
 
     public void setStatusFirstNeedDocument(String logisticsOrderCode) {
         var entityFind = trackingRepository.findByTrack(logisticsOrderCode);
-        var entity = entityFind.map(this::updateTrackingEntity)
-                .orElseGet(() -> trackingRepository.save(findByCargoFlow(logisticsOrderCode)));
-        entity.setFlagNeedDocument(true);
-        messageFacade.sendTrackingInfo(
-                entity.getUserPhone(),
-                entity.getStatus(),
-                entity.getOrderNumber(),
-                entity.getMarketplace());
-        var userDto = userService.findUserByPhone(entity.getUserPhone());
-        entity.setFlagNeedDocument(true);
-        if (userDto != null && userDto.isFull()) {
-            try {
-                cfApiService.sendPersonalInfo(logisticsOrderCode, userDto, entity.getProvider());
-            } catch (Error e) {
-                log.error("{}", e.getMessage(), e);
+        try {
+            var entity = entityFind.map(this::updateTrackingEntity)
+                    .orElseGet(() -> trackingRepository.save(findByCargoFlow(logisticsOrderCode)));
+            entity.setFlagNeedDocument(true);
+            messageFacade.sendTrackingInfo(
+                    entity.getUserPhone(),
+                    entity.getStatus(),
+                    entity.getOrderNumber(),
+                    entity.getMarketplace());
+            var userDto = userService.findUserByPhone(entity.getUserPhone());
+            entity.setFlagNeedDocument(true);
+            if (userDto != null && userDto.isFull()) {
+                try {
+                    cfApiService.sendPersonalInfo(logisticsOrderCode, userDto, entity.getProvider());
+                } catch (Error e) {
+                    log.error("{}", e.getMessage(), e);
+                }
+            } else {
+                entity.setStatus(FIRST_NEED_DOCUMENT);
+                messageFacade.sendTrackingInfo(entity.getUserPhone(),
+                        entity.getStatus(), entity.getOrderNumber(), entity.getMarketplace());
             }
-        } else {
-            entity.setStatus(FIRST_NEED_DOCUMENT);
-            messageFacade.sendTrackingInfo(entity.getUserPhone(),
-                    entity.getStatus(), entity.getOrderNumber(), entity.getMarketplace());
+            trackingRepository.save(entity);
+        } catch (TrackNotFoundException exception) {
+            log.error("setStatusFirstNeedDocument error {}", exception.getMessage());
         }
-        trackingRepository.save(entity);
     }
 
     private TrackingDto findTrack(String number) throws TrackNotFoundException {
@@ -361,7 +367,7 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     private TrackingEntity findByCargoFlow(String number) throws TrackNotFoundException {
-        var dto = getInfoByTrackNumberOrOrderNumber(number).orElseThrow(TrackNotFoundException::new);
+        var dto = getInfoByTrackNumberOrOrderNumber(number).orElseThrow(() -> new TrackNotFoundException(number));
         var trackingEntity = trackingRepository.save(mapToEntity(dto));
         updateRoute(trackingEntity);
         return trackingEntity;
@@ -422,7 +428,7 @@ public class TrackingServiceImpl implements TrackingService {
 
     private TrackingEntity updateTrackingEntity(TrackingEntity entity) {
         var dto = getInfoByTrackNumberOrOrderNumber(entity.getTrackNumber())
-                .orElseThrow(TrackNotFoundException::new);
+                .orElseThrow(() -> new TrackNotFoundException(entity.getTrackNumber()));
         trackingMapper.updateEntityFromDto(dto, entity);
         return updateRoute(entity);
     }

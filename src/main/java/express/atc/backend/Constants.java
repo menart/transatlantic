@@ -25,7 +25,7 @@ public class Constants {
     public static final String USER_NOT_FOUND_OR_NOT_VALID_PASSWORD = "Пользователь не найден или неверный пароль";
     public static final String USER_ALREADY_REGISTERED = "Пользователь уже зарегистрирован";
     public static final String PASSWORD_NOT_CONFIRMED = "Пароли не совпадают";
-    public static final String TRACK_NOT_FOUND = "Трек-номер не найден";
+    public static final String TRACK_NOT_FOUND = "Трек-номер %s не найден";
     public static final String ORDER_NOT_FOUND = "Заказ не найден";
     public static final String EMAIL_NOT_GIVEN = "Email не заполнен";
     public static final String PAYMENT_NOT_EQUALS="Сумма платежа не совпадает";
