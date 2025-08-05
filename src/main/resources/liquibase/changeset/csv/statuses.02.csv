@@ -1,0 +1,10 @@
+status;description_eng;description_rus;map_status
+TRANSIT_WH_IN;Arrived to the transit warehouse;Прибыл на транзитный склад;ACTIVE
+TRANSIT_WH_OUT;Departed from the transit warehouse;Покинул транзитный склад;ACTIVE
+CUSTOMS_DISPOSAL;Order disposed in customs zone;Заказ утилизирован в зоне ТО;ACTIVE
+CUSTOMS_PLANNING_DISPOSAL;Order marked for disposal in customs zone;Заказ помечен на утилизацию в зоне ТО;ACTIVE
+CUSTOMS_RETURN_PREPARING;Preparing order for return from customs;Подготовка заказа к возврату с таможни;ACTIVE
+CUSTOMS_PROBLEM;Problem with customs clearance;Проблема при таможенном оформлении;ACTIVE
+CUSTOMS_ID_REQUESTED;Customs documents requested by broker;Брокером запрошены ПД;ACTIVE
+CUSTOMS_CLEARANCE_RENEWAL;Customs clearance decision extended;Продление решения по выпуску;ACTIVE
+CUSTOMS_RETURNED;Order returned from customs to origin country;Заказ возвращён с таможни в страну отправления;ACTIVE

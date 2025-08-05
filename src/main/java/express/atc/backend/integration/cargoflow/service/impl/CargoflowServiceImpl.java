@@ -84,7 +84,7 @@ public class CargoflowServiceImpl implements CargoflowService {
                     .map(cargoflowMapper::toRoutes)
                     .collect(Collectors.toSet());
         }
-        return new HashSet<>();
+        return new TreeSet<>();
     }
 
     @Override
