@@ -68,6 +68,9 @@ public interface CargoflowMapper {
             if (phone.charAt(0) == '8') {
                 phone = "7" + phone.substring(1);
             }
+            if (phone.length() < 11 && phone.charAt(0) == '9') {
+                phone = "7" + phone;
+            }
         }
         return phone;
     }

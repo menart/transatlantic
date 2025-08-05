@@ -37,10 +37,6 @@ public class CargoflowClientImpl implements CargoflowClient {
                                               CargoflowView view, Class<T> response) {
         var request = new RequestDto(new FilterDto(condition), view.getView());
 
-        // Логируем информацию о запросе перед отправкой
-        log.info("Sending request to Cargoflow entity: {}", entity);
-        log.info("Request body: {}", request);
-
         var responseList = cargoflowEntityWebClient
                 .post()
                 .uri(uriBuilder -> {
@@ -64,7 +60,8 @@ public class CargoflowClientImpl implements CargoflowClient {
                         return clientResponse.bodyToMono(String.class)
                                 .defaultIfEmpty("")
                                 .flatMap(body -> {
-                                    log.error("Error response from Cargoflow - Status: {}, Body: {}",
+                                    log.error("Error response from Cargoflow - send body: {}\n Status: {}, Body: {}",
+                                            request,
                                             clientResponse.statusCode(), body);
                                     return Mono.error(new ApiException(
                                             "Cargoflow API error: " + body,
