@@ -5,6 +5,7 @@ import express.atc.backend.db.repository.UsersRepository;
 import express.atc.backend.dto.*;
 import express.atc.backend.enums.Language;
 import express.atc.backend.exception.ApiException;
+import express.atc.backend.exception.UnauthorizedException;
 import express.atc.backend.mapper.UserDetailMapper;
 import express.atc.backend.mapper.UserMapper;
 import express.atc.backend.security.UserDetail;
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateFullUserInfo(UserDto userInfo) {
         UserEntity entity = getUserByPhone(userInfo.getPhone())
-                .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new UnauthorizedException(USER_NOT_FOUND));
         entity = userMapper.toEntity(userInfo)
                 .setPassword(entity.getPassword())
                 .setId(entity.getId())
@@ -90,14 +91,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public LanguageDto getLanguage(String userPhone) {
         return new LanguageDto(usersRepository.findByPhone(userPhone)
-                .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND))
+                .orElseThrow(() -> new UnauthorizedException(USER_NOT_FOUND))
                 .getLanguage());
     }
 
     @Override
     public LanguageDto setLanguage(String userPhone, Language language) {
         var entity = usersRepository.findByPhone(userPhone)
-                .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND))
+                .orElseThrow(() -> new UnauthorizedException(USER_NOT_FOUND))
                 .setLanguage(language);
         return new LanguageDto(usersRepository.save(entity).getLanguage());
     }
@@ -106,13 +107,13 @@ public class UserServiceImpl implements UserService {
     public UserDto authenticate(LoginDto login) {
         return returnFullUserInfo(usersRepository.findByLogin(login.login())
                 .filter(user -> passwordEncoder.matches(login.password(), user.getPassword()))
-                .orElseThrow(() -> new ApiException(USER_NOT_FOUND_OR_NOT_VALID_PASSWORD, HttpStatus.NOT_FOUND)));
+                .orElseThrow(() -> new UnauthorizedException(USER_NOT_FOUND_OR_NOT_VALID_PASSWORD)));
     }
 
     @Override
     public UserDto changePassword(String userPhone, ChangePasswordDto changePassword) {
         UserEntity entity = getUserByPhone(userPhone)
-                .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new UnauthorizedException(USER_NOT_FOUND));
         if (!changePassword.password().equals(changePassword.confirmed())) {
             throw new ApiException(PASSWORD_NOT_CONFIRMED, HttpStatus.BAD_REQUEST);
         }
@@ -135,7 +136,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Boolean dropUser(String userPhone) {
         var user = usersRepository.findByPhone(userPhone)
-                .orElseThrow(() -> new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new UnauthorizedException(USER_NOT_FOUND));
         usersRepository.delete(user);
         return Boolean.TRUE;
     }

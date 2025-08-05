@@ -8,6 +8,7 @@ import express.atc.backend.dto.RegistrationDto;
 import express.atc.backend.dto.ValidateSmsDto;
 import express.atc.backend.exception.ApiException;
 import express.atc.backend.exception.AuthSmsException;
+import express.atc.backend.exception.UnauthorizedException;
 import express.atc.backend.model.AuthResponseModel;
 import express.atc.backend.security.JwtService;
 import express.atc.backend.service.*;
@@ -53,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
         if (user != null && !Strings.isBlank(user.getEmail())) {
             return makeCodeSms(ipAddress, authSmsDto);
         } else {
-            throw new ApiException(USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+            throw new UnauthorizedException(USER_NOT_FOUND);
         }
     }
 
