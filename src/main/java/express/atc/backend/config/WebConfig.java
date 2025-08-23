@@ -20,6 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
     public List<String> publicEndpoints() {
         return Arrays.asList(
                 "/actuator/**",
+                "/management/metrics/**",
                 "/api/auth/**",
                 "/swagger-ui/**",
                 "/swagger-resources/*",

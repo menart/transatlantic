@@ -2,7 +2,7 @@ package express.atc.backend.integration.cargoflow.client;
 
 import express.atc.backend.integration.cargoflow.config.FeignConfig;
 import express.atc.backend.integration.cargoflow.dto.RequestDto;
-import express.atc.backend.integration.metrics.annotation.IntegrationMetrics;
+import express.atc.backend.metrics.annotation.IntegrationMetrics;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

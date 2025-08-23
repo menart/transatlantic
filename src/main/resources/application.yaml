@@ -211,10 +211,29 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, prometheus, metrics
+        include: health, info, prometheus, metrics
+      base-path: /management
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
   metrics:
+    distribution:
+      percentiles:
+        - 0.5
+        - 0.9
+        - 0.95
+      percentiles-histogram:
+        integration_operation_duration_seconds: true
     tags:
       application: ${spring.application.name}
+      environment: ${spring.profiles.active:local}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+        step: 30s
 
 project:
   url: ${SERVER_NAME}

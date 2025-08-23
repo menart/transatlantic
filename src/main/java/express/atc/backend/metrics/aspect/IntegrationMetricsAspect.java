@@ -1,7 +1,8 @@
-package express.atc.backend.integration.metrics.aspect;
+package express.atc.backend.metrics.aspect;
 
-import express.atc.backend.integration.metrics.annotation.IntegrationMetrics;
-import express.atc.backend.integration.metrics.dto.IntegrationMetric;
+import express.atc.backend.metrics.annotation.IntegrationMetrics;
+import express.atc.backend.metrics.dto.IntegrationMetric;
+import express.atc.backend.metrics.service.PrometheusMetricsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -19,6 +20,8 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class IntegrationMetricsAspect {
 
+    private final PrometheusMetricsService prometheusMetricsService;
+
     private static final String METRIC_LOG_TEMPLATE = "INTEGRATION_METRIC - integration: {}, operation: {}, time: {}ms, success: {}";
 
     @Around("@annotation(integrationMetrics)")
@@ -31,6 +34,7 @@ public class IntegrationMetricsAspect {
 
         boolean success = false;
         Object result = null;
+        String statusCode = null;
 
         try {
             // Логирование запроса если включено
@@ -40,6 +44,13 @@ public class IntegrationMetricsAspect {
 
             result = joinPoint.proceed();
             success = true;
+
+            // Извлекаем статус код из ResponseEntity
+            if (result instanceof ResponseEntity) {
+                ResponseEntity<?> response = (ResponseEntity<?>) result;
+                statusCode = String.valueOf(response.getStatusCode().value());
+                metric.setStatusCode(statusCode);
+            }
 
             // Логирование ответа если включено
             if (integrationMetrics.logResponse() && result != null) {
@@ -51,6 +62,14 @@ public class IntegrationMetricsAspect {
         } catch (Exception e) {
             metric.setErrorMessage(e.getMessage());
             metric.setStatusCode("ERROR");
+
+            // Записываем ошибку в Prometheus
+            prometheusMetricsService.recordError(
+                    integrationMetrics.integrationName(),
+                    integrationMetrics.operationName(),
+                    e.getClass().getSimpleName()
+            );
+
             throw e;
 
         } finally {
@@ -58,10 +77,14 @@ public class IntegrationMetricsAspect {
             metric.setExecutionTimeMs(executionTime);
             metric.setSuccess(success);
 
-            if (result instanceof ResponseEntity) {
-                ResponseEntity<?> response = (ResponseEntity<?>) result;
-                metric.setStatusCode(String.valueOf(response.getStatusCode().value()));
-            }
+            // Отправляем метрики в Prometheus
+            prometheusMetricsService.recordIntegrationMetric(
+                    metric.getIntegrationName(),
+                    metric.getOperationName(),
+                    metric.getExecutionTimeMs(),
+                    metric.isSuccess(),
+                    metric.getStatusCode()
+            );
 
             logMetric(metric);
         }
@@ -95,6 +118,7 @@ public class IntegrationMetricsAspect {
         }
     }
 
+
     private void logMetric(IntegrationMetric metric) {
         if (metric.isSuccess()) {
             log.info(METRIC_LOG_TEMPLATE,
@@ -110,13 +134,5 @@ public class IntegrationMetricsAspect {
                     metric.isSuccess(),
                     metric.getErrorMessage());
         }
-
-        // Здесь можно добавить отправку метрик в Prometheus, InfluxDB и т.д.
-        sendToMonitoringSystem(metric);
-    }
-
-    private void sendToMonitoringSystem(IntegrationMetric metric) {
-        // Реализация отправки метрик в систему мониторинга
-        // Например: Micrometer, Prometheus, Elasticsearch и т.д.
     }
 }

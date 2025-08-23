@@ -1,4 +1,4 @@
-package express.atc.backend.integration.metrics.dto;
+package express.atc.backend.metrics.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
