@@ -69,6 +69,9 @@ spring:
             readTimeout: 30000
             loggerLevel: full
             retryer: feign.Retryer.Default
+  aop:
+    auto: true
+    proxy-target-class: true
 
 server:
   port: 8080
@@ -84,6 +87,7 @@ server:
 # Log
 logging:
   level:
+    express.atc.backend.integration.metrics.aspect: DEBUG
     net:
       ttddyy:
         dsproxy:

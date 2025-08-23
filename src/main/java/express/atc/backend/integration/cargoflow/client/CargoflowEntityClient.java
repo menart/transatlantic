@@ -2,6 +2,7 @@ package express.atc.backend.integration.cargoflow.client;
 
 import express.atc.backend.integration.cargoflow.config.FeignConfig;
 import express.atc.backend.integration.cargoflow.dto.RequestDto;
+import express.atc.backend.integration.metrics.annotation.IntegrationMetrics;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,12 @@ import java.util.List;
 )
 public interface CargoflowEntityClient {
 
+    @IntegrationMetrics(
+            integrationName = "Cargoflow",
+            operationName = "getEntity",
+            logRequest = true,
+            logResponse = false
+    )
     @PostMapping(value = "/entities/{entity}/search", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<List<?>> getEntity(
             @PathVariable("entity") String entity,
