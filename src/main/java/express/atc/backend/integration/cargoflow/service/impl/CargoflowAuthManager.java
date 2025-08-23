@@ -35,7 +35,6 @@ public class CargoflowAuthManager {
 
     private volatile CargoflowToken cargoflowToken;
 
-
     public WebClient cargoflowAuthWebClient() throws SSLException {
         return WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(httpClient))
