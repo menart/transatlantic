@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Aspect
 @Component
@@ -22,22 +24,28 @@ public class IntegrationMetricsAspect {
 
     private final PrometheusMetricsService prometheusMetricsService;
 
+    // Счетчик текущих выполняющихся операций по integrationName и operationName
+    private final ConcurrentHashMap<String, AtomicInteger> currentExecutions = new ConcurrentHashMap<>();
+
     private static final String METRIC_LOG_TEMPLATE = "INTEGRATION_METRIC - integration: {}, operation: {}, time: {}ms, success: {}";
 
     @Around("@annotation(integrationMetrics)")
     public Object measureIntegrationCall(ProceedingJoinPoint joinPoint, IntegrationMetrics integrationMetrics) throws Throwable {
+        String integrationName = integrationMetrics.integrationName();
+        String operationName = integrationMetrics.operationName();
+        String executionKey = getExecutionKey(integrationName, operationName);
+
+        // Увеличиваем счетчик текущих выполнений
+        currentExecutions.computeIfAbsent(executionKey, k -> new AtomicInteger(0)).incrementAndGet();
+
         long startTime = System.currentTimeMillis();
-        IntegrationMetric metric = new IntegrationMetric(
-                integrationMetrics.integrationName(),
-                integrationMetrics.operationName()
-        );
+        IntegrationMetric metric = new IntegrationMetric(integrationName, operationName);
 
         boolean success = false;
         Object result = null;
         String statusCode = null;
 
         try {
-            // Логирование запроса если включено
             if (integrationMetrics.logRequest()) {
                 logRequest(joinPoint, integrationMetrics);
             }
@@ -45,14 +53,12 @@ public class IntegrationMetricsAspect {
             result = joinPoint.proceed();
             success = true;
 
-            // Извлекаем статус код из ResponseEntity
             if (result instanceof ResponseEntity) {
                 ResponseEntity<?> response = (ResponseEntity<?>) result;
                 statusCode = String.valueOf(response.getStatusCode().value());
                 metric.setStatusCode(statusCode);
             }
 
-            // Логирование ответа если включено
             if (integrationMetrics.logResponse() && result != null) {
                 logResponse(result, integrationMetrics);
             }
@@ -63,31 +69,43 @@ public class IntegrationMetricsAspect {
             metric.setErrorMessage(e.getMessage());
             metric.setStatusCode("ERROR");
 
-            // Записываем ошибку в Prometheus
             prometheusMetricsService.recordError(
-                    integrationMetrics.integrationName(),
-                    integrationMetrics.operationName(),
+                    integrationName,
+                    operationName,
                     e.getClass().getSimpleName()
             );
 
             throw e;
 
         } finally {
+            // Уменьшаем счетчик текущих выполнений
+            currentExecutions.get(executionKey).decrementAndGet();
+
             long executionTime = System.currentTimeMillis() - startTime;
             metric.setExecutionTimeMs(executionTime);
             metric.setSuccess(success);
 
-            // Отправляем метрики в Prometheus
+            // Отправляем все метрики с группировкой
             prometheusMetricsService.recordIntegrationMetric(
-                    metric.getIntegrationName(),
-                    metric.getOperationName(),
-                    metric.getExecutionTimeMs(),
-                    metric.isSuccess(),
-                    metric.getStatusCode()
+                    integrationName,
+                    operationName,
+                    executionTime,
+                    success,
+                    statusCode
             );
 
             logMetric(metric);
         }
+    }
+
+    private String getExecutionKey(String integrationName, String operationName) {
+        return integrationName + ":" + operationName;
+    }
+
+    public int getCurrentExecutionsCount(String integrationName, String operationName) {
+        String key = getExecutionKey(integrationName, operationName);
+        AtomicInteger count = currentExecutions.get(key);
+        return count != null ? count.get() : 0;
     }
 
     private void logRequest(ProceedingJoinPoint joinPoint, IntegrationMetrics metrics) {

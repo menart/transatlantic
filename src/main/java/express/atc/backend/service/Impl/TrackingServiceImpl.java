@@ -304,7 +304,7 @@ public class TrackingServiceImpl implements TrackingService {
     }
 
     private TrackingDto findTrack(String number) throws TrackNotFoundException {
-        TrackingEntity entity = trackingRepository.findByTrack(number).map(this::updateRoute)
+        TrackingEntity entity = trackingRepository.findByTrack(number)
                 .map(this::updateRoute)
                 .orElseGet(() -> findByCargoFlow(number));
         trackingRepository.save(entity);
