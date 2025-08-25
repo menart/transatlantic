@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static express.atc.backend.Constants.METRIC_LOG_TEMPLATE;
+
 @Aspect
 @Component
 @Slf4j
@@ -26,8 +28,6 @@ public class IntegrationMetricsAspect {
 
     // Счетчик текущих выполняющихся операций по integrationName и operationName
     private final ConcurrentHashMap<String, AtomicInteger> currentExecutions = new ConcurrentHashMap<>();
-
-    private static final String METRIC_LOG_TEMPLATE = "INTEGRATION_METRIC - integration: {}, operation: {}, time: {}ms, success: {}";
 
     @Around("@annotation(integrationMetrics)")
     public Object measureIntegrationCall(ProceedingJoinPoint joinPoint, IntegrationMetrics integrationMetrics) throws Throwable {

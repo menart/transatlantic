@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import express.atc.backend.dto.ProviderInfoDto;
 import express.atc.backend.dto.UserDto;
+import express.atc.backend.integration.cfapi.client.CfApiClient;
 import express.atc.backend.integration.cfapi.dto.CfApiPersonalInfoDto;
 import express.atc.backend.integration.cfapi.dto.CfApiRequestDto;
 import express.atc.backend.integration.cfapi.dto.ChangeStatusDto;
@@ -16,11 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -47,7 +44,7 @@ public class CfApiServiceImpl implements CfApiService {
     @Value("${cfapi.location}")
     private String cfLocation;
 
-    private final WebClient cfApiWebClient;
+    private final CfApiClient cfApiClient;
     private final ObjectMapper objectMapper;
     private final UserInfoMapper userInfoMapper;
 
@@ -117,32 +114,21 @@ public class CfApiServiceImpl implements CfApiService {
                 secret);
         var uuid = UUID.randomUUID().toString();
         log.info("checksum: {}, uuid: {}", checksum, uuid);
-        var response = cfApiWebClient
-                .post()
-                .uri(type.toString().toLowerCase())
-                .headers(httpHeaders -> {
-                    httpHeaders.add("msgId", uuid);
-                    httpHeaders.add("checksum", checksum);
-                    httpHeaders.add("msgType", msgType.toString());
-                    httpHeaders.add("platformId", platform);
-                })
-                .bodyValue(msgString)
-                .retrieve()
-                .onStatus(
-                        status -> !status.equals(HttpStatus.OK),
-                        this::handleError
-                )
-                .bodyToMono(CfApiRequestDto.class)
-                .block();
-        return true;
-    }
 
-    private Mono<? extends Throwable> handleError(ClientResponse clientResponse) {
-        return clientResponse.bodyToMono(String.class)
-                .map(body -> {
-                    // Логируем статус и тело ответа
-                    log.error("HTTP Error {}: {}", clientResponse.statusCode(), body);
-                    return null;
-                });
+        try {
+            CfApiRequestDto response;
+            if (type == MESSAGES) {
+                response = cfApiClient.sendMessage(uuid, checksum, msgType, platform, msgString);
+            } else {
+                response = cfApiClient.sendEvent(uuid, checksum, msgType, platform, msgString);
+            }
+
+            log.info("CF API response: {}", response);
+            return true;
+
+        } catch (Exception e) {
+            log.error("Failed to send request to CF API", e);
+            return false;
+        }
     }
 }
