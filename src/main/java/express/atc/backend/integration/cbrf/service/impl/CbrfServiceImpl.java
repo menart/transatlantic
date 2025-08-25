@@ -5,13 +5,10 @@ import express.atc.backend.integration.cbrf.dto.CurrencyDto;
 import express.atc.backend.integration.cbrf.dto.ListCurrencyDto;
 import express.atc.backend.integration.cbrf.service.CbrfService;
 import jakarta.annotation.PostConstruct;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,16 +21,12 @@ public class CbrfServiceImpl implements CbrfService {
 
     private final CbrfClient cbrfClient;
 
-    @Getter
     private Map<String, CurrencyDto> currencyMap = new HashMap<>();
 
     @PostConstruct
     public void updateCurrency() {
         try {
-            ListCurrencyDto listCurrency = cbrfClient.getCurrencyRates(
-                    MediaType.APPLICATION_XML_VALUE,
-                    Charset.defaultCharset().name()
-            );
+            ListCurrencyDto listCurrency = cbrfClient.getCurrencyRates();
 
             currencyMap = listCurrency.getCurrencyList().stream()
                     .collect(Collectors.toMap(CurrencyDto::charCode, Function.identity()));
