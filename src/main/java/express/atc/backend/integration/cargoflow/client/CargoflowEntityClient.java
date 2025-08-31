@@ -1,6 +1,6 @@
 package express.atc.backend.integration.cargoflow.client;
 
-import express.atc.backend.integration.cargoflow.config.FeignConfig;
+import express.atc.backend.integration.cargoflow.config.CargoflowFeignConfig;
 import express.atc.backend.integration.cargoflow.dto.RequestDto;
 import express.atc.backend.metrics.annotation.IntegrationMetrics;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -16,7 +16,7 @@ import java.util.List;
 @FeignClient(
         name = "cargoflowEntityClient",
         url = "${cargoflow.entity.endpoint}",
-        configuration = FeignConfig.class
+        configuration = CargoflowFeignConfig.class
 )
 public interface CargoflowEntityClient {
 

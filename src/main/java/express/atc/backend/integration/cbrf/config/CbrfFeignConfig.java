@@ -1,37 +1,41 @@
 package express.atc.backend.integration.cbrf.config;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import feign.RequestInterceptor;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
+import feign.codec.ErrorDecoder;
 import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
-import org.springframework.cloud.openfeign.EnableFeignClients;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.nio.charset.StandardCharsets;
-
+@Slf4j
 @Configuration
-@EnableFeignClients(basePackages = "express.atc.backend.integration.cbrf.client")
 public class CbrfFeignConfig {
 
     @Bean
-    public Decoder feignDecoder() {
+    public Decoder cbrfFeignDecoder() {
         return new JacksonDecoder(new XmlMapper());
     }
 
     @Bean
-    public Encoder feignEncoder() {
+    public Encoder cbrfFeignEncoder() {
         return new JacksonEncoder(new XmlMapper());
     }
 
     @Bean
-    public RequestInterceptor cbrfRequestInterceptor() {
-        return template -> {
-            template.header("Accept", MediaType.APPLICATION_XML_VALUE);
-            template.header("Accept-Charset", StandardCharsets.UTF_8.name());
+    public ErrorDecoder cbrfErrorDecoder() {
+        return (methodKey, response) -> {
+            String errorMessage = String.format("CBRF API request failed: %s %s",
+                    response.status(), response.body());
+            log.error(errorMessage);
+            return new ResponseStatusException(
+                    HttpStatus.valueOf(response.status()),
+                    errorMessage
+            );
         };
     }
 }

@@ -1,7 +1,6 @@
 package express.atc.backend.integration.cargoflow.client;
 
-import express.atc.backend.integration.cargoflow.config.FeignConfig;
-import express.atc.backend.integration.cargoflow.config.MultipartSupportConfig;
+import express.atc.backend.integration.cargoflow.config.CargoflowFeignConfig;
 import express.atc.backend.integration.cargoflow.dto.FileDto;
 import express.atc.backend.metrics.annotation.IntegrationMetrics;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -13,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 @FeignClient(
         name = "cargoflowUploadClient",
         url = "${cargoflow.upload.endpoint}",
-        configuration = {FeignConfig.class, MultipartSupportConfig.class}
+        configuration = {CargoflowFeignConfig.class}
 )
 public interface CargoflowUploadClient {
 

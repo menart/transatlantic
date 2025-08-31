@@ -60,15 +60,15 @@ spring:
     multipart:
       max-file-size: 50MB
       max-request-size: 50MB
-  cloud:
-    openfeign:
-      client:
-        config:
-          default:
-            connectTimeout: 5000
-            readTimeout: 30000
-            loggerLevel: full
-            retryer: feign.Retryer.Default
+#  cloud:
+#    openfeign:
+#      client:
+#        config:
+#          default:
+#            connectTimeout: 5000
+#            readTimeout: 30000
+#            loggerLevel: full
+#            retryer: feign.Retryer.Default
   aop:
     auto: true
     proxy-target-class: true
@@ -102,6 +102,16 @@ logging:
       netty.http.client: ${LOG_LEVEL:ERROR}
     express:
       atc.backend: ${LOG_LEVEL:WARN}
+    express.atc.backend.integration: DEBUG
+    feign: DEBUG
+    express.atc.backend.integration.cbrf.client: DEBUG
+    express.atc.backend.integration.cfapi.client: DEBUG
+    express.atc.backend.integration.smsaero.client: DEBUG
+#feign:
+#  client:
+#    config:
+#      default:
+#        loggerLevel: FULL
 auth:
   time_hold_sms: ${AUTH_TIME_HOLD_SMS}
   count_number_code: ${AUTH_COUNT_NUMBER_CODE}
